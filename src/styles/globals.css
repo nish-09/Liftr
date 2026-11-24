@@ -3,8 +3,8 @@
 @tailwind utilities;
 
 :root {
-  --background: #B8D99A;
-  --foreground: #171B16;
+  --background: #F5F1E8;
+  --foreground: #171717;
 }
 
 * {
@@ -27,75 +27,84 @@ body {
   height: 8px;
 }
 ::-webkit-scrollbar-track {
-  background: #B8D99A;
+  background: #F5F1E8;
 }
 ::-webkit-scrollbar-thumb {
-  background: #183D2A;
-  border: 2px solid #171B16;
+  background: #3155F5;
+  border: 2px solid #171717;
   border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #D5F36A;
+  background: #E9F56A;
 }
 
-/* Green Neo-Brutalist Bento Card Utility Classes */
+/* Neo-Brutalist Bento Card Utility Classes */
 .bento-card {
-  background-color: #F5F0DF; /* Warm Cream */
-  color: #171B16;
-  border: 2px solid #171B16;
-  border-radius: 0.5rem;
-  box-shadow: 3px 3px 0px 0px #171B16;
+  background-color: #FFFFFF; /* Pure White */
+  color: #171717;
+  border: 2px solid #171717;
+  border-radius: 0.75rem;
+  box-shadow: 4px 4px 0px 0px #171717;
   transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
 .bento-card:hover {
   transform: translate(-1px, -1px);
-  box-shadow: 4px 4px 0px 0px #171B16;
+  box-shadow: 5px 5px 0px 0px #171717;
 }
 
+.bento-card-white {
+  background-color: #FFFFFF;
+  color: #171717;
+  border: 2px solid #171717;
+  box-shadow: 4px 4px 0px 0px #171717;
+}
+
+.bento-card-electric,
 .bento-card-forest {
-  background-color: #183D2A; /* Deep Forest Green */
+  background-color: #3155F5; /* Electric Blue */
   color: #FFFFFF;
-  border: 2px solid #171B16;
-  box-shadow: 3px 3px 0px 0px #171B16;
+  border: 2px solid #171717;
+  box-shadow: 4px 4px 0px 0px #171717;
 }
 
+.bento-card-acid,
 .bento-card-lime {
-  background-color: #D5F36A; /* Acid Lime */
-  color: #171B16;
-  border: 2px solid #171B16;
-  box-shadow: 3px 3px 0px 0px #171B16;
+  background-color: #E9F56A; /* Acid Yellow */
+  color: #171717;
+  border: 2px solid #171717;
+  box-shadow: 4px 4px 0px 0px #171717;
 }
 
 .bento-card-orange {
-  background-color: #F07845; /* Burnt Orange */
+  background-color: #FF7043; /* Signal Orange */
   color: #FFFFFF;
-  border: 2px solid #171B16;
-  box-shadow: 3px 3px 0px 0px #171B16;
+  border: 2px solid #171717;
+  box-shadow: 4px 4px 0px 0px #171717;
 }
 
 .bento-card-lavender {
-  background-color: #B9A4E8; /* Lavender */
-  color: #171B16;
-  border: 2px solid #171B16;
-  box-shadow: 3px 3px 0px 0px #171B16;
+  background-color: #B9A5EF; /* Soft Lavender */
+  color: #171717;
+  border: 2px solid #171717;
+  box-shadow: 4px 4px 0px 0px #171717;
 }
 
 /* Button & Interactive Utility Classes */
 .neo-btn {
-  border: 2px solid #171B16;
-  box-shadow: 3px 3px 0px 0px #171B16;
+  border: 2px solid #171717;
+  box-shadow: 3px 3px 0px 0px #171717;
   transition: all 0.1s ease;
 }
 
 .neo-btn:hover {
   transform: translate(-1px, -1px);
-  box-shadow: 4px 4px 0px 0px #171B16;
+  box-shadow: 4px 4px 0px 0px #171717;
 }
 
 .neo-btn:active {
   transform: translate(2px, 2px);
-  box-shadow: 1px 1px 0px 0px #171B16;
+  box-shadow: 1px 1px 0px 0px #171717;
 }
 
 /* Numeric display classes */

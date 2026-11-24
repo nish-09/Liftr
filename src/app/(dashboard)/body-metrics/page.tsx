@@ -273,30 +273,30 @@ export default function BodyMetricsPage() {
                     <AreaChart data={historicalBMIData}>
                       <defs>
                         <linearGradient id="bmiGrad" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#D5F36A" stopOpacity={0.8} />
-                          <stop offset="95%" stopColor="#D5F36A" stopOpacity={0.1} />
+                          <stop offset="5%" stopColor="#3155F5" stopOpacity={0.8} />
+                          <stop offset="95%" stopColor="#E9F56A" stopOpacity={0.1} />
                         </linearGradient>
                       </defs>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#171B16" opacity={0.15} />
-                      <XAxis dataKey="date" stroke="#171B16" fontSize={11} tick={{ fill: "#171B16", fontWeight: "bold" }} />
-                      <YAxis domain={["dataMin - 1", "dataMax + 1"]} stroke="#171B16" fontSize={11} tick={{ fill: "#171B16", fontWeight: "bold" }} />
+                      <CartesianGrid strokeDasharray="3 3" stroke="#171717" opacity={0.15} />
+                      <XAxis dataKey="date" stroke="#171717" fontSize={11} tick={{ fill: "#171717", fontWeight: "bold" }} />
+                      <YAxis domain={["dataMin - 1", "dataMax + 1"]} stroke="#171717" fontSize={11} tick={{ fill: "#171717", fontWeight: "bold" }} />
                       <Tooltip
                         contentStyle={{
-                          backgroundColor: "#F5F0DF",
-                          border: "2px solid #171B16",
+                          backgroundColor: "#FFFFFF",
+                          border: "2px solid #171717",
                           borderRadius: "8px",
-                          boxShadow: "3px 3px 0px #171B16",
+                          boxShadow: "4px 4px 0px #171717",
                           fontSize: "12px",
                           fontFamily: "monospace",
                           fontWeight: "bold",
-                          color: "#171B16",
+                          color: "#171717",
                         }}
                       />
                       <Area
                         type="monotone"
                         dataKey="bmi"
                         name="BMI"
-                        stroke="#183D2A"
+                        stroke="#3155F5"
                         strokeWidth={3}
                         fillOpacity={1}
                         fill="url(#bmiGrad)"

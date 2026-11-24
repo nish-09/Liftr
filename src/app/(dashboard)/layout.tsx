@@ -22,8 +22,8 @@ export default async function DashboardLayout({
   }
 
   return (
-    <div className="min-h-screen bg-[#B8D99A] flex flex-col lg:flex-row text-[#171B16]">
-      {/* Desktop Persistent Sidebar in Deep Forest Green */}
+    <div className="min-h-screen bg-[#F5F1E8] flex flex-col lg:flex-row text-[#171717]">
+      {/* Desktop Persistent Sidebar in Electric Blue */}
       <Sidebar />
 
       {/* Main Content Area */}

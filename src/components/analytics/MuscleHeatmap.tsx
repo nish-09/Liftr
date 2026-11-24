@@ -215,7 +215,7 @@ export default function MuscleHeatmap({
                 className="text-[10px] px-1.5 py-0.5 rounded font-black uppercase border-2 border-dark"
                 style={{
                   backgroundColor: `${hoveredMuscle.color}`,
-                  color: "#171B16",
+                  color: "#171717",
                 }}
               >
                 {hoveredMuscle.coveragePercentage}%
@@ -252,9 +252,9 @@ export default function MuscleHeatmap({
                 className="w-full h-full drop-shadow-sm"
               >
                 {/* Body Background Silhouette / Contours */}
-                <g fill="none" stroke="#171B16" strokeWidth="1.5">
+                <g fill="none" stroke="#171717" strokeWidth="1.5">
                   {/* Head & Neck */}
-                  <ellipse cx="140" cy="35" rx="18" ry="24" stroke="#171B16" strokeWidth="2" />
+                  <ellipse cx="140" cy="35" rx="18" ry="24" stroke="#171717" strokeWidth="2" />
                   <path d="M132 58 L130 75 M148 58 L150 75" />
                   {/* Outer body outline */}
                   <path d="M105 85 L85 105 L65 170 L55 230 L70 232 L85 180 L95 190 L95 240 L105 320 L108 400 L125 405 L135 320 L140 250 L145 320 L155 405 L172 400 L175 320 L185 240 L185 190 L195 180 L210 232 L225 230 L215 170 L195 105 L175 85 Z" />
@@ -469,9 +469,9 @@ export default function MuscleHeatmap({
                 className="w-full h-full drop-shadow-sm"
               >
                 {/* Body Background Silhouette / Contours */}
-                <g fill="none" stroke="#171B16" strokeWidth="1.5">
+                <g fill="none" stroke="#171717" strokeWidth="1.5">
                   {/* Head & Neck from Back */}
-                  <ellipse cx="140" cy="35" rx="18" ry="24" stroke="#171B16" strokeWidth="2" />
+                  <ellipse cx="140" cy="35" rx="18" ry="24" stroke="#171717" strokeWidth="2" />
                   <path d="M132 58 L128 75 M148 58 L152 75" />
                   {/* Outer body contour */}
                   <path d="M105 85 L85 105 L65 170 L55 230 L70 232 L85 180 L95 190 L95 240 L105 320 L108 400 L125 405 L135 320 L140 250 L145 320 L155 405 L172 400 L175 320 L185 240 L185 190 L195 180 L210 232 L225 230 L215 170 L195 105 L175 85 Z" />
@@ -734,7 +734,7 @@ export default function MuscleHeatmap({
                 </span>
                 <span
                   className="font-heading font-black text-2xl"
-                  style={{ color: "#183D2A" }}
+                  style={{ color: "#3155F5" }}
                 >
                   {selectedMuscle.coveragePercentage}%
                 </span>

@@ -145,21 +145,21 @@ export default function PlansPage() {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-3">
-            <h1 className="font-heading font-black text-3xl md:text-4xl text-dark tracking-tight">
+            <h1 className="font-heading font-black text-3xl md:text-4xl text-[#171717] tracking-tight uppercase">
               WORKOUT PLANS
             </h1>
-            <span className="px-2.5 py-1 rounded bg-forest text-cream border-2 border-dark text-xs font-mono font-bold shadow-neo-sm">
+            <span className="px-2.5 py-1 rounded-lg bg-[#3155F5] text-white border-2 border-[#171717] text-xs font-mono font-bold shadow-neo-sm">
               {plans.length} Routines
             </span>
           </div>
-          <p className="text-sm text-dark/70 font-sans mt-1">
+          <p className="text-sm text-[#171717]/70 font-sans mt-1">
             Architect your multi-day splits, set rep target ranges, and configure progression parameters.
           </p>
         </div>
 
         <button
           onClick={() => setIsNewPlanModalOpen(true)}
-          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-forest hover:bg-forest/90 text-cream text-xs font-mono font-bold uppercase tracking-wider border-2 border-dark shadow-neo cursor-pointer transition-all active:translate-x-0.5 active:translate-y-0.5"
+          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-[#3155F5] hover:bg-[#2542C7] text-white text-xs font-mono font-black uppercase tracking-wider border-2 border-[#171717] shadow-neo cursor-pointer transition-all active:translate-x-0.5 active:translate-y-0.5"
         >
           <Plus className="w-4 h-4 stroke-[2.5]" />
           <span>New Workout Plan</span>
@@ -170,7 +170,7 @@ export default function PlansPage() {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Left Column: Plan Cards List */}
         <div className="lg:col-span-4 space-y-3">
-          <div className="text-xs font-mono uppercase font-black tracking-wider text-dark/70 px-1">
+          <div className="text-xs font-mono uppercase font-black tracking-wider text-[#171717]/70 px-1">
             Available Routines
           </div>
 
@@ -190,20 +190,20 @@ export default function PlansPage() {
                     setSelectedDayId(plan.days[0]?.id || "");
                   }}
                   className={cn(
-                    "p-4 rounded-xl border-2 border-dark transition-all cursor-pointer relative group",
+                    "p-4 rounded-xl border-2 border-[#171717] transition-all cursor-pointer relative group",
                     isSelected
-                      ? "bg-forest text-cream shadow-neo"
-                      : "bg-cream text-dark shadow-neo-sm hover:shadow-neo hover:translate-x-0.5"
+                      ? "bg-[#3155F5] text-white shadow-neo"
+                      : "bg-white text-[#171717] shadow-neo-sm hover:shadow-neo hover:translate-x-0.5"
                   )}
                 >
                   <div className="flex items-start justify-between gap-2 mb-2">
                     <div className="flex items-center gap-1.5 flex-wrap">
                       <span
                         className={cn(
-                          "text-[10px] font-mono uppercase tracking-wider px-2 py-0.5 rounded border-2 border-dark font-black shadow-neo-sm",
+                          "text-[10px] font-mono uppercase tracking-wider px-2 py-0.5 rounded-md border-2 border-[#171717] font-black shadow-neo-sm",
                           isSelected
-                            ? "bg-lime text-dark"
-                            : "bg-lavender text-dark"
+                            ? "bg-[#E9F56A] text-[#171717]"
+                            : "bg-[#B9A5EF] text-[#171717]"
                         )}
                       >
                         {plan.phaseId || "General"}
@@ -211,10 +211,10 @@ export default function PlansPage() {
                       {plan.isActive && (
                         <span
                           className={cn(
-                            "text-[10px] font-mono uppercase px-2 py-0.5 rounded border-2 border-dark flex items-center gap-1 font-black shadow-neo-sm",
+                            "text-[10px] font-mono uppercase px-2 py-0.5 rounded-md border-2 border-[#171717] flex items-center gap-1 font-black shadow-neo-sm",
                             isSelected
-                              ? "bg-cream text-dark"
-                              : "bg-lime text-dark"
+                              ? "bg-white text-[#171717]"
+                              : "bg-[#E9F56A] text-[#171717]"
                           )}
                         >
                           <CheckCircle2 className="w-3 h-3 stroke-[2.5]" /> Active
@@ -229,10 +229,10 @@ export default function PlansPage() {
                           duplicatePlan(plan.id);
                         }}
                         className={cn(
-                          "p-1.5 rounded-md border-2 border-dark transition-all shadow-neo-sm",
+                          "p-1.5 rounded-md border-2 border-[#171717] transition-all shadow-neo-sm",
                           isSelected
-                            ? "bg-cream text-dark hover:bg-white"
-                            : "bg-white text-dark hover:bg-forest hover:text-cream"
+                            ? "bg-white text-[#171717] hover:bg-[#E9F56A]"
+                            : "bg-[#F5F1E8] text-[#171717] hover:bg-[#3155F5] hover:text-white"
                         )}
                         title="Duplicate Plan"
                       >
@@ -244,7 +244,7 @@ export default function PlansPage() {
                             e.stopPropagation();
                             deletePlan(plan.id);
                           }}
-                          className="p-1.5 rounded-md border-2 border-dark bg-orange text-cream hover:bg-orange/90 transition-all shadow-neo-sm"
+                          className="p-1.5 rounded-md border-2 border-[#171717] bg-[#FF7043] text-white hover:bg-[#e85d30] transition-all shadow-neo-sm"
                           title="Delete Plan"
                         >
                           <Trash2 className="w-3 h-3" />
@@ -255,8 +255,8 @@ export default function PlansPage() {
 
                   <h3
                     className={cn(
-                      "font-heading font-black text-base tracking-tight leading-tight",
-                      isSelected ? "text-cream" : "text-dark group-hover:text-forest"
+                      "font-heading font-black text-base tracking-tight leading-tight uppercase",
+                      isSelected ? "text-white" : "text-[#171717] group-hover:text-[#3155F5]"
                     )}
                   >
                     {plan.name}
@@ -266,7 +266,7 @@ export default function PlansPage() {
                     <p
                       className={cn(
                         "text-xs mt-1 line-clamp-2 font-sans",
-                        isSelected ? "text-cream/80" : "text-dark/70"
+                        isSelected ? "text-white/80" : "text-[#171717]/70"
                       )}
                     >
                       {plan.description}
@@ -277,8 +277,8 @@ export default function PlansPage() {
                     className={cn(
                       "mt-3 pt-2.5 border-t-2 flex items-center justify-between text-xs font-mono",
                       isSelected
-                        ? "border-cream/20 text-cream/80"
-                        : "border-dark/15 text-dark/70"
+                        ? "border-white/20 text-white/80"
+                        : "border-[#171717]/15 text-[#171717]/70"
                     )}
                   >
                     <span className="font-bold">
@@ -290,7 +290,7 @@ export default function PlansPage() {
                           e.stopPropagation();
                           setActivePlan(plan.id);
                         }}
-                        className="px-2 py-0.5 rounded bg-lime hover:bg-lime/90 text-dark border-2 border-dark text-[10px] font-mono font-black uppercase shadow-neo-sm cursor-pointer"
+                        className="px-2 py-0.5 rounded-md bg-[#E9F56A] hover:bg-[#dae852] text-[#171717] border-2 border-[#171717] text-[10px] font-mono font-black uppercase shadow-neo-sm cursor-pointer"
                       >
                         Set Active
                       </button>
@@ -305,9 +305,9 @@ export default function PlansPage() {
         {/* Right Column: Active Plan Day Editor */}
         <div className="lg:col-span-8 space-y-4">
           {currentPlan ? (
-            <div className="bg-cream border-2 border-dark rounded-xl shadow-neo p-5 space-y-5">
+            <div className="bg-white border-2 border-[#171717] rounded-xl shadow-neo p-5 space-y-5">
               {/* Plan Meta Edit Header */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b-2 border-dark/15">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b-2 border-[#171717]/15">
                 <div className="flex-1">
                   <input
                     type="text"
@@ -315,7 +315,7 @@ export default function PlansPage() {
                     onChange={(e) =>
                       updatePlan(currentPlan.id, { name: e.target.value })
                     }
-                    className="font-heading font-black text-xl md:text-2xl text-dark bg-white border-2 border-dark px-3 py-1.5 rounded-lg shadow-neo-sm focus:outline-none focus:ring-2 focus:ring-forest w-full max-w-md"
+                    className="font-heading font-black text-xl md:text-2xl text-[#171717] bg-[#F5F1E8] border-2 border-[#171717] px-3 py-1.5 rounded-lg shadow-neo-sm focus:outline-none focus:ring-2 focus:ring-[#3155F5] w-full max-w-md uppercase tracking-tight"
                   />
                   <input
                     type="text"
@@ -324,7 +324,7 @@ export default function PlansPage() {
                       updatePlan(currentPlan.id, { description: e.target.value })
                     }
                     placeholder="Add routine notes or cadence instructions..."
-                    className="text-xs text-dark/80 bg-white border-2 border-dark px-3 py-1 rounded-lg mt-2 shadow-neo-sm font-sans focus:outline-none focus:ring-2 focus:ring-forest w-full max-w-md"
+                    className="text-xs text-[#171717]/80 bg-[#F5F1E8] border-2 border-[#171717] px-3 py-1 rounded-lg mt-2 shadow-neo-sm font-sans focus:outline-none focus:ring-2 focus:ring-[#3155F5] w-full max-w-md"
                   />
                 </div>
 
@@ -334,7 +334,7 @@ export default function PlansPage() {
                     onChange={(e) =>
                       updatePlan(currentPlan.id, { phaseId: e.target.value })
                     }
-                    className="px-3 py-2 rounded-lg bg-white border-2 border-dark text-xs font-mono font-bold text-dark focus:outline-none focus:ring-2 focus:ring-forest shadow-neo-sm cursor-pointer"
+                    className="px-3 py-2 rounded-lg bg-[#F5F1E8] border-2 border-[#171717] text-xs font-mono font-bold text-[#171717] focus:outline-none focus:ring-2 focus:ring-[#3155F5] shadow-neo-sm cursor-pointer"
                   >
                     {PHASES.map((ph) => (
                       <option key={ph} value={ph}>
@@ -346,7 +346,7 @@ export default function PlansPage() {
                   {!currentPlan.isActive && (
                     <button
                       onClick={() => setActivePlan(currentPlan.id)}
-                      className="px-3 py-2 rounded-lg bg-lime hover:bg-lime/90 text-dark border-2 border-dark text-xs font-mono font-black uppercase shadow-neo-sm cursor-pointer transition-all active:translate-x-0.5 active:translate-y-0.5"
+                      className="px-3 py-2 rounded-lg bg-[#E9F56A] hover:bg-[#dae852] text-[#171717] border-2 border-[#171717] text-xs font-mono font-black uppercase shadow-neo-sm cursor-pointer transition-all active:translate-x-0.5 active:translate-y-0.5"
                     >
                       Make Active
                     </button>
@@ -357,7 +357,7 @@ export default function PlansPage() {
               {/* Day Tabs */}
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-xs font-mono uppercase font-black tracking-wider text-dark/70">
+                  <span className="text-xs font-mono uppercase font-black tracking-wider text-[#171717]/70">
                     Plan Split Days
                   </span>
                   <button
@@ -367,7 +367,7 @@ export default function PlansPage() {
                         `Day ${currentPlan.days.length + 1} - Workout`
                       )
                     }
-                    className="inline-flex items-center gap-1 text-xs font-mono font-bold uppercase text-forest hover:text-dark cursor-pointer"
+                    className="inline-flex items-center gap-1 text-xs font-mono font-bold uppercase text-[#3155F5] hover:text-[#171717] cursor-pointer"
                   >
                     <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
                     <span>Add Day</span>
@@ -384,8 +384,8 @@ export default function PlansPage() {
                         className={cn(
                           "px-3.5 py-2 rounded-lg text-xs font-mono whitespace-nowrap transition-all border-2 flex items-center gap-2 cursor-pointer",
                           isSelected
-                            ? "bg-forest text-lime border-dark shadow-neo-sm font-black"
-                            : "bg-white text-dark/80 border-dark/30 hover:border-dark hover:bg-white hover:text-dark font-bold"
+                            ? "bg-[#3155F5] text-[#E9F56A] border-[#171717] shadow-neo-sm font-black"
+                            : "bg-[#F5F1E8] text-[#171717]/80 border-[#171717]/30 hover:border-[#171717] hover:bg-white hover:text-[#171717] font-bold"
                         )}
                       >
                         <span>{day.name}</span>
@@ -401,7 +401,7 @@ export default function PlansPage() {
               {/* Current Day Exercise List & Controls */}
               {currentDay ? (
                 <div className="space-y-4 pt-2">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 rounded-xl bg-white border-2 border-dark shadow-neo-sm">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 rounded-xl bg-[#F5F1E8] border-2 border-[#171717] shadow-neo-sm">
                     <div>
                       <input
                         type="text"
@@ -409,9 +409,9 @@ export default function PlansPage() {
                         onChange={(e) =>
                           updateDayName(currentPlan.id, currentDay.id, e.target.value)
                         }
-                        className="font-heading font-black text-base text-dark bg-cream border-2 border-dark px-2.5 py-1 rounded-lg shadow-neo-sm focus:outline-none focus:ring-2 focus:ring-forest"
+                        className="font-heading font-black text-base text-[#171717] bg-white border-2 border-[#171717] px-2.5 py-1 rounded-lg shadow-neo-sm focus:outline-none focus:ring-2 focus:ring-[#3155F5] uppercase tracking-tight"
                       />
-                      <div className="text-xs text-dark/70 font-mono font-bold mt-1">
+                      <div className="text-xs text-[#171717]/70 font-mono font-bold mt-1">
                         {currentDay.exercises.length} prescribed movements
                       </div>
                     </div>
@@ -421,7 +421,7 @@ export default function PlansPage() {
                         onClick={() =>
                           duplicateDayInPlan(currentPlan.id, currentDay.id)
                         }
-                        className="px-3 py-1.5 rounded-lg bg-cream hover:bg-white border-2 border-dark text-xs font-mono font-bold text-dark flex items-center gap-1.5 shadow-neo-sm cursor-pointer"
+                        className="px-3 py-1.5 rounded-lg bg-white hover:bg-[#E9F56A] border-2 border-[#171717] text-xs font-mono font-bold text-[#171717] flex items-center gap-1.5 shadow-neo-sm cursor-pointer"
                         title="Duplicate Day"
                       >
                         <Copy className="w-3.5 h-3.5" />
@@ -433,7 +433,7 @@ export default function PlansPage() {
                           onClick={() =>
                             removeDayFromPlan(currentPlan.id, currentDay.id)
                           }
-                          className="px-3 py-1.5 rounded-lg bg-orange text-cream hover:bg-orange/90 border-2 border-dark text-xs font-mono font-bold flex items-center gap-1.5 shadow-neo-sm cursor-pointer"
+                          className="px-3 py-1.5 rounded-lg bg-[#FF7043] text-white hover:bg-[#e85d30] border-2 border-[#171717] text-xs font-mono font-bold flex items-center gap-1.5 shadow-neo-sm cursor-pointer"
                           title="Remove Day"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
@@ -443,9 +443,9 @@ export default function PlansPage() {
 
                       <button
                         onClick={() => handleStartWorkoutFromDay(currentDay)}
-                        className="px-4 py-2 rounded-lg bg-lime hover:bg-lime/90 text-dark border-2 border-dark text-xs font-mono font-black uppercase tracking-wider shadow-neo flex items-center gap-1.5 cursor-pointer transition-all active:translate-x-0.5 active:translate-y-0.5"
+                        className="px-4 py-2 rounded-lg bg-[#E9F56A] hover:bg-[#dae852] text-[#171717] border-2 border-[#171717] text-xs font-mono font-black uppercase tracking-wider shadow-neo flex items-center gap-1.5 cursor-pointer transition-all active:translate-x-0.5 active:translate-y-0.5"
                       >
-                        <Play className="w-3.5 h-3.5 fill-dark" />
+                        <Play className="w-3.5 h-3.5 fill-[#171717]" />
                         <span>Start Session</span>
                       </button>
                     </div>
@@ -453,13 +453,13 @@ export default function PlansPage() {
 
                   {/* Exercise Rows */}
                   {currentDay.exercises.length === 0 ? (
-                    <div className="p-8 text-center rounded-xl border-2 border-dashed border-dark/30 bg-white/50 space-y-3">
-                      <p className="text-xs text-dark/70 font-mono font-bold">
+                    <div className="p-8 text-center rounded-xl border-2 border-dashed border-[#171717]/30 bg-[#F5F1E8] space-y-3">
+                      <p className="text-xs text-[#171717]/70 font-mono font-bold">
                         No exercises configured for this day yet.
                       </p>
                       <button
                         onClick={() => setIsAddExerciseModalOpen(true)}
-                        className="px-4 py-2 rounded-lg bg-forest text-cream border-2 border-dark text-xs font-mono font-bold uppercase shadow-neo-sm hover:bg-forest/90 cursor-pointer"
+                        className="px-4 py-2 rounded-lg bg-[#3155F5] text-white border-2 border-[#171717] text-xs font-mono font-bold uppercase shadow-neo-sm hover:bg-[#2542C7] cursor-pointer"
                       >
                         + Add First Movement
                       </button>
@@ -474,18 +474,18 @@ export default function PlansPage() {
                         return (
                           <div
                             key={pe.id}
-                            className="p-3.5 rounded-xl bg-white border-2 border-dark shadow-neo-sm space-y-3"
+                            className="p-3.5 rounded-xl bg-[#F5F1E8] border-2 border-[#171717] shadow-neo-sm space-y-3"
                           >
                             <div className="flex items-center justify-between gap-3">
                               <div className="flex items-center gap-2.5">
-                                <span className="w-6 h-6 rounded-md bg-forest text-cream border-2 border-dark font-mono text-xs flex items-center justify-center font-black shadow-neo-sm">
+                                <span className="w-6 h-6 rounded-md bg-[#3155F5] text-white border-2 border-[#171717] font-mono text-xs flex items-center justify-center font-black shadow-neo-sm">
                                   {idx + 1}
                                 </span>
                                 <div>
-                                  <h4 className="font-heading font-black text-sm text-dark leading-tight">
+                                  <h4 className="font-heading font-black text-sm text-[#171717] leading-tight uppercase">
                                     {exMeta?.name || "Exercise"}
                                   </h4>
-                                  <span className="text-[10px] font-mono uppercase font-bold text-dark/60">
+                                  <span className="text-[10px] font-mono uppercase font-bold text-[#171717]/60">
                                     {exMeta?.primaryMuscleGroup} • {exMeta?.equipment}
                                   </span>
                                 </div>
@@ -503,7 +503,7 @@ export default function PlansPage() {
                                     )
                                   }
                                   disabled={idx === 0}
-                                  className="p-1 rounded border-2 border-dark bg-cream hover:bg-white text-dark disabled:opacity-30 cursor-pointer"
+                                  className="p-1 rounded border-2 border-[#171717] bg-white hover:bg-[#E9F56A] text-[#171717] disabled:opacity-30 cursor-pointer shadow-neo-sm"
                                 >
                                   <ArrowUp className="w-3.5 h-3.5" />
                                 </button>
@@ -517,7 +517,7 @@ export default function PlansPage() {
                                     )
                                   }
                                   disabled={idx === currentDay.exercises.length - 1}
-                                  className="p-1 rounded border-2 border-dark bg-cream hover:bg-white text-dark disabled:opacity-30 cursor-pointer"
+                                  className="p-1 rounded border-2 border-[#171717] bg-white hover:bg-[#E9F56A] text-[#171717] disabled:opacity-30 cursor-pointer shadow-neo-sm"
                                 >
                                   <ArrowDown className="w-3.5 h-3.5" />
                                 </button>
@@ -529,7 +529,7 @@ export default function PlansPage() {
                                       pe.id
                                     )
                                   }
-                                  className="p-1 rounded border-2 border-dark bg-orange text-cream hover:bg-orange/90 ml-1 cursor-pointer"
+                                  className="p-1 rounded border-2 border-[#171717] bg-[#FF7043] text-white hover:bg-[#e85d30] ml-1 cursor-pointer shadow-neo-sm"
                                 >
                                   <Trash2 className="w-3.5 h-3.5" />
                                 </button>
@@ -537,9 +537,9 @@ export default function PlansPage() {
                             </div>
 
                             {/* Configuration Fields: Sets, Reps, Weight, Rest, Step */}
-                            <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 pt-2 border-t-2 border-dark/10 text-xs">
+                            <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 pt-2 border-t-2 border-[#171717]/10 text-xs">
                               <div>
-                                <label className="text-[10px] font-mono uppercase font-bold text-dark/70 block mb-1">
+                                <label className="text-[10px] font-mono uppercase font-bold text-[#171717]/70 block mb-1">
                                   Target Sets
                                 </label>
                                 <input
@@ -555,12 +555,12 @@ export default function PlansPage() {
                                       { targetSets: Number(e.target.value) }
                                     )
                                   }
-                                  className="w-full px-2.5 py-1.5 rounded-lg bg-cream border-2 border-dark text-dark font-mono font-bold text-xs focus:outline-none focus:ring-2 focus:ring-forest shadow-neo-sm"
+                                  className="w-full px-2.5 py-1.5 rounded-lg bg-white border-2 border-[#171717] text-[#171717] font-mono font-bold text-xs focus:outline-none focus:ring-2 focus:ring-[#3155F5] shadow-neo-sm"
                                 />
                               </div>
 
                               <div>
-                                <label className="text-[10px] font-mono uppercase font-bold text-dark/70 block mb-1">
+                                <label className="text-[10px] font-mono uppercase font-bold text-[#171717]/70 block mb-1">
                                   Rep Range
                                 </label>
                                 <div className="flex items-center gap-1">
@@ -571,15 +571,15 @@ export default function PlansPage() {
                                     value={pe.minReps}
                                     onChange={(e) =>
                                       updatePlanExercise(
-                                       currentPlan.id,
+                                        currentPlan.id,
                                         currentDay.id,
                                         pe.id,
                                         { minReps: Number(e.target.value) }
                                       )
                                     }
-                                    className="w-full px-2 py-1.5 rounded-lg bg-cream border-2 border-dark text-dark font-mono font-bold text-xs text-center focus:outline-none focus:ring-2 focus:ring-forest shadow-neo-sm"
+                                    className="w-full px-2 py-1.5 rounded-lg bg-white border-2 border-[#171717] text-[#171717] font-mono font-bold text-xs text-center focus:outline-none focus:ring-2 focus:ring-[#3155F5] shadow-neo-sm"
                                   />
-                                  <span className="font-bold text-dark">-</span>
+                                  <span className="font-bold text-[#171717]">-</span>
                                   <input
                                     type="number"
                                     min={1}
@@ -593,13 +593,13 @@ export default function PlansPage() {
                                         { maxReps: Number(e.target.value) }
                                       )
                                     }
-                                    className="w-full px-2 py-1.5 rounded-lg bg-cream border-2 border-dark text-dark font-mono font-bold text-xs text-center focus:outline-none focus:ring-2 focus:ring-forest shadow-neo-sm"
+                                    className="w-full px-2 py-1.5 rounded-lg bg-white border-2 border-[#171717] text-[#171717] font-mono font-bold text-xs text-center focus:outline-none focus:ring-2 focus:ring-[#3155F5] shadow-neo-sm"
                                   />
                                 </div>
                               </div>
 
                               <div>
-                                <label className="text-[10px] font-mono uppercase font-bold text-dark/70 block mb-1">
+                                <label className="text-[10px] font-mono uppercase font-bold text-[#171717]/70 block mb-1">
                                   Start Weight (kg)
                                 </label>
                                 <input
@@ -615,12 +615,12 @@ export default function PlansPage() {
                                       { defaultWeight: Number(e.target.value) }
                                     )
                                   }
-                                  className="w-full px-2.5 py-1.5 rounded-lg bg-cream border-2 border-dark text-dark font-mono font-bold text-xs focus:outline-none focus:ring-2 focus:ring-forest shadow-neo-sm"
+                                  className="w-full px-2.5 py-1.5 rounded-lg bg-white border-2 border-[#171717] text-[#171717] font-mono font-bold text-xs focus:outline-none focus:ring-2 focus:ring-[#3155F5] shadow-neo-sm"
                                 />
                               </div>
 
                               <div>
-                                <label className="text-[10px] font-mono uppercase font-bold text-dark/70 block mb-1">
+                                <label className="text-[10px] font-mono uppercase font-bold text-[#171717]/70 block mb-1">
                                   Rest (sec)
                                 </label>
                                 <input
@@ -636,12 +636,12 @@ export default function PlansPage() {
                                       { restDuration: Number(e.target.value) }
                                     )
                                   }
-                                  className="w-full px-2.5 py-1.5 rounded-lg bg-cream border-2 border-dark text-dark font-mono font-bold text-xs focus:outline-none focus:ring-2 focus:ring-forest shadow-neo-sm"
+                                  className="w-full px-2.5 py-1.5 rounded-lg bg-white border-2 border-[#171717] text-[#171717] font-mono font-bold text-xs focus:outline-none focus:ring-2 focus:ring-[#3155F5] shadow-neo-sm"
                                 />
                               </div>
 
                               <div>
-                                <label className="text-[10px] font-mono uppercase font-bold text-dark/70 block mb-1">
+                                <label className="text-[10px] font-mono uppercase font-bold text-[#171717]/70 block mb-1">
                                   Step (+kg)
                                 </label>
                                 <input
@@ -659,7 +659,7 @@ export default function PlansPage() {
                                       }
                                     )
                                   }
-                                  className="w-full px-2.5 py-1.5 rounded-lg bg-cream border-2 border-dark text-dark font-mono font-bold text-xs focus:outline-none focus:ring-2 focus:ring-forest shadow-neo-sm"
+                                  className="w-full px-2.5 py-1.5 rounded-lg bg-white border-2 border-[#171717] text-[#171717] font-mono font-bold text-xs focus:outline-none focus:ring-2 focus:ring-[#3155F5] shadow-neo-sm"
                                 />
                               </div>
                             </div>
@@ -671,7 +671,7 @@ export default function PlansPage() {
 
                   <button
                     onClick={() => setIsAddExerciseModalOpen(true)}
-                    className="w-full py-3 rounded-xl border-2 border-dashed border-dark bg-cream hover:bg-white text-xs font-mono font-bold uppercase tracking-wider text-dark flex items-center justify-center gap-2 shadow-neo-sm transition-all cursor-pointer"
+                    className="w-full py-3 rounded-xl border-2 border-dashed border-[#171717] bg-white hover:bg-[#E9F56A] text-xs font-mono font-black uppercase tracking-wider text-[#171717] flex items-center justify-center gap-2 shadow-neo-sm transition-all cursor-pointer"
                   >
                     <Plus className="w-4 h-4 stroke-[2.5]" />
                     <span>Add Movement to {currentDay.name}</span>
@@ -685,15 +685,15 @@ export default function PlansPage() {
 
       {/* New Plan Modal */}
       {isNewPlanModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-dark/70 backdrop-blur-sm animate-in fade-in duration-150">
-          <div className="bg-cream border-3 border-dark rounded-xl shadow-neo-lg p-6 w-full max-w-md relative font-sans">
-            <div className="flex items-center justify-between mb-4 border-b-2 border-dark/15 pb-3">
-              <h3 className="font-heading font-black text-xl text-dark tracking-tight">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-150">
+          <div className="bg-white border-2 border-[#171717] rounded-xl shadow-neo-lg p-6 w-full max-w-md relative font-sans">
+            <div className="flex items-center justify-between mb-4 border-b-2 border-[#171717]/15 pb-3">
+              <h3 className="font-heading font-black text-xl text-[#171717] tracking-tight uppercase">
                 CREATE NEW WORKOUT PLAN
               </h3>
               <button
                 onClick={() => setIsNewPlanModalOpen(false)}
-                className="p-1.5 rounded-lg border-2 border-dark bg-white hover:bg-forest hover:text-cream text-dark transition-all cursor-pointer shadow-neo-sm"
+                className="p-1.5 rounded-lg border-2 border-[#171717] bg-[#F5F1E8] hover:bg-[#3155F5] hover:text-white text-[#171717] transition-all cursor-pointer shadow-neo-sm"
               >
                 <X className="w-4 h-4 stroke-[2.5]" />
               </button>
@@ -701,7 +701,7 @@ export default function PlansPage() {
 
             <form onSubmit={handleCreatePlan} className="space-y-4">
               <div>
-                <label className="block text-xs font-mono uppercase font-bold text-dark mb-1.5">
+                <label className="block text-xs font-mono uppercase font-black text-[#171717] mb-1.5">
                   Plan Name *
                 </label>
                 <input
@@ -710,18 +710,18 @@ export default function PlansPage() {
                   value={newPlanName}
                   onChange={(e) => setNewPlanName(e.target.value)}
                   placeholder="e.g., 4-Day Upper / Lower Wave"
-                  className="w-full px-3.5 py-2.5 rounded-lg bg-white border-2 border-dark text-dark text-sm focus:outline-none focus:ring-2 focus:ring-forest font-sans"
+                  className="w-full px-3.5 py-2.5 rounded-lg bg-[#F5F1E8] border-2 border-[#171717] text-[#171717] text-sm focus:outline-none focus:ring-2 focus:ring-[#3155F5] font-sans"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-mono uppercase font-bold text-dark mb-1.5">
+                <label className="block text-xs font-mono uppercase font-black text-[#171717] mb-1.5">
                   Training Phase
                 </label>
                 <select
                   value={newPlanPhase}
                   onChange={(e) => setNewPlanPhase(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-lg bg-white border-2 border-dark text-dark text-xs font-mono font-bold focus:outline-none focus:ring-2 focus:ring-forest cursor-pointer"
+                  className="w-full px-3.5 py-2.5 rounded-lg bg-[#F5F1E8] border-2 border-[#171717] text-[#171717] text-xs font-mono font-bold focus:outline-none focus:ring-2 focus:ring-[#3155F5] cursor-pointer"
                 >
                   {PHASES.map((ph) => (
                     <option key={ph} value={ph}>
@@ -732,7 +732,7 @@ export default function PlansPage() {
               </div>
 
               <div>
-                <label className="block text-xs font-mono uppercase font-bold text-dark mb-1.5">
+                <label className="block text-xs font-mono uppercase font-black text-[#171717] mb-1.5">
                   Description / Goals
                 </label>
                 <textarea
@@ -740,21 +740,21 @@ export default function PlansPage() {
                   value={newPlanDesc}
                   onChange={(e) => setNewPlanDesc(e.target.value)}
                   placeholder="Focus on compound strength and deload every 6th week..."
-                  className="w-full px-3.5 py-2 rounded-lg bg-white border-2 border-dark text-dark text-sm focus:outline-none focus:ring-2 focus:ring-forest resize-none font-sans"
+                  className="w-full px-3.5 py-2 rounded-lg bg-[#F5F1E8] border-2 border-[#171717] text-[#171717] text-sm focus:outline-none focus:ring-2 focus:ring-[#3155F5] resize-none font-sans"
                 />
               </div>
 
-              <div className="flex justify-end gap-2 pt-3 border-t-2 border-dark/15">
+              <div className="flex justify-end gap-2 pt-3 border-t-2 border-[#171717]/15">
                 <button
                   type="button"
                   onClick={() => setIsNewPlanModalOpen(false)}
-                  className="px-4 py-2.5 rounded-lg bg-white border-2 border-dark hover:bg-cream text-dark text-xs font-mono font-bold uppercase transition-all shadow-neo-sm cursor-pointer"
+                  className="px-4 py-2.5 rounded-lg bg-[#F5F1E8] border-2 border-[#171717] hover:bg-white text-[#171717] text-xs font-mono font-bold uppercase transition-all shadow-neo-sm cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2.5 rounded-lg bg-lime hover:bg-lime/90 text-dark text-xs font-mono uppercase font-black tracking-wider border-2 border-dark shadow-neo cursor-pointer transition-all active:translate-x-0.5 active:translate-y-0.5"
+                  className="px-5 py-2.5 rounded-lg bg-[#3155F5] hover:bg-[#2542C7] text-white text-xs font-mono uppercase font-black tracking-wider border-2 border-[#171717] shadow-neo cursor-pointer transition-all active:translate-x-0.5 active:translate-y-0.5"
                 >
                   Create Plan
                 </button>
@@ -766,15 +766,15 @@ export default function PlansPage() {
 
       {/* Add Exercise Modal */}
       {isAddExerciseModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-dark/70 backdrop-blur-sm animate-in fade-in duration-150">
-          <div className="bg-cream border-3 border-dark rounded-xl shadow-neo-lg p-6 w-full max-w-md relative font-sans">
-            <div className="flex items-center justify-between mb-4 border-b-2 border-dark/15 pb-3">
-              <h3 className="font-heading font-black text-xl text-dark tracking-tight">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-150">
+          <div className="bg-white border-2 border-[#171717] rounded-xl shadow-neo-lg p-6 w-full max-w-md relative font-sans">
+            <div className="flex items-center justify-between mb-4 border-b-2 border-[#171717]/15 pb-3">
+              <h3 className="font-heading font-black text-xl text-[#171717] tracking-tight uppercase">
                 SELECT MOVEMENT TO ADD
               </h3>
               <button
                 onClick={() => setIsAddExerciseModalOpen(false)}
-                className="p-1.5 rounded-lg border-2 border-dark bg-white hover:bg-forest hover:text-cream text-dark transition-all cursor-pointer shadow-neo-sm"
+                className="p-1.5 rounded-lg border-2 border-[#171717] bg-[#F5F1E8] hover:bg-[#3155F5] hover:text-white text-[#171717] transition-all cursor-pointer shadow-neo-sm"
               >
                 <X className="w-4 h-4 stroke-[2.5]" />
               </button>
@@ -782,13 +782,13 @@ export default function PlansPage() {
 
             <form onSubmit={handleAddExerciseToCurrentDay} className="space-y-4">
               <div>
-                <label className="block text-xs font-mono uppercase font-bold text-dark mb-1.5">
+                <label className="block text-xs font-mono uppercase font-black text-[#171717] mb-1.5">
                   Choose from Library
                 </label>
                 <select
                   value={selectedExerciseId}
                   onChange={(e) => setSelectedExerciseId(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-lg bg-white border-2 border-dark text-dark text-xs font-mono font-bold focus:outline-none focus:ring-2 focus:ring-forest cursor-pointer"
+                  className="w-full px-3.5 py-2.5 rounded-lg bg-[#F5F1E8] border-2 border-[#171717] text-[#171717] text-xs font-mono font-bold focus:outline-none focus:ring-2 focus:ring-[#3155F5] cursor-pointer"
                 >
                   {exercises.map((ex) => (
                     <option key={ex.id} value={ex.id}>
@@ -798,17 +798,17 @@ export default function PlansPage() {
                 </select>
               </div>
 
-              <div className="flex justify-end gap-2 pt-3 border-t-2 border-dark/15">
+              <div className="flex justify-end gap-2 pt-3 border-t-2 border-[#171717]/15">
                 <button
                   type="button"
                   onClick={() => setIsAddExerciseModalOpen(false)}
-                  className="px-4 py-2.5 rounded-lg bg-white border-2 border-dark hover:bg-cream text-dark text-xs font-mono font-bold uppercase transition-all shadow-neo-sm cursor-pointer"
+                  className="px-4 py-2.5 rounded-lg bg-[#F5F1E8] border-2 border-[#171717] hover:bg-white text-[#171717] text-xs font-mono font-bold uppercase transition-all shadow-neo-sm cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2.5 rounded-lg bg-lime hover:bg-lime/90 text-dark text-xs font-mono uppercase font-black tracking-wider border-2 border-dark shadow-neo cursor-pointer transition-all active:translate-x-0.5 active:translate-y-0.5"
+                  className="px-5 py-2.5 rounded-lg bg-[#3155F5] hover:bg-[#2542C7] text-white text-xs font-mono uppercase font-black tracking-wider border-2 border-[#171717] shadow-neo cursor-pointer transition-all active:translate-x-0.5 active:translate-y-0.5"
                 >
                   Add Movement
                 </button>

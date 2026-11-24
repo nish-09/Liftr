@@ -26,7 +26,7 @@ const ibmPlexMono = IBM_Plex_Mono({
 export const metadata: Metadata = {
   title: "Liftr — Progressive Overload & Athletic Performance",
   description:
-    "Green Neo-Brutalist athletic performance platform connecting workout tracking, progressive overload, and body composition.",
+    "Neo-Brutalist athletic performance platform connecting workout tracking, progressive overload, and body composition.",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
@@ -36,7 +36,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#B8D99A",
+  themeColor: "#3155F5",
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
@@ -52,7 +52,7 @@ export default function RootLayout({
       lang="en"
       className={`${spaceGrotesk.variable} ${dmSans.variable} ${ibmPlexMono.variable}`}
     >
-      <body className="min-h-screen bg-[#B8D99A] text-[#171B16] antialiased selection:bg-[#D5F36A] selection:text-[#171B16]">
+      <body className="min-h-screen bg-[#F5F1E8] text-[#171717] antialiased selection:bg-[#E9F56A] selection:text-[#171717]">
         {children}
       </body>
     </html>

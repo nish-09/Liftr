@@ -29,16 +29,16 @@ export default function ActiveWorkoutPill() {
   return (
     <Link
       href="/workouts"
-      className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md bg-[#D5F36A] hover:bg-[#c9e85e] border-2 border-[#171B16] text-[#171B16] shadow-neo-sm transition-all group active:translate-x-0.5 active:translate-y-0.5"
+      className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#E9F56A] hover:bg-[#dae852] border-2 border-[#171717] text-[#171717] shadow-neo-sm transition-all group active:translate-x-0.5 active:translate-y-0.5"
     >
-      <span className="w-2.5 h-2.5 rounded-full bg-[#183D2A] border border-[#171B16] animate-ping" />
+      <span className="w-2.5 h-2.5 rounded-full bg-[#3155F5] border border-[#171717] animate-ping" />
       <span className="text-xs font-mono font-bold tracking-tight">
         {formatDuration(elapsedSeconds)}
       </span>
-      <span className="hidden sm:inline text-xs font-sans font-bold">
+      <span className="hidden sm:inline text-xs font-heading font-bold">
         • {activeSession.name}
       </span>
-      <Play className="w-3.5 h-3.5 fill-[#171B16] stroke-[2] group-hover:translate-x-0.5 transition-transform" />
+      <Play className="w-3.5 h-3.5 fill-[#171717] stroke-[2] group-hover:translate-x-0.5 transition-transform" />
     </Link>
   );
 }

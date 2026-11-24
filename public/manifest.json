@@ -4,8 +4,8 @@
   "description": "Progressive overload workout tracking, strength analytics, BMI calculator, and body weight management.",
   "start_url": "/overview",
   "display": "standalone",
-  "background_color": "#090909",
-  "theme_color": "#090909",
+  "background_color": "#F5F1E8",
+  "theme_color": "#3155F5",
   "icons": [
     {
       "src": "/icon.svg",

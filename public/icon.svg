@@ -1,9 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
-  <rect width="512" height="512" rx="128" fill="#090909" />
-  <rect x="32" y="32" width="448" height="448" rx="96" fill="#8957DC" />
-  <path d="M160 216h192v80H160z" fill="#F5F3EB" />
-  <rect x="120" y="180" width="40" height="152" rx="12" fill="#F5F3EB" />
-  <rect x="352" y="180" width="40" height="152" rx="12" fill="#F5F3EB" />
-  <rect x="80" y="200" width="32" height="112" rx="8" fill="#E9D65B" />
-  <rect x="400" y="200" width="32" height="112" rx="8" fill="#E9D65B" />
+  <rect width="512" height="512" rx="128" fill="#171717" />
+  <rect x="32" y="32" width="448" height="448" rx="96" fill="#3155F5" stroke="#171717" stroke-width="8" />
+  <path d="M160 216h192v80H160z" fill="#FFFFFF" stroke="#171717" stroke-width="6" />
+  <rect x="120" y="180" width="40" height="152" rx="12" fill="#FFFFFF" stroke="#171717" stroke-width="6" />
+  <rect x="352" y="180" width="40" height="152" rx="12" fill="#FFFFFF" stroke="#171717" stroke-width="6" />
+  <rect x="80" y="200" width="32" height="112" rx="8" fill="#E9F56A" stroke="#171717" stroke-width="6" />
+  <rect x="400" y="200" width="32" height="112" rx="8" fill="#E9F56A" stroke="#171717" stroke-width="6" />
 </svg>

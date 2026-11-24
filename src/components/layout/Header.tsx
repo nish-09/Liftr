@@ -31,19 +31,19 @@ export default function Header({ userDisplayName, userEmail }: HeaderProps) {
   const { title, subtitle } = getPageHeading();
 
   return (
-    <header className="sticky top-0 z-20 bg-[#F5F0DF] border-b-2 border-[#171B16] px-4 lg:px-8 py-3.5 flex items-center justify-between shadow-[0px_2px_0px_0px_#171B16]">
+    <header className="sticky top-0 z-20 bg-white border-b-2 border-[#171717] px-4 lg:px-8 py-3.5 flex items-center justify-between shadow-[0px_2px_0px_0px_#171717]">
       {/* Mobile Brand / Page Title */}
       <div className="flex items-center gap-3">
         <Link href="/overview" className="lg:hidden flex items-center gap-2">
-          <div className="w-8 h-8 rounded-md bg-[#183D2A] border-2 border-[#171B16] flex items-center justify-center text-[#D5F36A] shadow-neo-sm">
-            <Dumbbell className="w-4 h-4" />
+          <div className="w-8 h-8 rounded-lg bg-[#3155F5] border-2 border-[#171717] flex items-center justify-center text-[#E9F56A] shadow-neo-sm">
+            <Dumbbell className="w-4 h-4 stroke-[2.5]" />
           </div>
         </Link>
         <div>
-          <h1 className="text-xl lg:text-2xl font-heading font-bold text-[#171B16] tracking-tight leading-tight">
+          <h1 className="text-xl lg:text-2xl font-heading font-black text-[#171717] tracking-tight leading-tight uppercase">
             {title}
           </h1>
-          <p className="hidden sm:block text-xs text-[#171B16]/70 font-mono">
+          <p className="hidden sm:block text-xs text-[#171717]/70 font-mono font-medium">
             {subtitle}
           </p>
         </div>
@@ -55,15 +55,15 @@ export default function Header({ userDisplayName, userEmail }: HeaderProps) {
         <ActiveWorkoutPill />
 
         {/* User profile dropdown & Logout */}
-        <div className="flex items-center gap-2 pl-2 border-l-2 border-[#171B16]/30">
+        <div className="flex items-center gap-2 pl-2 border-l-2 border-[#171717]/20">
           <Link
             href="/settings"
-            className="flex items-center gap-2 px-3 py-1.5 rounded-md bg-[#B8D99A] hover:bg-[#D5F36A] border-2 border-[#171B16] shadow-neo-sm transition-all text-xs text-[#171B16] font-bold"
+            className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#E9F56A] hover:bg-[#dae852] border-2 border-[#171717] shadow-neo-sm transition-all text-xs text-[#171717] font-bold"
           >
-            <div className="w-5 h-5 rounded bg-[#183D2A] text-[#F5F0DF] flex items-center justify-center font-bold font-mono text-[10px]">
+            <div className="w-5 h-5 rounded-md bg-[#3155F5] text-white flex items-center justify-center font-bold font-mono text-[10px] border border-[#171717]">
               {(userDisplayName || userEmail || "U")[0].toUpperCase()}
             </div>
-            <span className="hidden md:inline font-mono">
+            <span className="hidden md:inline font-mono font-bold">
               {userDisplayName || userEmail?.split("@")[0] || "Athlete"}
             </span>
           </Link>
@@ -72,7 +72,7 @@ export default function Header({ userDisplayName, userEmail }: HeaderProps) {
             <button
               type="submit"
               title="Sign Out"
-              className="p-1.5 rounded-md bg-[#F07845] hover:bg-[#d96636] text-white border-2 border-[#171B16] shadow-neo-sm transition-all cursor-pointer active:translate-x-0.5 active:translate-y-0.5"
+              className="p-1.5 rounded-lg bg-[#FF7043] hover:bg-[#e85d30] text-white border-2 border-[#171717] shadow-neo-sm transition-all cursor-pointer active:translate-x-0.5 active:translate-y-0.5"
             >
               <LogOut className="w-4 h-4 stroke-[2.5]" />
             </button>
