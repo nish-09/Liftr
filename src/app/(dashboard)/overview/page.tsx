@@ -61,6 +61,46 @@ export default function OverviewPage() {
     0
   );
 
+  // Dynamic Streak Calculation from real session history
+  const { streakCount, streakUnit, streakStatus } = useMemo(() => {
+    if (sessions.length === 0) {
+      return { streakCount: 0, streakUnit: "Days", streakStatus: "No Active Streak" };
+    }
+
+    const workoutDates = Array.from(
+      new Set(sessions.map((s) => (s.completedAt || s.startedAt).split("T")[0]))
+    ).sort((a, b) => new Date(b).getTime() - new Date(a).getTime());
+
+    const today = new Date().toISOString().split("T")[0];
+    const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString().split("T")[0];
+
+    if (workoutDates[0] !== today && workoutDates[0] !== yesterday) {
+      return { streakCount: 0, streakUnit: "Days", streakStatus: "Streak Inactive" };
+    }
+
+    let streak = 1;
+    let currentDate = new Date(workoutDates[0]);
+
+    for (let i = 1; i < workoutDates.length; i++) {
+      const prevExpectedDate = new Date(currentDate);
+      prevExpectedDate.setDate(prevExpectedDate.getDate() - 1);
+      const prevExpectedStr = prevExpectedDate.toISOString().split("T")[0];
+
+      if (workoutDates[i] === prevExpectedStr) {
+        streak++;
+        currentDate = prevExpectedDate;
+      } else {
+        break;
+      }
+    }
+
+    return {
+      streakCount: streak,
+      streakUnit: streak === 1 ? "Day" : "Days",
+      streakStatus: streak > 2 ? "High Momentum" : "Active Streak",
+    };
+  }, [sessions]);
+
   // Volume chart data for the last 5 sessions
   const chartData = useMemo(() => {
     return [...sessions]
@@ -87,10 +127,16 @@ export default function OverviewPage() {
             {greeting}, Athlete.
           </h1>
           <p className="text-xs sm:text-sm text-white/90 font-mono mt-2">
-            Double progression active on{" "}
-            <span className="text-[#E9F56A] font-black underline decoration-white underline-offset-4">
-              {activePlan?.name || "Push Pull Legs"}
-            </span>
+            {activePlan ? (
+              <>
+                Double progression active on{" "}
+                <span className="text-[#E9F56A] font-black underline decoration-white underline-offset-4">
+                  {activePlan.name}
+                </span>
+              </>
+            ) : (
+              "No active workout routine set. Create or activate a plan to track overload."
+            )}
           </p>
         </div>
 
@@ -130,7 +176,9 @@ export default function OverviewPage() {
               {workoutsThisWeek.length}
             </div>
             <span className="text-xs font-mono font-bold text-[#3155F5] mt-1 block">
-              ● On track for weekly quota
+              {workoutsThisWeek.length > 0
+                ? "● On track for weekly quota"
+                : "○ No sessions completed this week"}
             </span>
           </div>
           <div className="w-full bg-[#F5F1E8] border border-[#171717] h-2 rounded-full overflow-hidden">
@@ -155,14 +203,17 @@ export default function OverviewPage() {
           </div>
           <div className="my-3">
             <div className="text-4xl font-bold stat-number text-[#171717]">
-              {workoutsThisWeek.length > 0 ? "3 Weeks" : "1 Day"}
+              {streakCount}{" "}
+              <span className="text-xl font-mono font-bold">{streakUnit}</span>
             </div>
             <span className="text-xs font-mono font-semibold text-[#171717]/80 mt-1 block">
-              Consistent hypertrophic stimuli
+              {streakCount > 0
+                ? "Consistent hypertrophic stimuli"
+                : "Complete a session to begin streak"}
             </span>
           </div>
           <span className="text-[10px] font-mono text-[#171717] uppercase font-black px-2 py-0.5 rounded bg-white border border-[#171717] inline-block self-start shadow-neo-sm">
-            High Momentum
+            {streakStatus}
           </span>
         </div>
 
@@ -182,7 +233,9 @@ export default function OverviewPage() {
               <span className="text-sm font-normal text-white">kg</span>
             </div>
             <span className="text-xs font-mono text-white/80 mt-1 block">
-              Cumulative working set load
+              {weeklyVolume > 0
+                ? "Cumulative working set load"
+                : "No sets logged this week"}
             </span>
           </div>
           <Link
@@ -209,7 +262,9 @@ export default function OverviewPage() {
               {personalRecords.length}
             </div>
             <span className="text-xs font-mono text-white/90 mt-1 block">
-              Peak strength milestones
+              {personalRecords.length > 0
+                ? "Peak strength milestones"
+                : "No PRs recorded yet"}
             </span>
           </div>
           <Link
@@ -294,27 +349,31 @@ export default function OverviewPage() {
               <span className="text-[10px] font-mono uppercase tracking-wider text-[#171717] font-black">
                 Active Routine
               </span>
-              <span className="text-[10px] font-mono uppercase px-2 py-0.5 rounded-md bg-[#3155F5] text-white font-black border border-[#171717] shadow-neo-sm">
-                {activePlan?.phaseId || "Bulking"}
-              </span>
+              {activePlan && (
+                <span className="text-[10px] font-mono uppercase px-2 py-0.5 rounded-md bg-[#3155F5] text-white font-black border border-[#171717] shadow-neo-sm">
+                  {activePlan.phaseId || "Bulking"}
+                </span>
+              )}
             </div>
             <h3 className="text-2xl font-heading font-black text-[#171717] leading-tight uppercase">
-              {activePlan?.name || "Push Pull Legs"}
+              {activePlan ? activePlan.name : "No Active Routine"}
             </h3>
             <p className="text-xs text-[#171717]/80 mt-2 line-clamp-2 leading-relaxed font-sans">
-              {activePlan?.description || "High-yield progressive overload split."}
+              {activePlan
+                ? activePlan.description || "Routine split active."
+                : "No workout split currently active. Build a plan to track volume & double progression."}
             </p>
           </div>
 
           <div className="space-y-3 pt-3 border-t-2 border-[#171717]/20">
             <div className="text-xs font-mono font-bold text-[#171717]">
-              Prescribed Days: {activePlan?.days.length || 0} Routine Splits
+              Prescribed Days: {activePlan ? `${activePlan.days.length} Routine Splits` : "0 Routine Splits"}
             </div>
             <Link
               href="/plans"
               className="w-full py-2.5 px-4 rounded-lg bg-[#3155F5] hover:bg-[#2542C7] text-white text-xs font-heading font-black uppercase tracking-wider text-center block border-2 border-[#171717] shadow-neo transition-transform active:translate-x-0.5 active:translate-y-0.5"
             >
-              Configure Routine Days
+              {activePlan ? "Configure Routine Days" : "Create First Workout Plan"}
             </Link>
           </div>
         </div>

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { usePlanStore } from "@/stores/usePlanStore";
 import { useExerciseStore } from "@/stores/useExerciseStore";
 import { useWorkoutStore } from "@/stores/useWorkoutStore";
@@ -174,132 +175,144 @@ export default function PlansPage() {
             Available Routines
           </div>
 
-          <div className="space-y-3">
-            {plans.map((plan) => {
-              const isSelected = plan.id === currentPlan?.id;
-              const totalExercises = plan.days.reduce(
-                (acc, d) => acc + d.exercises.length,
-                0
-              );
+          {plans.length === 0 ? (
+            <div className="bg-white border-2 border-[#171717] rounded-xl shadow-neo p-6 text-center space-y-3">
+              <p className="text-xs font-mono font-bold text-[#171717]/70">No plans created</p>
+              <button
+                onClick={() => setIsNewPlanModalOpen(true)}
+                className="w-full py-2 px-3 rounded-lg bg-[#E9F56A] hover:bg-[#dae852] text-[#171717] border-2 border-[#171717] text-xs font-mono font-black uppercase shadow-neo-sm cursor-pointer"
+              >
+                + New Plan
+              </button>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {plans.map((plan) => {
+                const isSelected = plan.id === currentPlan?.id;
+                const totalExercises = plan.days.reduce(
+                  (acc, d) => acc + d.exercises.length,
+                  0
+                );
 
-              return (
-                <div
-                  key={plan.id}
-                  onClick={() => {
-                    setSelectedPlanId(plan.id);
-                    setSelectedDayId(plan.days[0]?.id || "");
-                  }}
-                  className={cn(
-                    "p-4 rounded-xl border-2 border-[#171717] transition-all cursor-pointer relative group",
-                    isSelected
-                      ? "bg-[#3155F5] text-white shadow-neo"
-                      : "bg-white text-[#171717] shadow-neo-sm hover:shadow-neo hover:translate-x-0.5"
-                  )}
-                >
-                  <div className="flex items-start justify-between gap-2 mb-2">
-                    <div className="flex items-center gap-1.5 flex-wrap">
-                      <span
-                        className={cn(
-                          "text-[10px] font-mono uppercase tracking-wider px-2 py-0.5 rounded-md border-2 border-[#171717] font-black shadow-neo-sm",
-                          isSelected
-                            ? "bg-[#E9F56A] text-[#171717]"
-                            : "bg-[#B9A5EF] text-[#171717]"
-                        )}
-                      >
-                        {plan.phaseId || "General"}
-                      </span>
-                      {plan.isActive && (
+                return (
+                  <div
+                    key={plan.id}
+                    onClick={() => {
+                      setSelectedPlanId(plan.id);
+                      setSelectedDayId(plan.days[0]?.id || "");
+                    }}
+                    className={cn(
+                      "p-4 rounded-xl border-2 border-[#171717] transition-all cursor-pointer relative group",
+                      isSelected
+                        ? "bg-[#3155F5] text-white shadow-neo"
+                        : "bg-white text-[#171717] shadow-neo-sm hover:shadow-neo hover:translate-x-0.5"
+                    )}
+                  >
+                    <div className="flex items-start justify-between gap-2 mb-2">
+                      <div className="flex items-center gap-1.5 flex-wrap">
                         <span
                           className={cn(
-                            "text-[10px] font-mono uppercase px-2 py-0.5 rounded-md border-2 border-[#171717] flex items-center gap-1 font-black shadow-neo-sm",
+                            "text-[10px] font-mono uppercase tracking-wider px-2 py-0.5 rounded-md border-2 border-[#171717] font-black shadow-neo-sm",
                             isSelected
-                              ? "bg-white text-[#171717]"
-                              : "bg-[#E9F56A] text-[#171717]"
+                              ? "bg-[#E9F56A] text-[#171717]"
+                              : "bg-[#B9A5EF] text-[#171717]"
                           )}
                         >
-                          <CheckCircle2 className="w-3 h-3 stroke-[2.5]" /> Active
+                          {plan.phaseId || "General"}
                         </span>
-                      )}
-                    </div>
-
-                    <div className="flex items-center gap-1">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          duplicatePlan(plan.id);
-                        }}
-                        className={cn(
-                          "p-1.5 rounded-md border-2 border-[#171717] transition-all shadow-neo-sm",
-                          isSelected
-                            ? "bg-white text-[#171717] hover:bg-[#E9F56A]"
-                            : "bg-[#F5F1E8] text-[#171717] hover:bg-[#3155F5] hover:text-white"
+                        {plan.isActive && (
+                          <span
+                            className={cn(
+                              "text-[10px] font-mono uppercase px-2 py-0.5 rounded-md border-2 border-[#171717] flex items-center gap-1 font-black shadow-neo-sm",
+                              isSelected
+                                ? "bg-white text-[#171717]"
+                                : "bg-[#E9F56A] text-[#171717]"
+                            )}
+                          >
+                            <CheckCircle2 className="w-3 h-3 stroke-[2.5]" /> Active
+                          </span>
                         )}
-                        title="Duplicate Plan"
-                      >
-                        <Copy className="w-3 h-3" />
-                      </button>
-                      {plans.length > 1 && (
+                      </div>
+
+                      <div className="flex items-center gap-1">
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
-                            deletePlan(plan.id);
+                            duplicatePlan(plan.id);
                           }}
-                          className="p-1.5 rounded-md border-2 border-[#171717] bg-[#FF7043] text-white hover:bg-[#e85d30] transition-all shadow-neo-sm"
-                          title="Delete Plan"
+                          className={cn(
+                            "p-1.5 rounded-md border-2 border-[#171717] transition-all shadow-neo-sm",
+                            isSelected
+                              ? "bg-white text-[#171717] hover:bg-[#E9F56A]"
+                              : "bg-[#F5F1E8] text-[#171717] hover:bg-[#3155F5] hover:text-white"
+                          )}
+                          title="Duplicate Plan"
                         >
-                          <Trash2 className="w-3 h-3" />
+                          <Copy className="w-3 h-3" />
+                        </button>
+                        {plans.length > 1 && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              deletePlan(plan.id);
+                            }}
+                            className="p-1.5 rounded-md border-2 border-[#171717] bg-[#FF7043] text-white hover:bg-[#e85d30] transition-all shadow-neo-sm"
+                            title="Delete Plan"
+                          >
+                            <Trash2 className="w-3 h-3" />
+                          </button>
+                        )}
+                      </div>
+                    </div>
+
+                    <h3
+                      className={cn(
+                        "font-heading font-black text-base tracking-tight leading-tight uppercase",
+                        isSelected ? "text-white" : "text-[#171717] group-hover:text-[#3155F5]"
+                      )}
+                    >
+                      {plan.name}
+                    </h3>
+
+                    {plan.description && (
+                      <p
+                        className={cn(
+                          "text-xs mt-1 line-clamp-2 font-sans",
+                          isSelected ? "text-white/80" : "text-[#171717]/70"
+                        )}
+                      >
+                        {plan.description}
+                      </p>
+                    )}
+
+                    <div
+                      className={cn(
+                        "mt-3 pt-2.5 border-t-2 flex items-center justify-between text-xs font-mono",
+                        isSelected
+                          ? "border-white/20 text-white/80"
+                          : "border-[#171717]/15 text-[#171717]/70"
+                      )}
+                    >
+                      <span className="font-bold">
+                        {plan.days.length} Days • {totalExercises} Movements
+                      </span>
+                      {!plan.isActive && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setActivePlan(plan.id);
+                          }}
+                          className="px-2 py-0.5 rounded-md bg-[#E9F56A] hover:bg-[#dae852] text-[#171717] border-2 border-[#171717] text-[10px] font-mono font-black uppercase shadow-neo-sm cursor-pointer"
+                        >
+                          Set Active
                         </button>
                       )}
                     </div>
                   </div>
-
-                  <h3
-                    className={cn(
-                      "font-heading font-black text-base tracking-tight leading-tight uppercase",
-                      isSelected ? "text-white" : "text-[#171717] group-hover:text-[#3155F5]"
-                    )}
-                  >
-                    {plan.name}
-                  </h3>
-
-                  {plan.description && (
-                    <p
-                      className={cn(
-                        "text-xs mt-1 line-clamp-2 font-sans",
-                        isSelected ? "text-white/80" : "text-[#171717]/70"
-                      )}
-                    >
-                      {plan.description}
-                    </p>
-                  )}
-
-                  <div
-                    className={cn(
-                      "mt-3 pt-2.5 border-t-2 flex items-center justify-between text-xs font-mono",
-                      isSelected
-                        ? "border-white/20 text-white/80"
-                        : "border-[#171717]/15 text-[#171717]/70"
-                    )}
-                  >
-                    <span className="font-bold">
-                      {plan.days.length} Days • {totalExercises} Movements
-                    </span>
-                    {!plan.isActive && (
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setActivePlan(plan.id);
-                        }}
-                        className="px-2 py-0.5 rounded-md bg-[#E9F56A] hover:bg-[#dae852] text-[#171717] border-2 border-[#171717] text-[10px] font-mono font-black uppercase shadow-neo-sm cursor-pointer"
-                      >
-                        Set Active
-                      </button>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+                );
+              })}
+            </div>
+          )}
         </div>
 
         {/* Right Column: Active Plan Day Editor */}
@@ -679,7 +692,28 @@ export default function PlansPage() {
                 </div>
               ) : null}
             </div>
-          ) : null}
+          ) : (
+            <div className="bg-white border-2 border-[#171717] rounded-xl shadow-neo p-12 text-center space-y-4">
+              <div className="w-16 h-16 mx-auto rounded-xl bg-[#3155F5]/10 border-2 border-[#171717] flex items-center justify-center text-[#3155F5]">
+                <Plus className="w-8 h-8 stroke-[2.5]" />
+              </div>
+              <div className="space-y-1">
+                <h3 className="font-heading font-black text-2xl text-[#171717] tracking-tight uppercase">
+                  NO WORKOUT PLANS CREATED
+                </h3>
+                <p className="text-xs sm:text-sm text-[#171717]/70 max-w-md mx-auto font-sans leading-relaxed">
+                  You haven&apos;t built any workout routines yet. Create a split (e.g. Upper / Lower, Push Pull Legs) to define target sets, rep ranges, rest intervals, and double progression increments.
+                </p>
+              </div>
+              <button
+                onClick={() => setIsNewPlanModalOpen(true)}
+                className="px-6 py-3 rounded-lg bg-[#3155F5] hover:bg-[#2542C7] text-white text-xs font-heading font-black uppercase tracking-wider border-2 border-[#171717] shadow-neo cursor-pointer transition-all active:translate-x-0.5 active:translate-y-0.5 inline-flex items-center gap-2"
+              >
+                <Plus className="w-4 h-4 stroke-[3]" />
+                <span>Create First Workout Plan</span>
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
@@ -781,22 +815,36 @@ export default function PlansPage() {
             </div>
 
             <form onSubmit={handleAddExerciseToCurrentDay} className="space-y-4">
-              <div>
-                <label className="block text-xs font-mono uppercase font-black text-[#171717] mb-1.5">
-                  Choose from Library
-                </label>
-                <select
-                  value={selectedExerciseId}
-                  onChange={(e) => setSelectedExerciseId(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-lg bg-[#F5F1E8] border-2 border-[#171717] text-[#171717] text-xs font-mono font-bold focus:outline-none focus:ring-2 focus:ring-[#3155F5] cursor-pointer"
-                >
-                  {exercises.map((ex) => (
-                    <option key={ex.id} value={ex.id}>
-                      {ex.name} ({ex.primaryMuscleGroup} • {ex.equipment})
-                    </option>
-                  ))}
-                </select>
-              </div>
+              {exercises.length === 0 ? (
+                <div className="p-4 rounded-lg bg-[#F5F1E8] border-2 border-[#171717] text-center space-y-2">
+                  <p className="text-xs text-[#171717]/80 font-mono">
+                    No exercises found in your library. Add custom exercises in the Exercise Library before adding them to routines.
+                  </p>
+                  <Link
+                    href="/exercises"
+                    className="inline-block px-3 py-1.5 rounded-md bg-[#3155F5] text-white text-xs font-mono font-bold border border-[#171717]"
+                  >
+                    Go to Exercise Library →
+                  </Link>
+                </div>
+              ) : (
+                <div>
+                  <label className="block text-xs font-mono uppercase font-black text-[#171717] mb-1.5">
+                    Choose from Library
+                  </label>
+                  <select
+                    value={selectedExerciseId}
+                    onChange={(e) => setSelectedExerciseId(e.target.value)}
+                    className="w-full px-3.5 py-2.5 rounded-lg bg-[#F5F1E8] border-2 border-[#171717] text-[#171717] text-xs font-mono font-bold focus:outline-none focus:ring-2 focus:ring-[#3155F5] cursor-pointer"
+                  >
+                    {exercises.map((ex) => (
+                      <option key={ex.id} value={ex.id}>
+                        {ex.name} ({ex.primaryMuscleGroup} • {ex.equipment})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
 
               <div className="flex justify-end gap-2 pt-3 border-t-2 border-[#171717]/15">
                 <button

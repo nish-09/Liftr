@@ -584,23 +584,37 @@ export default function WorkoutsPage() {
               Add Exercise to Live Session
             </h3>
             <form onSubmit={handleAddExercise} className="space-y-4">
-              <div>
-                <label className="block text-xs font-mono uppercase text-[#171717] font-black mb-1.5">
-                  Select Exercise
-                </label>
-                <select
-                  value={selectedExerciseId}
-                  onChange={(e) => setSelectedExerciseId(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-lg bg-[#F5F1E8] border-2 border-[#171717] text-[#171717] text-sm font-semibold focus:outline-none"
-                >
-                  <option value="">-- Choose Exercise --</option>
-                  {exercises.map((ex) => (
-                    <option key={ex.id} value={ex.id}>
-                      {ex.name} ({ex.primaryMuscleGroup} • {ex.equipment})
-                    </option>
-                  ))}
-                </select>
-              </div>
+              {exercises.length === 0 ? (
+                <div className="p-4 rounded-lg bg-[#F5F1E8] border-2 border-[#171717] text-center space-y-2">
+                  <p className="text-xs text-[#171717]/80 font-mono">
+                    No exercises found in your library. Add custom exercises in the Exercise Library first.
+                  </p>
+                  <Link
+                    href="/exercises"
+                    className="inline-block px-3 py-1.5 rounded-md bg-[#3155F5] text-white text-xs font-mono font-bold border border-[#171717]"
+                  >
+                    Go to Exercise Library →
+                  </Link>
+                </div>
+              ) : (
+                <div>
+                  <label className="block text-xs font-mono uppercase text-[#171717] font-black mb-1.5">
+                    Select Exercise
+                  </label>
+                  <select
+                    value={selectedExerciseId}
+                    onChange={(e) => setSelectedExerciseId(e.target.value)}
+                    className="w-full px-3.5 py-2.5 rounded-lg bg-[#F5F1E8] border-2 border-[#171717] text-[#171717] text-sm font-semibold focus:outline-none"
+                  >
+                    <option value="">-- Choose Exercise --</option>
+                    {exercises.map((ex) => (
+                      <option key={ex.id} value={ex.id}>
+                        {ex.name} ({ex.primaryMuscleGroup} • {ex.equipment})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
 
               <div className="flex justify-end gap-2 pt-2">
                 <button

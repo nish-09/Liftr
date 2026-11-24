@@ -383,6 +383,17 @@ export const useWorkoutStore = create<WorkoutStore>()(
     }),
     {
       name: "liftr-workout-storage",
+      version: 2,
+      migrate: () => ({
+        activeSession: null,
+        syncStatus: "synced",
+        elapsedSeconds: 0,
+        restTimer: {
+          remainingSeconds: 0,
+          totalSeconds: 0,
+          isRunning: false,
+        },
+      }),
       storage: createJSONStorage(() => localStorage),
     }
   )

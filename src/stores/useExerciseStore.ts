@@ -1,7 +1,6 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import { Exercise, MuscleGroup, Equipment } from "@/types";
-import { DEFAULT_EXERCISES } from "@/lib/data/defaultExercises";
 
 interface ExerciseStore {
   exercises: Exercise[];
@@ -16,7 +15,7 @@ interface ExerciseStore {
 export const useExerciseStore = create<ExerciseStore>()(
   persist(
     (set, get) => ({
-      exercises: DEFAULT_EXERCISES,
+      exercises: [],
 
       addExercise: (exerciseData) => {
         const newEx: Exercise = {
@@ -65,11 +64,13 @@ export const useExerciseStore = create<ExerciseStore>()(
       },
 
       resetToDefaults: () => {
-        set({ exercises: DEFAULT_EXERCISES });
+        set({ exercises: [] });
       },
     }),
     {
       name: "liftr-exercises-storage",
+      version: 2,
+      migrate: () => ({ exercises: [] }),
       storage: createJSONStorage(() => localStorage),
     }
   )

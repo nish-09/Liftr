@@ -54,10 +54,10 @@ export default function WeightTrackerPage() {
   // Target Settings Modal State
   const [isTargetModalOpen, setIsTargetModalOpen] = useState(false);
   const [targetWeightVal, setTargetWeightVal] = useState(
-    userBodyProfile.targetWeight || 85
+    userBodyProfile.targetWeight != null ? String(userBodyProfile.targetWeight) : ""
   );
   const [startWeightVal, setStartWeightVal] = useState(
-    userBodyProfile.startingWeight || 78.5
+    userBodyProfile.startingWeight != null ? String(userBodyProfile.startingWeight) : ""
   );
   const [targetDateVal, setTargetDateVal] = useState(
     userBodyProfile.targetDate || ""
@@ -72,10 +72,20 @@ export default function WeightTrackerPage() {
   const [editDateVal, setEditDateVal] = useState("");
   const [editNotesVal, setEditNotesVal] = useState("");
 
-  const currentWeight =
-    weightLogs.length > 0 ? weightLogs[0].weight : userBodyProfile.startingWeight || 78.5;
-  const startWeight = userBodyProfile.startingWeight || 78.5;
-  const targetWeight = userBodyProfile.targetWeight || 85.0;
+  const hasLogs = weightLogs.length > 0;
+  const currentWeight = hasLogs
+    ? weightLogs[0].weight
+    : userBodyProfile.startingWeight != null
+    ? userBodyProfile.startingWeight
+    : null;
+  const startWeight = userBodyProfile.startingWeight != null
+    ? userBodyProfile.startingWeight
+    : hasLogs
+    ? weightLogs[weightLogs.length - 1].weight
+    : null;
+  const targetWeight = userBodyProfile.targetWeight != null
+    ? userBodyProfile.targetWeight
+    : null;
 
   // Filter weight logs by time
   const filteredLogs = useMemo(() => {
@@ -93,20 +103,32 @@ export default function WeightTrackerPage() {
           day: "numeric",
         }),
         weight: w.weight,
-        target: targetWeight,
+        ...(targetWeight != null ? { target: targetWeight } : {}),
       }));
   }, [filteredLogs, targetWeight]);
 
   // Trajectory Calculations
-  const totalChange = Number((currentWeight - startWeight).toFixed(2));
-  const remainingWeight = Number(Math.abs(targetWeight - currentWeight).toFixed(2));
+  const totalChange =
+    currentWeight != null && startWeight != null
+      ? Number((currentWeight - startWeight).toFixed(2))
+      : null;
+  const remainingWeight =
+    currentWeight != null && targetWeight != null
+      ? Number(Math.abs(targetWeight - currentWeight).toFixed(2))
+      : null;
 
-  const totalGoalDelta = Math.abs(targetWeight - startWeight);
-  const currentProgressDelta = Math.abs(currentWeight - startWeight);
+  const totalGoalDelta =
+    targetWeight != null && startWeight != null
+      ? Math.abs(targetWeight - startWeight)
+      : null;
+  const currentProgressDelta =
+    currentWeight != null && startWeight != null
+      ? Math.abs(currentWeight - startWeight)
+      : null;
   const progressPercent =
-    totalGoalDelta > 0
+    totalGoalDelta != null && totalGoalDelta > 0 && currentProgressDelta != null
       ? Math.min(100, Math.round((currentProgressDelta / totalGoalDelta) * 100))
-      : 100;
+      : 0;
 
   // Calculate average weekly change
   const weeklyChangeRate = useMemo(() => {
@@ -142,9 +164,11 @@ export default function WeightTrackerPage() {
 
   function handleSaveTargetProfile(e: React.FormEvent) {
     e.preventDefault();
+    const sWeight = parseFloat(startWeightVal);
+    const tWeight = parseFloat(targetWeightVal);
     updateBodyProfile({
-      startingWeight: Number(startWeightVal),
-      targetWeight: Number(targetWeightVal),
+      startingWeight: !isNaN(sWeight) && sWeight > 0 ? sWeight : null,
+      targetWeight: !isNaN(tWeight) && tWeight > 0 ? tWeight : null,
       targetDate: targetDateVal || null,
       goalType: goalTypeVal,
     });
@@ -202,7 +226,7 @@ export default function WeightTrackerPage() {
 
           <button
             onClick={() => {
-              setLogWeightValue(String(currentWeight));
+              setLogWeightValue(currentWeight != null ? String(currentWeight) : "");
               setLogDate(new Date().toISOString().split("T")[0]);
               setLogError(null);
               setIsLogModalOpen(true);
@@ -216,59 +240,103 @@ export default function WeightTrackerPage() {
       </div>
 
       {/* Prominent Bento Hero Card: Target Progress */}
-      <div className="bg-forest text-cream border-2 border-dark rounded-xl shadow-neo p-6 space-y-5">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div className="flex items-center gap-2">
+      {currentWeight == null || targetWeight == null ? (
+        <div className="bg-forest text-cream border-2 border-dark rounded-xl shadow-neo p-6 space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <span className="text-xs font-mono uppercase tracking-wider text-lime font-black">
-              Goal Objective
+              Weight Trajectory Engine
             </span>
             <span className="text-[10px] font-mono uppercase px-2.5 py-0.5 rounded bg-lime text-dark border-2 border-dark font-black shadow-neo-sm">
-              {userBodyProfile.goalType.toUpperCase()}
+              Ready for Setup
             </span>
           </div>
 
-          <span className="text-xs font-mono font-bold text-cream/80">
-            {progressPercent}% Journey Completed
-          </span>
-        </div>
-
-        {/* Big Numbers Display */}
-        <div className="flex flex-wrap items-baseline gap-4 sm:gap-6">
-          <div className="flex items-baseline gap-2">
-            <span className="text-5xl sm:text-6xl font-heading font-black text-cream tracking-tight">
-              {currentWeight}
-            </span>
-            <span className="text-lg font-mono font-bold text-cream/70">kg</span>
+          <div className="py-2">
+            <h2 className="text-2xl sm:text-3xl font-heading font-black text-cream uppercase tracking-tight">
+              NO WEIGHT CHECKPOINTS LOGGED
+            </h2>
+            <p className="text-xs sm:text-sm text-cream/80 font-mono mt-1 max-w-xl">
+              Record your initial weigh-in and configure your target body weight to track progressive surplus/deficit trajectories and weekly rates of change.
+            </p>
           </div>
 
-          <div className="flex items-center text-lime font-mono text-2xl font-black">
-            →
-          </div>
-
-          <div className="flex items-baseline gap-2">
-            <span className="text-5xl sm:text-6xl font-heading font-black text-lime tracking-tight">
-              {targetWeight}
-            </span>
-            <span className="text-lg font-mono font-bold text-cream/70">kg</span>
-          </div>
-
-          <div className="sm:ml-auto px-4 py-2 rounded-xl bg-cream text-dark border-2 border-dark shadow-neo-sm font-mono">
-            <span className="text-dark/60 block text-[10px] uppercase font-black">Remaining</span>
-            <span className="font-heading font-black text-lg text-orange">
-              {userBodyProfile.goalType === "gain" ? "+" : "-"}
-              {remainingWeight} kg
-            </span>
+          <div className="flex flex-wrap items-center gap-3 pt-2">
+            <button
+              onClick={() => {
+                setLogWeightValue("");
+                setLogDate(new Date().toISOString().split("T")[0]);
+                setLogError(null);
+                setIsLogModalOpen(true);
+              }}
+              className="px-5 py-2.5 rounded-lg bg-lime hover:bg-lime/90 text-dark border-2 border-dark text-xs font-mono uppercase font-black tracking-wider shadow-neo flex items-center gap-1.5 cursor-pointer"
+            >
+              <Plus className="w-4 h-4 stroke-[3]" />
+              <span>Log Starting Weight</span>
+            </button>
+            <button
+              onClick={() => setIsTargetModalOpen(true)}
+              className="px-4 py-2.5 rounded-lg bg-white hover:bg-cream border-2 border-dark text-xs font-mono uppercase font-bold text-dark shadow-neo-sm transition-all flex items-center gap-1.5 cursor-pointer"
+            >
+              <Target className="w-4 h-4 text-forest stroke-[2.5]" />
+              <span>Configure Target</span>
+            </button>
           </div>
         </div>
+      ) : (
+        <div className="bg-forest text-cream border-2 border-dark rounded-xl shadow-neo p-6 space-y-5">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-mono uppercase tracking-wider text-lime font-black">
+                Goal Objective
+              </span>
+              <span className="text-[10px] font-mono uppercase px-2.5 py-0.5 rounded bg-lime text-dark border-2 border-dark font-black shadow-neo-sm">
+                {userBodyProfile.goalType.toUpperCase()}
+              </span>
+            </div>
 
-        {/* Progress Bar */}
-        <div className="w-full bg-forest-dark border-2 border-dark h-3 rounded-full overflow-hidden shadow-neo-sm">
-          <div
-            className="bg-lime h-full transition-all duration-700 ease-out"
-            style={{ width: `${progressPercent}%` }}
-          />
+            <span className="text-xs font-mono font-bold text-cream/80">
+              {progressPercent}% Journey Completed
+            </span>
+          </div>
+
+          {/* Big Numbers Display */}
+          <div className="flex flex-wrap items-baseline gap-4 sm:gap-6">
+            <div className="flex items-baseline gap-2">
+              <span className="text-5xl sm:text-6xl font-heading font-black text-cream tracking-tight">
+                {currentWeight}
+              </span>
+              <span className="text-lg font-mono font-bold text-cream/70">kg</span>
+            </div>
+
+            <div className="flex items-center text-lime font-mono text-2xl font-black">
+              →
+            </div>
+
+            <div className="flex items-baseline gap-2">
+              <span className="text-5xl sm:text-6xl font-heading font-black text-lime tracking-tight">
+                {targetWeight}
+              </span>
+              <span className="text-lg font-mono font-bold text-cream/70">kg</span>
+            </div>
+
+            <div className="sm:ml-auto px-4 py-2 rounded-xl bg-cream text-dark border-2 border-dark shadow-neo-sm font-mono">
+              <span className="text-dark/60 block text-[10px] uppercase font-black">Remaining</span>
+              <span className="font-heading font-black text-lg text-orange">
+                {userBodyProfile.goalType === "gain" ? "+" : "-"}
+                {remainingWeight} kg
+              </span>
+            </div>
+          </div>
+
+          {/* Progress Bar */}
+          <div className="w-full bg-forest-dark border-2 border-dark h-3 rounded-full overflow-hidden shadow-neo-sm">
+            <div
+              className="bg-lime h-full transition-all duration-700 ease-out"
+              style={{ width: `${progressPercent}%` }}
+            />
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Metrics Row: Starting, Target, Net, Rate */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -277,7 +345,7 @@ export default function WeightTrackerPage() {
             Starting Baseline
           </span>
           <div className="text-2xl font-heading font-black text-dark tracking-tight">
-            {startWeight} kg
+            {startWeight != null ? `${startWeight} kg` : "--"}
           </div>
           <span className="text-[11px] font-mono font-bold text-dark/60 mt-1 block">
             Initial weigh-in
@@ -291,10 +359,14 @@ export default function WeightTrackerPage() {
           <div
             className={cn(
               "text-2xl font-heading font-black tracking-tight",
-              totalChange >= 0 ? "text-forest" : "text-orange"
+              totalChange != null && totalChange >= 0 ? "text-forest" : "text-orange"
             )}
           >
-            {totalChange > 0 ? `+${totalChange}` : totalChange} kg
+            {totalChange != null
+              ? totalChange > 0
+                ? `+${totalChange} kg`
+                : `${totalChange} kg`
+              : "--"}
           </div>
           <span className="text-[11px] font-mono font-bold text-dark/60 mt-1 block">
             Since tracking began
@@ -306,7 +378,11 @@ export default function WeightTrackerPage() {
             Weekly Cadence
           </span>
           <div className="text-2xl font-heading font-black text-orange tracking-tight">
-            {weeklyChangeRate > 0 ? `+${weeklyChangeRate}` : weeklyChangeRate} kg
+            {weeklyChangeRate !== 0
+              ? weeklyChangeRate > 0
+                ? `+${weeklyChangeRate} kg`
+                : `${weeklyChangeRate} kg`
+              : "--"}
           </div>
           <span className="text-[11px] font-mono font-bold text-dark/60 mt-1 block">
             Rate per 7 days
@@ -390,19 +466,21 @@ export default function WeightTrackerPage() {
                     color: "#171717",
                   }}
                 />
-                <ReferenceLine
-                  y={targetWeight}
-                  stroke="#FF7043"
-                  strokeWidth={2}
-                  strokeDasharray="4 4"
-                  label={{
-                    value: `Target: ${targetWeight} kg`,
-                    fill: "#FF7043",
-                    fontSize: 11,
-                    fontWeight: "bold",
-                    position: "insideTopRight",
-                  }}
-                />
+                {targetWeight != null && (
+                  <ReferenceLine
+                    y={targetWeight}
+                    stroke="#FF7043"
+                    strokeWidth={2}
+                    strokeDasharray="4 4"
+                    label={{
+                      value: `Target: ${targetWeight} kg`,
+                      fill: "#FF7043",
+                      fontSize: 11,
+                      fontWeight: "bold",
+                      position: "insideTopRight",
+                    }}
+                  />
+                )}
                 <Area
                   type="monotone"
                   dataKey="weight"
@@ -427,55 +505,65 @@ export default function WeightTrackerPage() {
           </span>
         </div>
 
-        <div className="space-y-2">
-          {weightLogs.map((log) => (
-            <div
-              key={log.id}
-              className="p-3 rounded-xl bg-white border-2 border-dark shadow-neo-sm flex items-center justify-between gap-3 text-xs font-mono"
-            >
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-lg bg-forest text-cream border-2 border-dark flex items-center justify-center font-bold shadow-neo-sm">
-                  <Scale className="w-4 h-4 stroke-[2.5]" />
-                </div>
-                <div>
-                  <div className="font-heading font-black text-dark text-base">
-                    {log.weight} {log.unit}
+        {weightLogs.length === 0 ? (
+          <div className="bg-white border-2 border-dark rounded-xl p-8 text-center space-y-2">
+            <Scale className="w-8 h-8 text-dark/40 mx-auto" />
+            <div className="font-heading font-black text-sm text-dark uppercase">No Weight Checkpoints Recorded</div>
+            <p className="text-xs text-dark/60 font-mono max-w-sm mx-auto">
+              Your weigh-in archive is empty. Log your body weight regularly to track weekly rate of change and historical checkpoints.
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-2">
+            {weightLogs.map((log) => (
+              <div
+                key={log.id}
+                className="p-3 rounded-xl bg-white border-2 border-dark shadow-neo-sm flex items-center justify-between gap-3 text-xs font-mono"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-lg bg-forest text-cream border-2 border-dark flex items-center justify-center font-bold shadow-neo-sm">
+                    <Scale className="w-4 h-4 stroke-[2.5]" />
                   </div>
-                  <span className="text-[10px] text-dark/60 font-bold">
-                    {new Date(log.recordedAt).toLocaleDateString("en-US", {
-                      weekday: "short",
-                      month: "short",
-                      day: "numeric",
-                      year: "numeric",
-                    })}
-                    {log.notes && ` • ${log.notes}`}
-                  </span>
+                  <div>
+                    <div className="font-heading font-black text-dark text-base">
+                      {log.weight} {log.unit}
+                    </div>
+                    <span className="text-[10px] text-dark/60 font-bold">
+                      {new Date(log.recordedAt).toLocaleDateString("en-US", {
+                        weekday: "short",
+                        month: "short",
+                        day: "numeric",
+                        year: "numeric",
+                      })}
+                      {log.notes && ` • ${log.notes}`}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-1.5">
+                  <button
+                    onClick={() => openEditLog(log)}
+                    className="p-1.5 rounded-md border-2 border-dark bg-white hover:bg-forest hover:text-cream text-dark transition-all shadow-neo-sm cursor-pointer"
+                    title="Edit Entry"
+                  >
+                    <Edit2 className="w-3.5 h-3.5" />
+                  </button>
+                  <button
+                    onClick={() => {
+                      if (confirm("Delete this weight log entry?")) {
+                        deleteWeightLog(log.id);
+                      }
+                    }}
+                    className="p-1.5 rounded-md border-2 border-dark bg-orange text-cream hover:bg-orange/90 transition-all shadow-neo-sm cursor-pointer"
+                    title="Delete Entry"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
                 </div>
               </div>
-
-              <div className="flex items-center gap-1.5">
-                <button
-                  onClick={() => openEditLog(log)}
-                  className="p-1.5 rounded-md border-2 border-dark bg-white hover:bg-forest hover:text-cream text-dark transition-all shadow-neo-sm cursor-pointer"
-                  title="Edit Entry"
-                >
-                  <Edit2 className="w-3.5 h-3.5" />
-                </button>
-                <button
-                  onClick={() => {
-                    if (confirm("Delete this weight log entry?")) {
-                      deleteWeightLog(log.id);
-                    }
-                  }}
-                  className="p-1.5 rounded-md border-2 border-dark bg-orange text-cream hover:bg-orange/90 transition-all shadow-neo-sm cursor-pointer"
-                  title="Delete Entry"
-                >
-                  <Trash2 className="w-3.5 h-3.5" />
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Log Weight Modal */}
@@ -587,7 +675,7 @@ export default function WeightTrackerPage() {
                     step={0.1}
                     required
                     value={startWeightVal}
-                    onChange={(e) => setStartWeightVal(Number(e.target.value))}
+                    onChange={(e) => setStartWeightVal(e.target.value)}
                     className="w-full px-3.5 py-2.5 rounded-lg bg-white border-2 border-dark text-dark text-sm focus:outline-none focus:ring-2 focus:ring-forest font-mono font-bold"
                   />
                 </div>
@@ -601,7 +689,7 @@ export default function WeightTrackerPage() {
                     step={0.1}
                     required
                     value={targetWeightVal}
-                    onChange={(e) => setTargetWeightVal(Number(e.target.value))}
+                    onChange={(e) => setTargetWeightVal(e.target.value)}
                     className="w-full px-3.5 py-2.5 rounded-lg bg-white border-2 border-dark text-dark text-sm focus:outline-none focus:ring-2 focus:ring-forest font-mono font-bold"
                   />
                 </div>

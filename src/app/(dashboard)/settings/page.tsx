@@ -115,7 +115,20 @@ export default function SettingsPage() {
       let matchedEx = exercises.find(
         (e) => e.name.toLowerCase() === exName.toLowerCase()
       );
-      const exId = matchedEx ? matchedEx.id : "ex-bench-press";
+      if (!matchedEx) {
+        matchedEx = useExerciseStore.getState().addExercise({
+          name: exName,
+          primaryMuscleGroup: "full_body",
+          secondaryMuscleGroups: [],
+          equipment: "other",
+          weightUnit: "kg",
+          defaultRestDuration: 90,
+          progressionIncrement: 2.5,
+          isFavorite: false,
+          description: "Imported via CSV",
+        });
+      }
+      const exId = matchedEx.id;
 
       let sessionEx = workoutGroups[key].exercises.find((e: any) => e.exerciseId === exId);
       if (!sessionEx) {

@@ -226,26 +226,55 @@ export default function ExerciseLibraryPage() {
       </div>
 
       {/* Exercises Grid */}
-      {filteredExercises.length === 0 ? (
+      {exercises.length === 0 ? (
+        <div className="bg-white border-2 border-[#171717] rounded-xl shadow-neo p-12 text-center space-y-4">
+          <div className="w-16 h-16 mx-auto rounded-xl bg-[#3155F5]/10 border-2 border-[#171717] flex items-center justify-center text-[#3155F5]">
+            <Dumbbell className="w-8 h-8 stroke-[2.5]" />
+          </div>
+          <div className="space-y-1">
+            <h3 className="font-heading text-2xl font-black text-[#171717] tracking-tight uppercase">
+              EXERCISE LIBRARY IS EMPTY
+            </h3>
+            <p className="text-xs sm:text-sm text-[#171717]/70 max-w-md mx-auto font-sans leading-relaxed">
+              No movements currently exist in your library. Add custom exercises with target rest times, progression increments, and muscle group classifications to start building routines and logging sets.
+            </p>
+          </div>
+          <button
+            onClick={openCreateModal}
+            className="px-6 py-3 rounded-lg bg-[#3155F5] hover:bg-[#2542C7] text-white text-xs font-heading font-black uppercase tracking-wider border-2 border-[#171717] shadow-neo cursor-pointer transition-all active:translate-x-0.5 active:translate-y-0.5 inline-flex items-center gap-2"
+          >
+            <Plus className="w-4 h-4 stroke-[3]" />
+            <span>Create Custom Exercise</span>
+          </button>
+        </div>
+      ) : filteredExercises.length === 0 ? (
         <div className="bg-white border-2 border-[#171717] rounded-xl shadow-neo p-12 text-center space-y-3">
           <div className="w-12 h-12 mx-auto rounded-xl bg-[#3155F5]/10 border-2 border-[#171717] flex items-center justify-center text-[#171717]">
             <Dumbbell className="w-6 h-6 stroke-[2.5]" />
           </div>
-          <h3 className="font-heading text-lg font-black text-[#171717] tracking-tight uppercase">NO EXERCISES FOUND</h3>
+          <h3 className="font-heading text-lg font-black text-[#171717] tracking-tight uppercase">NO EXERCISES MATCH FILTERS</h3>
           <p className="text-xs text-[#171717]/70 max-w-sm mx-auto font-sans">
             Try adjusting your search criteria, clearing the muscle filter, or create a new custom exercise.
           </p>
-          <button
-            onClick={() => {
-              setSearchQuery("");
-              setSelectedMuscle("all");
-              setSelectedEquipment("all");
-              setOnlyFavorites(false);
-            }}
-            className="px-4 py-2 rounded-lg bg-[#3155F5] text-xs font-mono font-bold text-white border-2 border-[#171717] shadow-neo-sm hover:bg-[#2542C7] transition-colors cursor-pointer"
-          >
-            Reset Filters
-          </button>
+          <div className="flex items-center justify-center gap-2 pt-1">
+            <button
+              onClick={() => {
+                setSearchQuery("");
+                setSelectedMuscle("all");
+                setSelectedEquipment("all");
+                setOnlyFavorites(false);
+              }}
+              className="px-4 py-2 rounded-lg bg-[#3155F5] text-xs font-mono font-bold text-white border-2 border-[#171717] shadow-neo-sm hover:bg-[#2542C7] transition-colors cursor-pointer"
+            >
+              Reset Filters
+            </button>
+            <button
+              onClick={openCreateModal}
+              className="px-4 py-2 rounded-lg bg-[#E9F56A] text-xs font-mono font-black text-[#171717] border-2 border-[#171717] shadow-neo-sm hover:bg-[#dae852] transition-colors cursor-pointer"
+            >
+              + Create Exercise
+            </button>
+          </div>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">

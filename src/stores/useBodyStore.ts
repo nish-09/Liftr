@@ -8,123 +8,16 @@ import {
   MeasurementUnit,
 } from "@/types";
 
-const INITIAL_BODY_PROFILE: UserBodyProfile = {
-  id: "profile-1",
+const EMPTY_BODY_PROFILE: UserBodyProfile = {
+  id: "profile-default",
   userId: "local-user",
-  height: 180, // cm
+  height: null,
   heightUnit: "cm",
-  startingWeight: 78.5,
-  targetWeight: 85.0,
-  targetDate: new Date(Date.now() + 180 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
-  goalType: "gain",
+  startingWeight: null,
+  targetWeight: null,
+  targetDate: null,
+  goalType: "maintenance",
 };
-
-const INITIAL_WEIGHT_LOGS: WeightLogItem[] = [
-  {
-    id: "wl-1",
-    userId: "local-user",
-    weight: 78.5,
-    unit: "kg",
-    recordedAt: new Date(Date.now() - 28 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
-    notes: "Starting weight for lean bulk phase.",
-  },
-  {
-    id: "wl-2",
-    userId: "local-user",
-    weight: 78.9,
-    unit: "kg",
-    recordedAt: new Date(Date.now() - 21 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
-    notes: "Post-workout morning weigh-in.",
-  },
-  {
-    id: "wl-3",
-    userId: "local-user",
-    weight: 79.4,
-    unit: "kg",
-    recordedAt: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
-    notes: "Surplus holding steady at 300 kcal.",
-  },
-  {
-    id: "wl-4",
-    userId: "local-user",
-    weight: 79.8,
-    unit: "kg",
-    recordedAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
-    notes: "Good recovery and fullness.",
-  },
-  {
-    id: "wl-5",
-    userId: "local-user",
-    weight: 80.2,
-    unit: "kg",
-    recordedAt: new Date().toISOString().split("T")[0],
-    notes: "Current weight checkpoint.",
-  },
-];
-
-const INITIAL_MEASUREMENTS: BodyMeasurementItem[] = [
-  {
-    id: "bm-1",
-    userId: "local-user",
-    measurementType: "chest",
-    value: 104,
-    unit: "cm",
-    recordedAt: new Date(Date.now() - 28 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
-    notes: "Relaxed at nipple line.",
-  },
-  {
-    id: "bm-2",
-    userId: "local-user",
-    measurementType: "chest",
-    value: 106,
-    unit: "cm",
-    recordedAt: new Date().toISOString().split("T")[0],
-    notes: "+2 cm gain over 4 weeks.",
-  },
-  {
-    id: "bm-3",
-    userId: "local-user",
-    measurementType: "left_arm",
-    value: 38.5,
-    unit: "cm",
-    recordedAt: new Date().toISOString().split("T")[0],
-    notes: "Flexed peak.",
-  },
-  {
-    id: "bm-4",
-    userId: "local-user",
-    measurementType: "right_arm",
-    value: 39.0,
-    unit: "cm",
-    recordedAt: new Date().toISOString().split("T")[0],
-    notes: "Flexed peak.",
-  },
-  {
-    id: "bm-5",
-    userId: "local-user",
-    measurementType: "waist",
-    value: 82.0,
-    unit: "cm",
-    recordedAt: new Date().toISOString().split("T")[0],
-    notes: "Fasting morning, navel level.",
-  },
-  {
-    id: "bm-6",
-    userId: "local-user",
-    measurementType: "left_thigh",
-    value: 61.5,
-    unit: "cm",
-    recordedAt: new Date().toISOString().split("T")[0],
-  },
-  {
-    id: "bm-7",
-    userId: "local-user",
-    measurementType: "right_thigh",
-    value: 61.5,
-    unit: "cm",
-    recordedAt: new Date().toISOString().split("T")[0],
-  },
-];
 
 interface BodyStore {
   userBodyProfile: UserBodyProfile;
@@ -159,9 +52,9 @@ interface BodyStore {
 export const useBodyStore = create<BodyStore>()(
   persist(
     (set, get) => ({
-      userBodyProfile: INITIAL_BODY_PROFILE,
-      weightLogs: INITIAL_WEIGHT_LOGS,
-      bodyMeasurements: INITIAL_MEASUREMENTS,
+      userBodyProfile: EMPTY_BODY_PROFILE,
+      weightLogs: [],
+      bodyMeasurements: [],
 
       updateBodyProfile: (updates) => {
         set((state) => ({
@@ -252,11 +145,17 @@ export const useBodyStore = create<BodyStore>()(
         if (weightLogs.length > 0) {
           return weightLogs[0].weight;
         }
-        return userBodyProfile.startingWeight || 75.0;
+        return userBodyProfile.startingWeight || 0;
       },
     }),
     {
       name: "liftr-body-storage",
+      version: 2,
+      migrate: () => ({
+        userBodyProfile: EMPTY_BODY_PROFILE,
+        weightLogs: [],
+        bodyMeasurements: [],
+      }),
       storage: createJSONStorage(() => localStorage),
     }
   )

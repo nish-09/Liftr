@@ -345,18 +345,27 @@ export default function ProgressPage() {
           <select
             value={selectedExerciseId}
             onChange={(e) => setSelectedExerciseId(e.target.value)}
-            className="px-3 py-2 rounded-lg bg-[#F5F1E8] border-2 border-[#171717] text-xs font-mono font-bold text-[#171717] focus:outline-none focus:ring-2 focus:ring-[#3155F5] shadow-neo-sm cursor-pointer"
+            disabled={exercises.length === 0}
+            className="px-3 py-2 rounded-lg bg-[#F5F1E8] border-2 border-[#171717] text-xs font-mono font-bold text-[#171717] focus:outline-none focus:ring-2 focus:ring-[#3155F5] shadow-neo-sm cursor-pointer disabled:opacity-50"
           >
-            {exercises.map((ex) => (
-              <option key={ex.id} value={ex.id}>
-                {ex.name}
-              </option>
-            ))}
+            {exercises.length === 0 ? (
+              <option value="">No exercises in library</option>
+            ) : (
+              exercises.map((ex) => (
+                <option key={ex.id} value={ex.id}>
+                  {ex.name}
+                </option>
+              ))
+            )}
           </select>
         </div>
 
         <div className="h-64 w-full">
-          {exerciseProgressData.length === 0 ? (
+          {exercises.length === 0 ? (
+            <div className="h-full flex items-center justify-center text-xs text-[#171717]/60 font-mono font-bold">
+              Add movements to your exercise library and log sets to view 1RM trajectory.
+            </div>
+          ) : exerciseProgressData.length === 0 ? (
             <div className="h-full flex items-center justify-center text-xs text-[#171717]/60 font-mono font-bold">
               No historical logged sets for this movement yet.
             </div>

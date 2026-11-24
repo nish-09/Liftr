@@ -162,7 +162,7 @@ export interface BodyMeasurementItem {
 export interface UserBodyProfile {
   id: string;
   userId: string;
-  height: number; // in cm
+  height?: number | null; // in cm
   heightUnit: HeightUnit;
   startingWeight?: number | null;
   targetWeight?: number | null;

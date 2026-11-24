@@ -48,7 +48,9 @@ export default function BodyMetricsPage() {
 
   const [activeTab, setActiveTab] = useState<"bmi" | "measurements">("bmi");
   const [isHeightModalOpen, setIsHeightModalOpen] = useState(false);
-  const [formHeight, setFormHeight] = useState(userBodyProfile.height || 180);
+  const [formHeight, setFormHeight] = useState(
+    userBodyProfile.height != null ? String(userBodyProfile.height) : ""
+  );
 
   // Measurement Modal State
   const [isMeasureModalOpen, setIsMeasureModalOpen] = useState(false);
@@ -60,16 +62,25 @@ export default function BodyMetricsPage() {
   const [customName, setCustomName] = useState("");
 
   const latestWeight =
-    weightLogs.length > 0 ? weightLogs[0].weight : userBodyProfile.startingWeight || 75;
-  const currentHeightCm = userBodyProfile.height || 180;
+    weightLogs.length > 0
+      ? weightLogs[0].weight
+      : userBodyProfile.startingWeight != null
+      ? userBodyProfile.startingWeight
+      : null;
+  const currentHeightCm = userBodyProfile.height != null ? userBodyProfile.height : null;
+  const hasBMIData = latestWeight != null && currentHeightCm != null && currentHeightCm > 0;
 
   // Calculate dynamic BMI
   const { bmi, category } = useMemo(() => {
+    if (!hasBMIData || latestWeight == null || currentHeightCm == null) {
+      return { bmi: 0, category: "Uncalculated", color: "#A1A9A8" };
+    }
     return calculateBMI(latestWeight, currentHeightCm);
-  }, [latestWeight, currentHeightCm]);
+  }, [hasBMIData, latestWeight, currentHeightCm]);
 
   // Historical BMI data derived from weight logs
   const historicalBMIData = useMemo(() => {
+    if (currentHeightCm == null || currentHeightCm <= 0) return [];
     return [...weightLogs]
       .reverse()
       .map((log) => {
@@ -88,7 +99,10 @@ export default function BodyMetricsPage() {
 
   function handleSaveHeight(e: React.FormEvent) {
     e.preventDefault();
-    updateBodyProfile({ height: Number(formHeight) });
+    const h = parseFloat(formHeight);
+    if (!isNaN(h) && h > 0) {
+      updateBodyProfile({ height: h });
+    }
     setIsHeightModalOpen(false);
   }
 
@@ -115,10 +129,9 @@ export default function BodyMetricsPage() {
   // Calculate needle position percentage across a 15 - 35 BMI range
   const minBMIScale = 15;
   const maxBMIScale = 35;
-  const scalePercent = Math.max(
-    0,
-    Math.min(100, ((bmi - minBMIScale) / (maxBMIScale - minBMIScale)) * 100)
-  );
+  const scalePercent = hasBMIData
+    ? Math.max(0, Math.min(100, ((bmi - minBMIScale) / (maxBMIScale - minBMIScale)) * 100))
+    : null;
 
   return (
     <div className="space-y-6">
@@ -187,28 +200,35 @@ export default function BodyMetricsPage() {
                   <span className="text-xs font-mono uppercase font-black tracking-wider text-dark/80">
                     Current BMI Status
                   </span>
-                  <span className="text-xs font-mono font-black uppercase px-2.5 py-1 rounded bg-lime text-dark border-2 border-dark shadow-neo-sm">
-                    {category}
+                  <span
+                    className={cn(
+                      "text-xs font-mono font-black uppercase px-2.5 py-1 rounded border-2 border-dark shadow-neo-sm",
+                      hasBMIData ? "bg-lime text-dark" : "bg-white text-dark/60"
+                    )}
+                  >
+                    {hasBMIData ? category : "NOT CONFIGURED"}
                   </span>
                 </div>
 
                 <div className="my-4">
                   <div className="text-6xl font-heading font-black text-forest tracking-tight">
-                    {bmi}
+                    {hasBMIData ? bmi : "--"}
                   </div>
-                  <div className="flex items-center justify-between mt-2">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mt-2">
                     <span className="text-xs font-mono font-bold text-dark/70">
-                      Derived from {latestWeight} kg and {currentHeightCm} cm
+                      {hasBMIData
+                        ? `Derived from ${latestWeight} kg and ${currentHeightCm} cm`
+                        : "Configure height and log a weigh-in to calculate BMI."}
                     </span>
                     <button
                       onClick={() => {
-                        setFormHeight(currentHeightCm);
+                        setFormHeight(currentHeightCm != null ? String(currentHeightCm) : "");
                         setIsHeightModalOpen(true);
                       }}
-                      className="text-xs font-mono font-black text-forest hover:text-dark flex items-center gap-1 cursor-pointer"
+                      className="text-xs font-mono font-black text-forest hover:text-dark flex items-center gap-1 cursor-pointer self-start sm:self-auto"
                     >
                       <Edit2 className="w-3 h-3" />
-                      <span>Edit Height</span>
+                      <span>{currentHeightCm != null ? "Edit Height" : "Set Height"}</span>
                     </button>
                   </div>
                 </div>
@@ -230,14 +250,16 @@ export default function BodyMetricsPage() {
                   <div className="w-[25.5%] h-full bg-orange" title="Obesity" />
                 </div>
 
-                <div className="relative w-full h-4">
-                  <div
-                    className="absolute top-0 -ml-2 text-center transition-all duration-500 ease-out"
-                    style={{ left: `${scalePercent}%` }}
-                  >
-                    <div className="w-4 h-4 rounded-full bg-forest border-2 border-dark shadow-neo-sm mx-auto" />
+                {scalePercent != null && (
+                  <div className="relative w-full h-4">
+                    <div
+                      className="absolute top-0 -ml-2 text-center transition-all duration-500 ease-out"
+                      style={{ left: `${scalePercent}%` }}
+                    >
+                      <div className="w-4 h-4 rounded-full bg-forest border-2 border-dark shadow-neo-sm mx-auto" />
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
 
               <div className="pt-4 border-t-2 border-dark/15 flex items-center justify-between text-xs font-mono font-bold text-dark/70">
@@ -559,7 +581,7 @@ export default function BodyMetricsPage() {
                   step={0.5}
                   required
                   value={formHeight}
-                  onChange={(e) => setFormHeight(Number(e.target.value))}
+                  onChange={(e) => setFormHeight(e.target.value)}
                   className="w-full px-3.5 py-2.5 rounded-lg bg-white border-2 border-dark text-dark text-sm focus:outline-none focus:ring-2 focus:ring-forest font-mono font-bold"
                 />
               </div>

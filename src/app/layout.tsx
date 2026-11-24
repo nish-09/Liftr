@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Space_Grotesk, DM_Sans, IBM_Plex_Mono } from "next/font/google";
 import "@/styles/globals.css";
+import StorageSanitizer from "@/components/common/StorageSanitizer";
 
 const spaceGrotesk = Space_Grotesk({
   subsets: ["latin"],
@@ -53,6 +54,7 @@ export default function RootLayout({
       className={`${spaceGrotesk.variable} ${dmSans.variable} ${ibmPlexMono.variable}`}
     >
       <body className="min-h-screen bg-[#F5F1E8] text-[#171717] antialiased selection:bg-[#E9F56A] selection:text-[#171717]">
+        <StorageSanitizer />
         {children}
       </body>
     </html>
