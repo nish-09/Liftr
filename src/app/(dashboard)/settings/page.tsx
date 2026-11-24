@@ -5,6 +5,7 @@ import { useHistoryStore } from "@/stores/useHistoryStore";
 import { useExerciseStore } from "@/stores/useExerciseStore";
 import { usePlanStore } from "@/stores/usePlanStore";
 import { useBodyStore } from "@/stores/useBodyStore";
+import { WorkoutSessionItem, SessionExerciseItem } from "@/types";
 import {
   downloadJSONBackup,
   downloadWorkoutsCSV,
@@ -25,9 +26,9 @@ import {
 
 export default function SettingsPage() {
   const { sessions, deleteHistoricalSession, addCompletedSession } = useHistoryStore();
-  const { exercises } = useExerciseStore();
+  const { exercises, addExercise } = useExerciseStore();
   const { plans } = usePlanStore();
-  const { userBodyProfile, weightLogs, bodyMeasurements } = useBodyStore();
+  const { weightLogs, bodyMeasurements } = useBodyStore();
 
   // Settings State
   const [displayName, setDisplayName] = useState("Athlete");
@@ -76,11 +77,15 @@ export default function SettingsPage() {
 
     const reader = new FileReader();
     reader.onload = (event) => {
-      const text = event.target?.result as string;
-      if (text) {
+      const text = event.target?.result;
+      if (typeof text === "string") {
         const parsed = parseCSV(text);
         setCsvPreview(parsed);
+        setImportStatus(null);
       }
+    };
+    reader.onerror = () => {
+      setImportStatus("Failed to read CSV file. Please verify the file format.");
     };
     reader.readAsText(file);
   }
@@ -89,7 +94,10 @@ export default function SettingsPage() {
     if (!csvPreview || csvPreview.rows.length === 0) return;
 
     // Group rows into workouts by Date and Workout Name
-    const workoutGroups: Record<string, any> = {};
+    const workoutGroups: Record<string, WorkoutSessionItem> = {};
+    const resolvedExercises = new Map(
+      exercises.map((ex) => [ex.name.toLowerCase(), ex])
+    );
 
     csvPreview.rows.forEach((row) => {
       const date = row["Date"] || row["date"] || new Date().toISOString().split("T")[0];
@@ -111,12 +119,9 @@ export default function SettingsPage() {
       }
 
       const exName = row["Exercise Name"] || row["exercise"] || "Imported Exercise";
-      // Find or associate exercise
-      let matchedEx = exercises.find(
-        (e) => e.name.toLowerCase() === exName.toLowerCase()
-      );
+      let matchedEx = resolvedExercises.get(exName.toLowerCase());
       if (!matchedEx) {
-        matchedEx = useExerciseStore.getState().addExercise({
+        matchedEx = addExercise({
           name: exName,
           primaryMuscleGroup: "full_body",
           secondaryMuscleGroups: [],
@@ -127,10 +132,13 @@ export default function SettingsPage() {
           isFavorite: false,
           description: "Imported via CSV",
         });
+        resolvedExercises.set(exName.toLowerCase(), matchedEx);
       }
       const exId = matchedEx.id;
 
-      let sessionEx = workoutGroups[key].exercises.find((e: any) => e.exerciseId === exId);
+      let sessionEx: SessionExerciseItem | undefined = workoutGroups[key].exercises.find(
+        (e) => e.exerciseId === exId
+      );
       if (!sessionEx) {
         sessionEx = {
           id: `sex-${crypto.randomUUID()}`,

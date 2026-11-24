@@ -58,6 +58,16 @@ const config: Config = {
         },
         offwhite: "#F5F1E8",
         jet: "#171717",
+        // Top-level compatibility aliases mapped to the Electric Blue / Acid Yellow Neo-Brutalist palette
+        forest: {
+          DEFAULT: "#3155F5",
+          dark: "#2542C7",
+        },
+        lime: "#E9F56A",
+        cream: "#FFFFFF",
+        pistachio: "#F5F1E8",
+        dark: "#171717",
+        orange: "#FF7043",
         card: {
           DEFAULT: "#FFFFFF", // Pure White
           electric: "#3155F5",

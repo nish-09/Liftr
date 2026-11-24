@@ -12,7 +12,7 @@ interface LiftrDB extends DBSchema {
       id: string;
       action: "create" | "update" | "delete";
       entityType: "workout" | "weight" | "measurement";
-      payload: any;
+      payload: unknown;
       createdAt: string;
       idempotencyKey: string;
     };
@@ -76,7 +76,7 @@ export async function clearActiveWorkoutOffline(): Promise<void> {
 export async function queueSyncOperation(operation: {
   action: "create" | "update" | "delete";
   entityType: "workout" | "weight" | "measurement";
-  payload: any;
+  payload: unknown;
   idempotencyKey: string;
 }): Promise<void> {
   const db = await getDB();

@@ -9,9 +9,14 @@ import {
   Trash2,
   Target,
   Edit2,
-  X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { NEO_TOOLTIP_STYLE } from "@/components/charts/chartStyles";
+import {
+  LogWeightModal,
+  TargetWeightModal,
+  EditWeightModal,
+} from "@/components/body/WeightTrackerModals";
 import {
   ResponsiveContainer,
   AreaChart,
@@ -454,18 +459,7 @@ export default function WeightTrackerPage() {
                   fontSize={11}
                   tick={{ fill: "#171717", fontWeight: "bold" }}
                 />
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: "#FFFFFF",
-                    border: "2px solid #171717",
-                    borderRadius: "8px",
-                    boxShadow: "4px 4px 0px #171717",
-                    fontSize: "12px",
-                    fontFamily: "monospace",
-                    fontWeight: "bold",
-                    color: "#171717",
-                  }}
-                />
+                <Tooltip contentStyle={NEO_TOOLTIP_STYLE} />
                 {targetWeight != null && (
                   <ReferenceLine
                     y={targetWeight}
@@ -566,255 +560,44 @@ export default function WeightTrackerPage() {
         )}
       </div>
 
-      {/* Log Weight Modal */}
-      {isLogModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-dark/70 backdrop-blur-sm animate-in fade-in duration-150">
-          <div className="bg-cream border-3 border-dark rounded-xl shadow-neo-lg p-6 w-full max-w-sm relative font-sans space-y-4">
-            <div className="flex items-center justify-between border-b-2 border-dark/15 pb-3">
-              <h3 className="font-heading font-black text-xl text-dark tracking-tight">LOG BODY WEIGHT</h3>
-              <button
-                onClick={() => setIsLogModalOpen(false)}
-                className="p-1.5 rounded-lg border-2 border-dark bg-white hover:bg-forest hover:text-cream text-dark transition-all cursor-pointer shadow-neo-sm"
-              >
-                <X className="w-4 h-4 stroke-[2.5]" />
-              </button>
-            </div>
+      <LogWeightModal
+        isOpen={isLogModalOpen}
+        weightValue={logWeightValue}
+        dateValue={logDate}
+        notesValue={logNotes}
+        error={logError}
+        onWeightChange={setLogWeightValue}
+        onDateChange={setLogDate}
+        onNotesChange={setLogNotes}
+        onClose={() => setIsLogModalOpen(false)}
+        onSubmit={handleLogWeightSubmit}
+      />
 
-            {logError && (
-              <div className="p-3 rounded-lg bg-orange/20 border-2 border-orange text-dark text-xs font-mono font-bold">
-                {logError}
-              </div>
-            )}
+      <TargetWeightModal
+        isOpen={isTargetModalOpen}
+        startWeight={startWeightVal}
+        targetWeight={targetWeightVal}
+        goalType={goalTypeVal}
+        targetDate={targetDateVal}
+        onStartWeightChange={setStartWeightVal}
+        onTargetWeightChange={setTargetWeightVal}
+        onGoalTypeChange={setGoalTypeVal}
+        onTargetDateChange={setTargetDateVal}
+        onClose={() => setIsTargetModalOpen(false)}
+        onSubmit={handleSaveTargetProfile}
+      />
 
-            <form onSubmit={handleLogWeightSubmit} className="space-y-4">
-              <div>
-                <label className="block text-xs font-mono uppercase font-bold text-dark mb-1.5">
-                  Weight (kg) *
-                </label>
-                <input
-                  type="number"
-                  step={0.1}
-                  min={30}
-                  max={300}
-                  required
-                  value={logWeightValue}
-                  onChange={(e) => setLogWeightValue(e.target.value)}
-                  placeholder="e.g., 80.5"
-                  className="w-full px-3.5 py-2.5 rounded-lg bg-white border-2 border-dark text-dark text-sm focus:outline-none focus:ring-2 focus:ring-forest font-mono font-bold"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-mono uppercase font-bold text-dark mb-1.5">
-                  Date
-                </label>
-                <input
-                  type="date"
-                  required
-                  value={logDate}
-                  onChange={(e) => setLogDate(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-lg bg-white border-2 border-dark text-dark text-sm focus:outline-none focus:ring-2 focus:ring-forest font-mono font-bold"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-mono uppercase font-bold text-dark mb-1.5">
-                  Notes / Conditions
-                </label>
-                <input
-                  type="text"
-                  value={logNotes}
-                  onChange={(e) => setLogNotes(e.target.value)}
-                  placeholder="Fasting morning weigh-in..."
-                  className="w-full px-3.5 py-2.5 rounded-lg bg-white border-2 border-dark text-dark text-sm focus:outline-none focus:ring-2 focus:ring-forest font-sans"
-                />
-              </div>
-
-              <div className="flex justify-end gap-2 pt-3 border-t-2 border-dark/15">
-                <button
-                  type="button"
-                  onClick={() => setIsLogModalOpen(false)}
-                  className="px-4 py-2.5 rounded-lg bg-white border-2 border-dark hover:bg-cream text-dark text-xs font-mono font-bold uppercase transition-all shadow-neo-sm cursor-pointer"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-5 py-2.5 rounded-lg bg-lime hover:bg-lime/90 text-dark text-xs font-mono uppercase font-black tracking-wider border-2 border-dark shadow-neo cursor-pointer transition-all active:translate-x-0.5 active:translate-y-0.5"
-                >
-                  Save Log
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* Target Settings Modal */}
-      {isTargetModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-dark/70 backdrop-blur-sm animate-in fade-in duration-150">
-          <div className="bg-cream border-3 border-dark rounded-xl shadow-neo-lg p-6 w-full max-w-md relative font-sans space-y-4">
-            <div className="flex items-center justify-between border-b-2 border-dark/15 pb-3">
-              <h3 className="font-heading font-black text-xl text-dark tracking-tight">TARGET WEIGHT SETUP</h3>
-              <button
-                onClick={() => setIsTargetModalOpen(false)}
-                className="p-1.5 rounded-lg border-2 border-dark bg-white hover:bg-forest hover:text-cream text-dark transition-all cursor-pointer shadow-neo-sm"
-              >
-                <X className="w-4 h-4 stroke-[2.5]" />
-              </button>
-            </div>
-
-            <form onSubmit={handleSaveTargetProfile} className="space-y-4">
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-mono uppercase font-bold text-dark mb-1.5">
-                    Starting (kg)
-                  </label>
-                  <input
-                    type="number"
-                    step={0.1}
-                    required
-                    value={startWeightVal}
-                    onChange={(e) => setStartWeightVal(e.target.value)}
-                    className="w-full px-3.5 py-2.5 rounded-lg bg-white border-2 border-dark text-dark text-sm focus:outline-none focus:ring-2 focus:ring-forest font-mono font-bold"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-mono uppercase font-bold text-dark mb-1.5">
-                    Target (kg)
-                  </label>
-                  <input
-                    type="number"
-                    step={0.1}
-                    required
-                    value={targetWeightVal}
-                    onChange={(e) => setTargetWeightVal(e.target.value)}
-                    className="w-full px-3.5 py-2.5 rounded-lg bg-white border-2 border-dark text-dark text-sm focus:outline-none focus:ring-2 focus:ring-forest font-mono font-bold"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-mono uppercase font-bold text-dark mb-1.5">
-                  Goal Trajectory
-                </label>
-                <select
-                  value={goalTypeVal}
-                  onChange={(e) => setGoalTypeVal(e.target.value as GoalType)}
-                  className="w-full px-3.5 py-2.5 rounded-lg bg-white border-2 border-dark text-dark text-xs font-mono font-bold focus:outline-none focus:ring-2 focus:ring-forest cursor-pointer"
-                >
-                  <option value="gain">Weight Gain (Hypertrophy / Bulk)</option>
-                  <option value="loss">Weight Loss (Cut / Leaning)</option>
-                  <option value="maintenance">Maintenance (Body Recomposition)</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-xs font-mono uppercase font-bold text-dark mb-1.5">
-                  Target Arrival Date
-                </label>
-                <input
-                  type="date"
-                  value={targetDateVal}
-                  onChange={(e) => setTargetDateVal(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-lg bg-white border-2 border-dark text-dark text-sm focus:outline-none focus:ring-2 focus:ring-forest font-mono font-bold"
-                />
-              </div>
-
-              <div className="flex justify-end gap-2 pt-3 border-t-2 border-dark/15">
-                <button
-                  type="button"
-                  onClick={() => setIsTargetModalOpen(false)}
-                  className="px-4 py-2.5 rounded-lg bg-white border-2 border-dark hover:bg-cream text-dark text-xs font-mono font-bold uppercase transition-all shadow-neo-sm cursor-pointer"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-5 py-2.5 rounded-lg bg-lime hover:bg-lime/90 text-dark text-xs font-mono uppercase font-black tracking-wider border-2 border-dark shadow-neo cursor-pointer transition-all active:translate-x-0.5 active:translate-y-0.5"
-                >
-                  Update Goals
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* Edit Weight Log Modal */}
-      {editingLog && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-dark/70 backdrop-blur-sm animate-in fade-in duration-150">
-          <div className="bg-cream border-3 border-dark rounded-xl shadow-neo-lg p-6 w-full max-w-sm relative font-sans space-y-4">
-            <div className="flex items-center justify-between border-b-2 border-dark/15 pb-3">
-              <h3 className="font-heading font-black text-xl text-dark tracking-tight">EDIT WEIGHT ENTRY</h3>
-              <button
-                onClick={() => setEditingLog(null)}
-                className="p-1.5 rounded-lg border-2 border-dark bg-white hover:bg-forest hover:text-cream text-dark transition-all cursor-pointer shadow-neo-sm"
-              >
-                <X className="w-4 h-4 stroke-[2.5]" />
-              </button>
-            </div>
-
-            <form onSubmit={handleSaveEditLog} className="space-y-4">
-              <div>
-                <label className="block text-xs font-mono uppercase font-bold text-dark mb-1.5">
-                  Weight (kg)
-                </label>
-                <input
-                  type="number"
-                  step={0.1}
-                  required
-                  value={editWeightVal}
-                  onChange={(e) => setEditWeightVal(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-lg bg-white border-2 border-dark text-dark text-sm focus:outline-none focus:ring-2 focus:ring-forest font-mono font-bold"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-mono uppercase font-bold text-dark mb-1.5">
-                  Date
-                </label>
-                <input
-                  type="date"
-                  required
-                  value={editDateVal}
-                  onChange={(e) => setEditDateVal(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-lg bg-white border-2 border-dark text-dark text-sm focus:outline-none focus:ring-2 focus:ring-forest font-mono font-bold"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-mono uppercase font-bold text-dark mb-1.5">
-                  Notes
-                </label>
-                <input
-                  type="text"
-                  value={editNotesVal}
-                  onChange={(e) => setEditNotesVal(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-lg bg-white border-2 border-dark text-dark text-sm focus:outline-none focus:ring-2 focus:ring-forest font-sans"
-                />
-              </div>
-
-              <div className="flex justify-end gap-2 pt-3 border-t-2 border-dark/15">
-                <button
-                  type="button"
-                  onClick={() => setEditingLog(null)}
-                  className="px-4 py-2.5 rounded-lg bg-white border-2 border-dark hover:bg-cream text-dark text-xs font-mono font-bold uppercase transition-all shadow-neo-sm cursor-pointer"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-5 py-2.5 rounded-lg bg-lime hover:bg-lime/90 text-dark text-xs font-mono uppercase font-black tracking-wider border-2 border-dark shadow-neo cursor-pointer transition-all active:translate-x-0.5 active:translate-y-0.5"
-                >
-                  Save Entry
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+      <EditWeightModal
+        editingLog={editingLog}
+        weightValue={editWeightVal}
+        dateValue={editDateVal}
+        notesValue={editNotesVal}
+        onWeightChange={setEditWeightVal}
+        onDateChange={setEditDateVal}
+        onNotesChange={setEditNotesVal}
+        onClose={() => setEditingLog(null)}
+        onSubmit={handleSaveEditLog}
+      />
     </div>
   );
 }

@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 import { usePlanStore } from "@/stores/usePlanStore";
 import { useExerciseStore } from "@/stores/useExerciseStore";
 import { useWorkoutStore } from "@/stores/useWorkoutStore";
@@ -16,12 +15,11 @@ import {
   Copy,
   Trash2,
   CheckCircle2,
-  ArrowUp,
-  ArrowDown,
   Play,
-  X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { PlanExerciseRow } from "@/components/plans/PlanExerciseRow";
+import { NewPlanModal, AddPlanExerciseModal } from "@/components/plans/PlanModals";
 
 const PHASES = ["Bulking", "Recomp", "Cutting", "Strength", "Custom"];
 
@@ -62,9 +60,8 @@ export default function PlansPage() {
 
   // Add Exercise to Day Modal
   const [isAddExerciseModalOpen, setIsAddExerciseModalOpen] = useState(false);
-  const [selectedExerciseId, setSelectedExerciseId] = useState<string>(
-    exercises[0]?.id || ""
-  );
+  const [selectedExerciseId, setSelectedExerciseId] = useState<string>("");
+  const activeSelectedExerciseId = selectedExerciseId || exercises[0]?.id || "";
 
   const currentPlan = plans.find((p) => p.id === selectedPlanId) || plans[0];
   const currentDay =
@@ -84,10 +81,10 @@ export default function PlansPage() {
 
   function handleAddExerciseToCurrentDay(e: React.FormEvent) {
     e.preventDefault();
-    if (!currentPlan || !currentDay || !selectedExerciseId) return;
+    if (!currentPlan || !currentDay || !activeSelectedExerciseId) return;
 
-    const exMeta = exercises.find((ex) => ex.id === selectedExerciseId);
-    addExerciseToDay(currentPlan.id, currentDay.id, selectedExerciseId, {
+    const exMeta = exercises.find((ex) => ex.id === activeSelectedExerciseId);
+    addExerciseToDay(currentPlan.id, currentDay.id, activeSelectedExerciseId, {
       restDuration: exMeta?.defaultRestDuration || 90,
       progressionIncrement: exMeta?.progressionIncrement || 2.5,
     });
@@ -122,6 +119,9 @@ export default function PlansPage() {
           sessionId: "",
           exerciseId: pe.exerciseId,
           orderInSession: exIdx + 1,
+          targetReps: pe.maxReps || 12,
+          restDuration: pe.restDuration || exMeta?.defaultRestDuration || 120,
+          notes: pe.notes || null,
           isCompleted: false,
           exercise: exMeta,
           sets,
@@ -479,206 +479,20 @@ export default function PlansPage() {
                     </div>
                   ) : (
                     <div className="space-y-3">
-                      {currentDay.exercises.map((pe, idx) => {
-                        const exMeta = exercises.find(
-                          (ex) => ex.id === pe.exerciseId
-                        );
-
-                        return (
-                          <div
-                            key={pe.id}
-                            className="p-3.5 rounded-xl bg-[#F5F1E8] border-2 border-[#171717] shadow-neo-sm space-y-3"
-                          >
-                            <div className="flex items-center justify-between gap-3">
-                              <div className="flex items-center gap-2.5">
-                                <span className="w-6 h-6 rounded-md bg-[#3155F5] text-white border-2 border-[#171717] font-mono text-xs flex items-center justify-center font-black shadow-neo-sm">
-                                  {idx + 1}
-                                </span>
-                                <div>
-                                  <h4 className="font-heading font-black text-sm text-[#171717] leading-tight uppercase">
-                                    {exMeta?.name || "Exercise"}
-                                  </h4>
-                                  <span className="text-[10px] font-mono uppercase font-bold text-[#171717]/60">
-                                    {exMeta?.primaryMuscleGroup} • {exMeta?.equipment}
-                                  </span>
-                                </div>
-                              </div>
-
-                              {/* Ordering & delete */}
-                              <div className="flex items-center gap-1">
-                                <button
-                                  onClick={() =>
-                                    moveExerciseOrder(
-                                      currentPlan.id,
-                                      currentDay.id,
-                                      pe.id,
-                                      "up"
-                                    )
-                                  }
-                                  disabled={idx === 0}
-                                  className="p-1 rounded border-2 border-[#171717] bg-white hover:bg-[#E9F56A] text-[#171717] disabled:opacity-30 cursor-pointer shadow-neo-sm"
-                                >
-                                  <ArrowUp className="w-3.5 h-3.5" />
-                                </button>
-                                <button
-                                  onClick={() =>
-                                    moveExerciseOrder(
-                                      currentPlan.id,
-                                      currentDay.id,
-                                      pe.id,
-                                      "down"
-                                    )
-                                  }
-                                  disabled={idx === currentDay.exercises.length - 1}
-                                  className="p-1 rounded border-2 border-[#171717] bg-white hover:bg-[#E9F56A] text-[#171717] disabled:opacity-30 cursor-pointer shadow-neo-sm"
-                                >
-                                  <ArrowDown className="w-3.5 h-3.5" />
-                                </button>
-                                <button
-                                  onClick={() =>
-                                    removeExerciseFromDay(
-                                      currentPlan.id,
-                                      currentDay.id,
-                                      pe.id
-                                    )
-                                  }
-                                  className="p-1 rounded border-2 border-[#171717] bg-[#FF7043] text-white hover:bg-[#e85d30] ml-1 cursor-pointer shadow-neo-sm"
-                                >
-                                  <Trash2 className="w-3.5 h-3.5" />
-                                </button>
-                              </div>
-                            </div>
-
-                            {/* Configuration Fields: Sets, Reps, Weight, Rest, Step */}
-                            <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 pt-2 border-t-2 border-[#171717]/10 text-xs">
-                              <div>
-                                <label className="text-[10px] font-mono uppercase font-bold text-[#171717]/70 block mb-1">
-                                  Target Sets
-                                </label>
-                                <input
-                                  type="number"
-                                  min={1}
-                                  max={15}
-                                  value={pe.targetSets}
-                                  onChange={(e) =>
-                                    updatePlanExercise(
-                                      currentPlan.id,
-                                      currentDay.id,
-                                      pe.id,
-                                      { targetSets: Number(e.target.value) }
-                                    )
-                                  }
-                                  className="w-full px-2.5 py-1.5 rounded-lg bg-white border-2 border-[#171717] text-[#171717] font-mono font-bold text-xs focus:outline-none focus:ring-2 focus:ring-[#3155F5] shadow-neo-sm"
-                                />
-                              </div>
-
-                              <div>
-                                <label className="text-[10px] font-mono uppercase font-bold text-[#171717]/70 block mb-1">
-                                  Rep Range
-                                </label>
-                                <div className="flex items-center gap-1">
-                                  <input
-                                    type="number"
-                                    min={1}
-                                    max={50}
-                                    value={pe.minReps}
-                                    onChange={(e) =>
-                                      updatePlanExercise(
-                                        currentPlan.id,
-                                        currentDay.id,
-                                        pe.id,
-                                        { minReps: Number(e.target.value) }
-                                      )
-                                    }
-                                    className="w-full px-2 py-1.5 rounded-lg bg-white border-2 border-[#171717] text-[#171717] font-mono font-bold text-xs text-center focus:outline-none focus:ring-2 focus:ring-[#3155F5] shadow-neo-sm"
-                                  />
-                                  <span className="font-bold text-[#171717]">-</span>
-                                  <input
-                                    type="number"
-                                    min={1}
-                                    max={50}
-                                    value={pe.maxReps}
-                                    onChange={(e) =>
-                                      updatePlanExercise(
-                                        currentPlan.id,
-                                        currentDay.id,
-                                        pe.id,
-                                        { maxReps: Number(e.target.value) }
-                                      )
-                                    }
-                                    className="w-full px-2 py-1.5 rounded-lg bg-white border-2 border-[#171717] text-[#171717] font-mono font-bold text-xs text-center focus:outline-none focus:ring-2 focus:ring-[#3155F5] shadow-neo-sm"
-                                  />
-                                </div>
-                              </div>
-
-                              <div>
-                                <label className="text-[10px] font-mono uppercase font-bold text-[#171717]/70 block mb-1">
-                                  Start Weight (kg)
-                                </label>
-                                <input
-                                  type="number"
-                                  min={0}
-                                  step={0.5}
-                                  value={pe.defaultWeight}
-                                  onChange={(e) =>
-                                    updatePlanExercise(
-                                      currentPlan.id,
-                                      currentDay.id,
-                                      pe.id,
-                                      { defaultWeight: Number(e.target.value) }
-                                    )
-                                  }
-                                  className="w-full px-2.5 py-1.5 rounded-lg bg-white border-2 border-[#171717] text-[#171717] font-mono font-bold text-xs focus:outline-none focus:ring-2 focus:ring-[#3155F5] shadow-neo-sm"
-                                />
-                              </div>
-
-                              <div>
-                                <label className="text-[10px] font-mono uppercase font-bold text-[#171717]/70 block mb-1">
-                                  Rest (sec)
-                                </label>
-                                <input
-                                  type="number"
-                                  min={15}
-                                  step={15}
-                                  value={pe.restDuration}
-                                  onChange={(e) =>
-                                    updatePlanExercise(
-                                      currentPlan.id,
-                                      currentDay.id,
-                                      pe.id,
-                                      { restDuration: Number(e.target.value) }
-                                    )
-                                  }
-                                  className="w-full px-2.5 py-1.5 rounded-lg bg-white border-2 border-[#171717] text-[#171717] font-mono font-bold text-xs focus:outline-none focus:ring-2 focus:ring-[#3155F5] shadow-neo-sm"
-                                />
-                              </div>
-
-                              <div>
-                                <label className="text-[10px] font-mono uppercase font-bold text-[#171717]/70 block mb-1">
-                                  Step (+kg)
-                                </label>
-                                <input
-                                  type="number"
-                                  min={0.5}
-                                  step={0.5}
-                                  value={pe.progressionIncrement}
-                                  onChange={(e) =>
-                                    updatePlanExercise(
-                                      currentPlan.id,
-                                      currentDay.id,
-                                      pe.id,
-                                      {
-                                        progressionIncrement: Number(e.target.value),
-                                      }
-                                    )
-                                  }
-                                  className="w-full px-2.5 py-1.5 rounded-lg bg-white border-2 border-[#171717] text-[#171717] font-mono font-bold text-xs focus:outline-none focus:ring-2 focus:ring-[#3155F5] shadow-neo-sm"
-                                />
-                              </div>
-                            </div>
-                          </div>
-                        );
-                      })}
+                      {currentDay.exercises.map((pe, idx) => (
+                        <PlanExerciseRow
+                          key={pe.id}
+                          planId={currentPlan.id}
+                          dayId={currentDay.id}
+                          planExercise={pe}
+                          index={idx}
+                          totalExercises={currentDay.exercises.length}
+                          exerciseMeta={exercises.find((ex) => ex.id === pe.exerciseId)}
+                          onMove={moveExerciseOrder}
+                          onRemove={removeExerciseFromDay}
+                          onUpdate={updatePlanExercise}
+                        />
+                      ))}
                     </div>
                   )}
 
@@ -717,154 +531,27 @@ export default function PlansPage() {
         </div>
       </div>
 
-      {/* New Plan Modal */}
-      {isNewPlanModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-150">
-          <div className="bg-white border-2 border-[#171717] rounded-xl shadow-neo-lg p-6 w-full max-w-md relative font-sans">
-            <div className="flex items-center justify-between mb-4 border-b-2 border-[#171717]/15 pb-3">
-              <h3 className="font-heading font-black text-xl text-[#171717] tracking-tight uppercase">
-                CREATE NEW WORKOUT PLAN
-              </h3>
-              <button
-                onClick={() => setIsNewPlanModalOpen(false)}
-                className="p-1.5 rounded-lg border-2 border-[#171717] bg-[#F5F1E8] hover:bg-[#3155F5] hover:text-white text-[#171717] transition-all cursor-pointer shadow-neo-sm"
-              >
-                <X className="w-4 h-4 stroke-[2.5]" />
-              </button>
-            </div>
+      <NewPlanModal
+        isOpen={isNewPlanModalOpen}
+        name={newPlanName}
+        phase={newPlanPhase}
+        description={newPlanDesc}
+        phases={PHASES}
+        onNameChange={setNewPlanName}
+        onPhaseChange={setNewPlanPhase}
+        onDescriptionChange={setNewPlanDesc}
+        onClose={() => setIsNewPlanModalOpen(false)}
+        onSubmit={handleCreatePlan}
+      />
 
-            <form onSubmit={handleCreatePlan} className="space-y-4">
-              <div>
-                <label className="block text-xs font-mono uppercase font-black text-[#171717] mb-1.5">
-                  Plan Name *
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={newPlanName}
-                  onChange={(e) => setNewPlanName(e.target.value)}
-                  placeholder="e.g., 4-Day Upper / Lower Wave"
-                  className="w-full px-3.5 py-2.5 rounded-lg bg-[#F5F1E8] border-2 border-[#171717] text-[#171717] text-sm focus:outline-none focus:ring-2 focus:ring-[#3155F5] font-sans"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-mono uppercase font-black text-[#171717] mb-1.5">
-                  Training Phase
-                </label>
-                <select
-                  value={newPlanPhase}
-                  onChange={(e) => setNewPlanPhase(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-lg bg-[#F5F1E8] border-2 border-[#171717] text-[#171717] text-xs font-mono font-bold focus:outline-none focus:ring-2 focus:ring-[#3155F5] cursor-pointer"
-                >
-                  {PHASES.map((ph) => (
-                    <option key={ph} value={ph}>
-                      {ph}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-xs font-mono uppercase font-black text-[#171717] mb-1.5">
-                  Description / Goals
-                </label>
-                <textarea
-                  rows={2}
-                  value={newPlanDesc}
-                  onChange={(e) => setNewPlanDesc(e.target.value)}
-                  placeholder="Focus on compound strength and deload every 6th week..."
-                  className="w-full px-3.5 py-2 rounded-lg bg-[#F5F1E8] border-2 border-[#171717] text-[#171717] text-sm focus:outline-none focus:ring-2 focus:ring-[#3155F5] resize-none font-sans"
-                />
-              </div>
-
-              <div className="flex justify-end gap-2 pt-3 border-t-2 border-[#171717]/15">
-                <button
-                  type="button"
-                  onClick={() => setIsNewPlanModalOpen(false)}
-                  className="px-4 py-2.5 rounded-lg bg-[#F5F1E8] border-2 border-[#171717] hover:bg-white text-[#171717] text-xs font-mono font-bold uppercase transition-all shadow-neo-sm cursor-pointer"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-5 py-2.5 rounded-lg bg-[#3155F5] hover:bg-[#2542C7] text-white text-xs font-mono uppercase font-black tracking-wider border-2 border-[#171717] shadow-neo cursor-pointer transition-all active:translate-x-0.5 active:translate-y-0.5"
-                >
-                  Create Plan
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* Add Exercise Modal */}
-      {isAddExerciseModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-150">
-          <div className="bg-white border-2 border-[#171717] rounded-xl shadow-neo-lg p-6 w-full max-w-md relative font-sans">
-            <div className="flex items-center justify-between mb-4 border-b-2 border-[#171717]/15 pb-3">
-              <h3 className="font-heading font-black text-xl text-[#171717] tracking-tight uppercase">
-                SELECT MOVEMENT TO ADD
-              </h3>
-              <button
-                onClick={() => setIsAddExerciseModalOpen(false)}
-                className="p-1.5 rounded-lg border-2 border-[#171717] bg-[#F5F1E8] hover:bg-[#3155F5] hover:text-white text-[#171717] transition-all cursor-pointer shadow-neo-sm"
-              >
-                <X className="w-4 h-4 stroke-[2.5]" />
-              </button>
-            </div>
-
-            <form onSubmit={handleAddExerciseToCurrentDay} className="space-y-4">
-              {exercises.length === 0 ? (
-                <div className="p-4 rounded-lg bg-[#F5F1E8] border-2 border-[#171717] text-center space-y-2">
-                  <p className="text-xs text-[#171717]/80 font-mono">
-                    No exercises found in your library. Add custom exercises in the Exercise Library before adding them to routines.
-                  </p>
-                  <Link
-                    href="/exercises"
-                    className="inline-block px-3 py-1.5 rounded-md bg-[#3155F5] text-white text-xs font-mono font-bold border border-[#171717]"
-                  >
-                    Go to Exercise Library →
-                  </Link>
-                </div>
-              ) : (
-                <div>
-                  <label className="block text-xs font-mono uppercase font-black text-[#171717] mb-1.5">
-                    Choose from Library
-                  </label>
-                  <select
-                    value={selectedExerciseId}
-                    onChange={(e) => setSelectedExerciseId(e.target.value)}
-                    className="w-full px-3.5 py-2.5 rounded-lg bg-[#F5F1E8] border-2 border-[#171717] text-[#171717] text-xs font-mono font-bold focus:outline-none focus:ring-2 focus:ring-[#3155F5] cursor-pointer"
-                  >
-                    {exercises.map((ex) => (
-                      <option key={ex.id} value={ex.id}>
-                        {ex.name} ({ex.primaryMuscleGroup} • {ex.equipment})
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              )}
-
-              <div className="flex justify-end gap-2 pt-3 border-t-2 border-[#171717]/15">
-                <button
-                  type="button"
-                  onClick={() => setIsAddExerciseModalOpen(false)}
-                  className="px-4 py-2.5 rounded-lg bg-[#F5F1E8] border-2 border-[#171717] hover:bg-white text-[#171717] text-xs font-mono font-bold uppercase transition-all shadow-neo-sm cursor-pointer"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-5 py-2.5 rounded-lg bg-[#3155F5] hover:bg-[#2542C7] text-white text-xs font-mono uppercase font-black tracking-wider border-2 border-[#171717] shadow-neo cursor-pointer transition-all active:translate-x-0.5 active:translate-y-0.5"
-                >
-                  Add Movement
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+      <AddPlanExerciseModal
+        isOpen={isAddExerciseModalOpen}
+        exercises={exercises}
+        selectedExerciseId={activeSelectedExerciseId}
+        onSelectExercise={setSelectedExerciseId}
+        onClose={() => setIsAddExerciseModalOpen(false)}
+        onSubmit={handleAddExerciseToCurrentDay}
+      />
     </div>
   );
 }

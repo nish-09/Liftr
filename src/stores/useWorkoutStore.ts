@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import type { WorkoutSessionItem, SessionExerciseItem, SetLogItem, SetType } from "@/types";
+import { calculateVolume } from "@/lib/calculations/strength";
 
 interface RestTimerState {
   remainingSeconds: number;
@@ -96,15 +97,10 @@ export const useWorkoutStore = create<WorkoutStore>()(
         const { activeSession, elapsedSeconds } = get();
         if (!activeSession) return null;
 
-        // Calculate total volume across all completed sets
-        let totalVol = 0;
-        activeSession.exercises.forEach((ex) => {
-          ex.sets.forEach((s) => {
-            if (s.isCompleted && s.setType !== "warmup") {
-              totalVol += (s.weight || 0) * (s.reps || 0);
-            }
-          });
-        });
+        const totalVol = activeSession.exercises.reduce(
+          (sum, ex) => sum + calculateVolume(ex.sets),
+          0
+        );
 
         const completedSession: WorkoutSessionItem = {
           ...activeSession,
@@ -273,7 +269,6 @@ export const useWorkoutStore = create<WorkoutStore>()(
         if (!activeSession) return;
 
         let shouldStartTimer = false;
-        let completedExName: string | undefined;
         let completedSetNum: number | undefined;
 
         const updatedExercises = activeSession.exercises.map((ex) => {
@@ -300,7 +295,7 @@ export const useWorkoutStore = create<WorkoutStore>()(
         });
 
         if (shouldStartTimer) {
-          get().startRestTimer(90, completedExName, completedSetNum);
+          get().startRestTimer(90, undefined, completedSetNum);
         }
       },
 

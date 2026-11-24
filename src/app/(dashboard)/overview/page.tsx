@@ -2,10 +2,9 @@
 
 import { useMemo } from "react";
 import Link from "next/link";
-import { useWorkoutStore } from "@/stores/useWorkoutStore";
 import { useHistoryStore } from "@/stores/useHistoryStore";
 import { usePlanStore } from "@/stores/usePlanStore";
-import { useExerciseStore } from "@/stores/useExerciseStore";
+import { NEO_TOOLTIP_STYLE } from "@/components/charts/chartStyles";
 import {
   Play,
   CalendarDays,
@@ -26,10 +25,8 @@ import {
 } from "recharts";
 
 export default function OverviewPage() {
-  const { activeSession } = useWorkoutStore();
   const { sessions, personalRecords } = useHistoryStore();
   const { plans } = usePlanStore();
-  const { exercises } = useExerciseStore();
 
   const activePlan = plans.find((p) => p.isActive) || plans[0];
 
@@ -315,18 +312,7 @@ export default function OverviewPage() {
                   <CartesianGrid strokeDasharray="3 3" stroke="#E2DAC9" />
                   <XAxis dataKey="date" stroke="#171717" fontSize={11} fontStyle="bold" />
                   <YAxis stroke="#171717" fontSize={11} fontStyle="bold" />
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: "#FFFFFF",
-                      border: "2px solid #171717",
-                      borderRadius: "8px",
-                      boxShadow: "4px 4px 0px #171717",
-                      fontSize: "12px",
-                      fontFamily: "monospace",
-                      fontWeight: "bold",
-                      color: "#171717",
-                    }}
-                  />
+                  <Tooltip contentStyle={NEO_TOOLTIP_STYLE} />
                   <Area
                     type="monotone"
                     dataKey="volume"

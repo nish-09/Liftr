@@ -8,8 +8,9 @@ import { useHistoryStore } from "@/stores/useHistoryStore";
 import { useExerciseStore } from "@/stores/useExerciseStore";
 import { usePlanStore } from "@/stores/usePlanStore";
 import { calculateProgression, ProgressionSuggestion } from "@/lib/progression/engine";
+import { calculateVolume } from "@/lib/calculations/strength";
 import { formatDuration, cn } from "@/lib/utils";
-import { SetType, Exercise, SetLogItem } from "@/types";
+import { SetType, PersonalRecordItem } from "@/types";
 import {
   Play,
   Check,
@@ -23,6 +24,15 @@ import {
   Dumbbell,
   Flame,
 } from "lucide-react";
+
+interface CompletionSummary {
+  durationSeconds: number;
+  totalVolume: number;
+  exercisesCount: number;
+  completedSetsCount: number;
+  totalSetsCount: number;
+  newPRs: PersonalRecordItem[];
+}
 
 export default function WorkoutsPage() {
   const {
@@ -50,7 +60,7 @@ export default function WorkoutsPage() {
   const [isAddExerciseOpen, setIsAddExerciseOpen] = useState(false);
   const [selectedExerciseId, setSelectedExerciseId] = useState<string>("");
   const [showCompletionModal, setShowCompletionModal] = useState(false);
-  const [completionSummary, setCompletionSummary] = useState<any>(null);
+  const [completionSummary, setCompletionSummary] = useState<CompletionSummary | null>(null);
   const [sessionNotes, setSessionNotes] = useState("");
 
   useEffect(() => {
@@ -73,15 +83,9 @@ export default function WorkoutsPage() {
 
   if (activeSession) {
     activeSession.exercises.forEach((ex) => {
-      ex.sets.forEach((s) => {
-        totalSetsCount++;
-        if (s.isCompleted) {
-          completedSetsCount++;
-          if (s.setType !== "warmup") {
-            currentVolume += (s.weight || 0) * (s.reps || 0);
-          }
-        }
-      });
+      totalSetsCount += ex.sets.length;
+      completedSetsCount += ex.sets.filter((s) => s.isCompleted).length;
+      currentVolume += calculateVolume(ex.sets);
     });
   }
 
@@ -697,7 +701,7 @@ export default function WorkoutsPage() {
                   <span>Personal Records Broken!</span>
                 </div>
                 <div className="space-y-1">
-                  {completionSummary.newPRs.map((pr: any) => (
+                  {completionSummary.newPRs.map((pr) => (
                     <div
                       key={pr.id}
                       className="text-xs font-mono flex items-center justify-between"

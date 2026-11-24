@@ -40,9 +40,10 @@ async function inspect() {
       try {
         const result = await sql`SELECT count(*) FROM ${sql(table)}`;
         counts[table] = parseInt(result[0].count, 10);
-      } catch (err: any) {
+      } catch (err: unknown) {
         counts[table] = -1; // table might not exist or error
-        console.error(`Error querying ${table}:`, err.message);
+        const msg = err instanceof Error ? err.message : String(err);
+        console.error(`Error querying ${table}:`, msg);
       }
     }
 
@@ -51,17 +52,18 @@ async function inspect() {
       console.log(`- ${table}: ${count}`);
     }
 
-    // Check auth.users
+    // Check auth.users count without exposing PII emails in logs
     try {
-      const authUsers = await sql`SELECT count(*), json_agg(json_build_object('id', id, 'email', email, 'created_at', created_at)) as users FROM auth.users`;
+      const authUsers = await sql`SELECT count(*) FROM auth.users`;
       console.log(`\n=== AUTH.USERS COUNT ===: ${authUsers[0].count}`);
-      console.log("Users:", JSON.stringify(authUsers[0].users, null, 2));
-    } catch (err: any) {
-      console.log("Could not query auth.users:", err.message);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.log("Could not query auth.users:", msg);
     }
 
-  } catch (err: any) {
-    console.error("Database connection failed:", err.message);
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : String(err);
+    console.error("Database connection failed:", msg);
   } finally {
     await sql.end();
   }

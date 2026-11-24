@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useBodyStore } from "@/stores/useBodyStore";
 import { calculateBMI } from "@/lib/calculations/strength";
 import { BodyMeasurementItem, MeasurementUnit } from "@/types";
+import { NEO_TOOLTIP_STYLE } from "@/components/charts/chartStyles";
 import {
   Info,
   Plus,
@@ -302,18 +303,7 @@ export default function BodyMetricsPage() {
                       <CartesianGrid strokeDasharray="3 3" stroke="#171717" opacity={0.15} />
                       <XAxis dataKey="date" stroke="#171717" fontSize={11} tick={{ fill: "#171717", fontWeight: "bold" }} />
                       <YAxis domain={["dataMin - 1", "dataMax + 1"]} stroke="#171717" fontSize={11} tick={{ fill: "#171717", fontWeight: "bold" }} />
-                      <Tooltip
-                        contentStyle={{
-                          backgroundColor: "#FFFFFF",
-                          border: "2px solid #171717",
-                          borderRadius: "8px",
-                          boxShadow: "4px 4px 0px #171717",
-                          fontSize: "12px",
-                          fontFamily: "monospace",
-                          fontWeight: "bold",
-                          color: "#171717",
-                        }}
-                      />
+                      <Tooltip contentStyle={NEO_TOOLTIP_STYLE} />
                       <Area
                         type="monotone"
                         dataKey="bmi"
@@ -427,7 +417,7 @@ export default function BodyMetricsPage() {
       {/* Log Measurement Modal */}
       {isMeasureModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-dark/70 backdrop-blur-sm animate-in fade-in duration-150">
-          <div className="bg-cream border-3 border-dark rounded-xl shadow-neo-lg p-6 w-full max-w-sm relative font-sans space-y-4">
+          <div className="bg-cream border-2 border-dark rounded-xl shadow-neo-lg p-6 w-full max-w-sm relative font-sans space-y-4">
             <div className="flex items-center justify-between border-b-2 border-dark/15 pb-3">
               <h3 className="font-heading font-black text-xl text-dark tracking-tight">
                 LOG MEASUREMENT
@@ -558,7 +548,7 @@ export default function BodyMetricsPage() {
       {/* Update Height Modal */}
       {isHeightModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-dark/70 backdrop-blur-sm animate-in fade-in duration-150">
-          <div className="bg-cream border-3 border-dark rounded-xl shadow-neo-lg p-6 w-full max-w-sm relative font-sans space-y-4">
+          <div className="bg-cream border-2 border-dark rounded-xl shadow-neo-lg p-6 w-full max-w-sm relative font-sans space-y-4">
             <div className="flex items-center justify-between border-b-2 border-dark/15 pb-3">
               <h3 className="font-heading font-black text-xl text-dark tracking-tight">UPDATE HEIGHT</h3>
               <button

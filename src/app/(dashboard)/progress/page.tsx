@@ -5,6 +5,7 @@ import { useHistoryStore } from "@/stores/useHistoryStore";
 import { useExerciseStore } from "@/stores/useExerciseStore";
 import { calculate1RM } from "@/lib/calculations/strength";
 import MuscleHeatmap from "@/components/analytics/MuscleHeatmap";
+import { NEO_TOOLTIP_STYLE } from "@/components/charts/chartStyles";
 import { Award } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -31,9 +32,8 @@ export default function ProgressPage() {
   const { exercises } = useExerciseStore();
 
   const [selectedTimeFilter, setSelectedTimeFilter] = useState(30);
-  const [selectedExerciseId, setSelectedExerciseId] = useState<string>(
-    exercises[0]?.id || ""
-  );
+  const [selectedExerciseId, setSelectedExerciseId] = useState<string>("");
+  const activeExerciseId = selectedExerciseId || exercises[0]?.id || "";
 
   // Filter sessions by selected time window
   const filteredSessions = useMemo(() => {
@@ -71,7 +71,7 @@ export default function ProgressPage() {
           new Date(b.completedAt || b.startedAt).getTime()
       )
       .forEach((sess) => {
-        const found = sess.exercises.find((e) => e.exerciseId === selectedExerciseId);
+        const found = sess.exercises.find((e) => e.exerciseId === activeExerciseId);
         if (found) {
           let highestWeight = 0;
           let highest1RM = 0;
@@ -98,7 +98,7 @@ export default function ProgressPage() {
       });
 
     return dataPoints;
-  }, [sessions, selectedExerciseId]);
+  }, [sessions, activeExerciseId]);
 
   // Muscle group working set distribution
   const muscleDistributionData = useMemo(() => {
@@ -250,18 +250,7 @@ export default function ProgressPage() {
                   <CartesianGrid strokeDasharray="3 3" stroke="#171717" opacity={0.15} />
                   <XAxis dataKey="date" stroke="#171717" fontSize={11} tick={{ fill: "#171717", fontWeight: "bold" }} />
                   <YAxis stroke="#171717" fontSize={11} tick={{ fill: "#171717", fontWeight: "bold" }} />
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: "#FFFFFF",
-                      border: "2px solid #171717",
-                      borderRadius: "8px",
-                      boxShadow: "4px 4px 0px #171717",
-                      fontSize: "12px",
-                      fontFamily: "monospace",
-                      fontWeight: "bold",
-                      color: "#171717",
-                    }}
-                  />
+                  <Tooltip contentStyle={NEO_TOOLTIP_STYLE} />
                   <Area
                     type="monotone"
                     dataKey="volume"
@@ -310,18 +299,7 @@ export default function ProgressPage() {
                     width={80}
                     tick={{ fill: "#171717", fontWeight: "bold" }}
                   />
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: "#FFFFFF",
-                      border: "2px solid #171717",
-                      borderRadius: "8px",
-                      boxShadow: "4px 4px 0px #171717",
-                      fontSize: "12px",
-                      fontFamily: "monospace",
-                      fontWeight: "bold",
-                      color: "#171717",
-                    }}
-                  />
+                  <Tooltip contentStyle={NEO_TOOLTIP_STYLE} />
                   <Bar dataKey="value" name="Sets" fill="#3155F5" stroke="#171717" strokeWidth={2} radius={[0, 4, 4, 0]} />
                 </BarChart>
               </ResponsiveContainer>
@@ -343,7 +321,7 @@ export default function ProgressPage() {
           </div>
 
           <select
-            value={selectedExerciseId}
+            value={activeExerciseId}
             onChange={(e) => setSelectedExerciseId(e.target.value)}
             disabled={exercises.length === 0}
             className="px-3 py-2 rounded-lg bg-[#F5F1E8] border-2 border-[#171717] text-xs font-mono font-bold text-[#171717] focus:outline-none focus:ring-2 focus:ring-[#3155F5] shadow-neo-sm cursor-pointer disabled:opacity-50"
@@ -381,18 +359,7 @@ export default function ProgressPage() {
                 <CartesianGrid strokeDasharray="3 3" stroke="#171717" opacity={0.15} />
                 <XAxis dataKey="date" stroke="#171717" fontSize={11} tick={{ fill: "#171717", fontWeight: "bold" }} />
                 <YAxis stroke="#171717" fontSize={11} tick={{ fill: "#171717", fontWeight: "bold" }} />
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: "#FFFFFF",
-                    border: "2px solid #171717",
-                    borderRadius: "8px",
-                    boxShadow: "4px 4px 0px #171717",
-                    fontSize: "12px",
-                    fontFamily: "monospace",
-                    fontWeight: "bold",
-                    color: "#171717",
-                  }}
-                />
+                <Tooltip contentStyle={NEO_TOOLTIP_STYLE} />
                 <Area
                   type="monotone"
                   dataKey="estimated1RM"
