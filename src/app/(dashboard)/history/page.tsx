@@ -1,34 +1,129 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef, Fragment } from "react";
 import { useHistoryStore } from "@/stores/useHistoryStore";
 import { useExerciseStore } from "@/stores/useExerciseStore";
 import { usePlanStore } from "@/stores/usePlanStore";
-import { formatDuration } from "@/lib/utils";
-import { WorkoutSessionItem } from "@/types";
+import { formatDuration, cn } from "@/lib/utils";
+import { calculateVolume } from "@/lib/calculations/strength";
+import {
+  downloadWorkoutSheetCSV,
+  parseWorkoutSheetCSV,
+  getSetColumnLabel,
+  getWorkingSets,
+  getSessionDayLabel,
+  formatSheetWeight,
+} from "@/lib/export/dataHandler";
+import { WorkoutSessionItem, SessionExerciseItem, SetLogItem } from "@/types";
 import {
   Calendar,
   Clock,
   Dumbbell,
   Trash2,
-  ChevronDown,
-  ChevronUp,
   Search,
   Edit2,
   X,
+  Download,
+  Upload,
+  FileSpreadsheet,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
+
+interface EditableCellProps {
+  value: string;
+  placeholder?: string;
+  type?: "text" | "number";
+  align?: "left" | "center";
+  onCommit: (nextValue: string) => void;
+  className?: string;
+}
+
+function EditableCell({
+  value,
+  placeholder = "",
+  type = "text",
+  align = "center",
+  onCommit,
+  className,
+}: EditableCellProps) {
+  const [isEditing, setIsEditing] = useState(false);
+  const [draft, setDraft] = useState(value);
+
+  function startEditing() {
+    setDraft(value);
+    setIsEditing(true);
+  }
+
+  function commit() {
+    setIsEditing(false);
+    if (draft !== value) {
+      onCommit(draft);
+    }
+  }
+
+  if (isEditing) {
+    return (
+      <input
+        autoFocus
+        type={type}
+        step={type === "number" ? "any" : undefined}
+        value={draft}
+        onChange={(e) => setDraft(e.target.value)}
+        onFocus={(e) => e.target.select()}
+        onBlur={commit}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") {
+            commit();
+          } else if (e.key === "Escape") {
+            setIsEditing(false);
+            setDraft(value);
+          }
+        }}
+        className={cn(
+          "w-full h-full px-2 py-1.5 bg-[#E9F56A]/40 text-[#171717] font-mono text-xs font-bold focus:outline-none ring-2 ring-inset ring-[#3155F5]",
+          align === "center" ? "text-center" : "text-left",
+          className
+        )}
+      />
+    );
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={startEditing}
+      title="Click to edit cell"
+      className={cn(
+        "w-full h-full min-h-[34px] px-2.5 py-1.5 font-mono text-xs transition-colors hover:bg-[#E9F56A]/25 cursor-text flex items-center",
+        align === "center" ? "justify-center text-center" : "justify-start text-left",
+        value ? "text-[#171717] font-semibold" : "text-[#171717]/30",
+        className
+      )}
+    >
+      <span className={cn(align === "left" && "line-clamp-2 break-words")}>
+        {value || placeholder}
+      </span>
+    </button>
+  );
+}
+
+function recalculateSessionVolume(exercisesList: SessionExerciseItem[]): number {
+  return exercisesList.reduce((sum, ex) => sum + calculateVolume(ex.sets), 0);
+}
 
 export default function HistoryPage() {
-  const { sessions, deleteHistoricalSession, updateHistoricalSession } = useHistoryStore();
-  const { exercises } = useExerciseStore();
+  const {
+    sessions,
+    addCompletedSession,
+    deleteHistoricalSession,
+    updateHistoricalSession,
+  } = useHistoryStore();
+  const { exercises, addExercise } = useExerciseStore();
   const { plans } = usePlanStore();
 
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedPlanFilter, setSelectedPlanFilter] = useState("all");
-  const [expandedSessionId, setExpandedSessionId] = useState<string | null>(
-    sessions[0]?.id || null
-  );
+  const [importFeedback, setImportFeedback] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Edit Modal State
   const [editingSession, setEditingSession] = useState<WorkoutSessionItem | null>(null);
@@ -40,7 +135,7 @@ export default function HistoryPage() {
       const matchesSearch =
         sess.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         sess.exercises.some((e) => {
-          const exMeta = exercises.find((ex) => ex.id === e.exerciseId);
+          const exMeta = exercises.find((ex) => ex.id === e.exerciseId) || e.exercise;
           return exMeta?.name.toLowerCase().includes(searchQuery.toLowerCase());
         });
 
@@ -51,8 +146,30 @@ export default function HistoryPage() {
     });
   }, [sessions, searchQuery, selectedPlanFilter, exercises]);
 
+  // Match the Google Sheet's First / Second / Third Set Reps columns by default,
+  // expanding dynamically if any visible session has 4+ working sets.
+  const maxSetColumns = useMemo(() => {
+    let maxSets = 3;
+    filteredSessions.forEach((sess) => {
+      sess.exercises.forEach((ex) => {
+        const count = getWorkingSets(ex).length;
+        if (count > maxSets) maxSets = count;
+      });
+    });
+    return maxSets;
+  }, [filteredSessions]);
+
+  const setColumnHeaders = useMemo(
+    () => Array.from({ length: maxSetColumns }, (_, idx) => getSetColumnLabel(idx)),
+    [maxSetColumns]
+  );
+
   function handleDelete(id: string, name: string) {
-    if (confirm(`Are you sure you want to delete "${name}"? Derived analytics and personal records will be recalculated.`)) {
+    if (
+      confirm(
+        `Are you sure you want to delete "${name}"? Derived analytics and personal records will be recalculated.`
+      )
+    ) {
       deleteHistoricalSession(id);
     }
   }
@@ -75,12 +192,217 @@ export default function HistoryPage() {
     setEditingSession(null);
   }
 
+  function updateSessionExercise(
+    sess: WorkoutSessionItem,
+    sessionExId: string,
+    transform: (ex: SessionExerciseItem) => SessionExerciseItem
+  ) {
+    const updatedExercises = sess.exercises.map((ex) =>
+      ex.id === sessionExId ? transform(ex) : ex
+    );
+    const updatedVolume = recalculateSessionVolume(updatedExercises);
+    updateHistoricalSession(sess.id, {
+      exercises: updatedExercises,
+      totalVolume: updatedVolume,
+    });
+  }
+
+  function handleCommitTargetReps(sess: WorkoutSessionItem, ex: SessionExerciseItem, raw: string) {
+    const parsed = parseInt(raw, 10);
+    const nextTarget = Number.isNaN(parsed) || parsed < 0 ? null : parsed;
+    updateSessionExercise(sess, ex.id, (item) => ({
+      ...item,
+      targetReps: nextTarget,
+      sets: item.sets.map((s) => ({ ...s, targetReps: nextTarget })),
+    }));
+  }
+
+  function handleCommitRest(sess: WorkoutSessionItem, ex: SessionExerciseItem, raw: string) {
+    const parsed = parseInt(raw, 10);
+    const nextRest = Number.isNaN(parsed) || parsed < 0 ? 0 : parsed;
+    updateSessionExercise(sess, ex.id, (item) => ({
+      ...item,
+      restDuration: nextRest,
+    }));
+  }
+
+  function handleCommitWeight(sess: WorkoutSessionItem, ex: SessionExerciseItem, raw: string) {
+    const trimmed = raw.trim();
+    const parsed = trimmed === "" ? 0 : parseFloat(trimmed);
+    if (trimmed !== "" && Number.isNaN(parsed)) return;
+    const nextWeight = Math.max(0, parsed || 0);
+
+    updateSessionExercise(sess, ex.id, (item) => ({
+      ...item,
+      sets: item.sets.map((s) =>
+        s.setType === "warmup" ? s : { ...s, weight: nextWeight }
+      ),
+    }));
+  }
+
+  function handleCommitSetReps(
+    sess: WorkoutSessionItem,
+    ex: SessionExerciseItem,
+    setIndex: number,
+    raw: string
+  ) {
+    const trimmed = raw.trim();
+    const parsed = trimmed === "" ? null : parseInt(trimmed, 10);
+    if (parsed !== null && (Number.isNaN(parsed) || parsed < 0)) return;
+
+    updateSessionExercise(sess, ex.id, (item) => {
+      const workingSets = getWorkingSets(item);
+      const warmups = item.sets.filter((s) => s.setType === "warmup");
+      const baseWeight =
+        workingSets.find((s) => (s.weight || 0) > 0)?.weight ?? 0;
+
+      const updatedWorking = [...workingSets];
+      while (updatedWorking.length <= setIndex) {
+        const nextNum = updatedWorking.length + 1;
+        updatedWorking.push({
+          id: crypto.randomUUID(),
+          sessionExerciseId: item.id,
+          sessionId: sess.id,
+          exerciseId: item.exerciseId,
+          setNumber: nextNum,
+          setType: "normal",
+          weight: baseWeight,
+          reps: 0,
+          targetReps: item.targetReps ?? null,
+          isCompleted: false,
+        });
+      }
+
+      updatedWorking[setIndex] = {
+        ...updatedWorking[setIndex],
+        reps: parsed ?? 0,
+        isCompleted: parsed !== null,
+      };
+
+      const mergedSets: SetLogItem[] = [...warmups, ...updatedWorking].map(
+        (s, idx) => ({ ...s, setNumber: idx + 1 })
+      );
+
+      return {
+        ...item,
+        sets: mergedSets,
+        isCompleted: mergedSets.some((s) => s.isCompleted),
+      };
+    });
+  }
+
+  function handleCommitNote(sess: WorkoutSessionItem, ex: SessionExerciseItem, raw: string) {
+    updateSessionExercise(sess, ex.id, (item) => ({
+      ...item,
+      notes: raw.trim() || null,
+    }));
+  }
+
+  function handleImportSheetCSV(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const text = event.target?.result;
+      if (typeof text !== "string") return;
+
+      const blocks = parseWorkoutSheetCSV(text);
+      if (blocks.length === 0) {
+        setImportFeedback("No valid workout day blocks found in CSV.");
+        return;
+      }
+
+      // Build lookup map of existing exercises by lowercase name
+      const exerciseByName = new Map(
+        exercises.map((ex) => [ex.name.trim().toLowerCase(), ex])
+      );
+
+      // Insert in reverse order because addCompletedSession prepends newest sessions first,
+      // keeping DAY 1..DAY N in natural spreadsheet top-to-bottom order.
+      const baseTime = Date.now();
+      [...blocks].reverse().forEach((block, revIdx) => {
+        const sessionId = `sess-import-${crypto.randomUUID()}`;
+        const timestamp = new Date(baseTime - revIdx * 60_000).toISOString();
+
+        const sessionExercises: SessionExerciseItem[] = block.exercises.map((row, exIdx) => {
+          const normalizedName = row.name.trim().toLowerCase();
+          let exMeta = exerciseByName.get(normalizedName);
+          if (!exMeta) {
+            exMeta = addExercise({
+              name: row.name.trim(),
+              primaryMuscleGroup: "full_body",
+              secondaryMuscleGroups: [],
+              equipment: "other",
+              weightUnit: "kg",
+              defaultRestDuration: row.restDuration || 120,
+              progressionIncrement: 2.5,
+              isFavorite: false,
+            });
+            exerciseByName.set(normalizedName, exMeta);
+          }
+
+          const sessionExId = crypto.randomUUID();
+          const setCount = Math.max(row.targetSets, row.setReps.length, 1);
+          const sets: SetLogItem[] = Array.from({ length: setCount }, (_, sIdx) => {
+            const repVal = row.setReps[sIdx] ?? null;
+            return {
+              id: crypto.randomUUID(),
+              sessionExerciseId: sessionExId,
+              sessionId,
+              exerciseId: exMeta!.id,
+              setNumber: sIdx + 1,
+              setType: "normal",
+              weight: row.weight || 0,
+              reps: repVal ?? 0,
+              targetReps: row.targetReps,
+              isCompleted: repVal !== null,
+            };
+          });
+
+          return {
+            id: sessionExId,
+            sessionId,
+            exerciseId: exMeta.id,
+            orderInSession: exIdx + 1,
+            targetReps: row.targetReps,
+            restDuration: row.restDuration,
+            notes: row.note || null,
+            isCompleted: sets.some((s) => s.isCompleted),
+            exercise: exMeta,
+            sets,
+          };
+        });
+
+        const totalVolume = recalculateSessionVolume(sessionExercises);
+
+        addCompletedSession({
+          id: sessionId,
+          userId: "local-user",
+          name: block.dayLabel,
+          startedAt: timestamp,
+          completedAt: timestamp,
+          durationSeconds: 0,
+          status: "completed",
+          notes: "",
+          totalVolume,
+          exercises: sessionExercises,
+        });
+      });
+
+      setImportFeedback(`Imported ${blocks.length} workout day(s) into history.`);
+      setTimeout(() => setImportFeedback(null), 4000);
+    };
+    reader.readAsText(file);
+    e.target.value = "";
+  }
+
   return (
     <div className="space-y-6">
       {/* Top Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 flex-wrap">
             <h1 className="font-heading font-black text-3xl md:text-4xl text-[#171717] tracking-tight uppercase">
               WORKOUT HISTORY
             </h1>
@@ -89,10 +411,45 @@ export default function HistoryPage() {
             </span>
           </div>
           <p className="text-sm text-[#171717]/70 font-sans mt-1">
-            Archival record of past sessions, individual set weights, rep thresholds, and training volume.
+            Spreadsheet logbook matching your Day-by-Day training sheet. Click any Weight, Reps, Rest, or Note cell to edit inline.
           </p>
         </div>
+
+        {/* Sheet Import / Export Controls */}
+        <div className="flex items-center gap-2.5 flex-wrap">
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".csv,text/csv"
+            onChange={handleImportSheetCSV}
+            className="hidden"
+          />
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-white hover:bg-[#E9F56A] text-[#171717] text-xs font-mono font-bold uppercase border-2 border-[#171717] shadow-neo-sm cursor-pointer transition-all active:translate-x-0.5 active:translate-y-0.5"
+          >
+            <Upload className="w-3.5 h-3.5 stroke-[2.5]" />
+            <span>Import Sheet CSV</span>
+          </button>
+          <button
+            type="button"
+            disabled={filteredSessions.length === 0}
+            onClick={() => downloadWorkoutSheetCSV(filteredSessions, exercises, plans)}
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-[#3155F5] hover:bg-[#2542C7] disabled:opacity-40 text-white text-xs font-mono font-bold uppercase border-2 border-[#171717] shadow-neo-sm cursor-pointer transition-all active:translate-x-0.5 active:translate-y-0.5"
+          >
+            <Download className="w-3.5 h-3.5 stroke-[2.5]" />
+            <span>Export Sheet CSV</span>
+          </button>
+        </div>
       </div>
+
+      {importFeedback && (
+        <div className="px-4 py-2.5 rounded-lg bg-[#E9F56A] border-2 border-[#171717] shadow-neo-sm text-xs font-mono font-bold text-[#171717] flex items-center gap-2">
+          <FileSpreadsheet className="w-4 h-4 stroke-[2.5]" />
+          <span>{importFeedback}</span>
+        </div>
+      )}
 
       {/* Filter and Search Bar */}
       <div className="bg-white border-2 border-[#171717] rounded-xl shadow-neo p-4 flex flex-col sm:flex-row gap-3">
@@ -121,177 +478,313 @@ export default function HistoryPage() {
         </select>
       </div>
 
-      {/* Session List */}
+      {/* Spreadsheet View */}
       {filteredSessions.length === 0 ? (
-        <div className="bg-white border-2 border-[#171717] rounded-xl shadow-neo p-12 text-center space-y-3">
-          <div className="w-12 h-12 mx-auto rounded-xl bg-[#3155F5]/10 border-2 border-[#171717] flex items-center justify-center text-[#171717]">
-            <Calendar className="w-6 h-6 stroke-[2.5]" />
+        <div className="bg-white border-2 border-[#171717] rounded-xl shadow-neo overflow-hidden">
+          {/* Show exact sheet header structure preview even when empty */}
+          <div className="overflow-x-auto border-b-2 border-[#171717]">
+            <table className="w-full border-collapse text-xs font-mono">
+              <thead>
+                <tr className="bg-[#3155F5] text-white border-b-2 border-[#171717]">
+                  <th className="px-3 py-2.5 bg-[#E9F56A] text-[#171717] font-heading font-black uppercase border-r border-[#171717] whitespace-nowrap">
+                    DAY 1
+                  </th>
+                  <th className="px-3 py-2.5 text-left font-heading font-black uppercase border-r border-[#171717]/40 whitespace-nowrap">
+                    Exercise
+                  </th>
+                  <th className="px-3 py-2.5 text-center font-heading font-black uppercase border-r border-[#171717]/40 whitespace-nowrap">
+                    Sets
+                  </th>
+                  <th className="px-3 py-2.5 text-center font-heading font-black uppercase border-r border-[#171717]/40 whitespace-nowrap">
+                    Reps
+                  </th>
+                  <th className="px-3 py-2.5 text-center font-heading font-black uppercase border-r border-[#171717]/40 whitespace-nowrap">
+                    Rest (Seconds)
+                  </th>
+                  <th className="px-3 py-2.5 text-center font-heading font-black uppercase border-r border-[#171717]/40 whitespace-nowrap">
+                    Weight
+                  </th>
+                  {setColumnHeaders.map((label) => (
+                    <th
+                      key={label}
+                      className="px-3 py-2.5 text-center font-heading font-black uppercase border-r border-[#171717]/40 whitespace-nowrap"
+                    >
+                      {label}
+                    </th>
+                  ))}
+                  <th className="px-3 py-2.5 text-left font-heading font-black uppercase whitespace-nowrap">
+                    Note
+                  </th>
+                </tr>
+              </thead>
+            </table>
           </div>
-          <h3 className="font-heading font-black text-lg text-[#171717] tracking-tight uppercase">NO SESSIONS FOUND</h3>
-          <p className="text-xs text-[#171717]/70 max-w-sm mx-auto font-sans">
-            No completed workouts match your current filter. Complete a session in the Live Workout Tracker to build your archive.
-          </p>
+
+          <div className="p-12 text-center space-y-3">
+            <div className="w-12 h-12 mx-auto rounded-xl bg-[#3155F5]/10 border-2 border-[#171717] flex items-center justify-center text-[#171717]">
+              <Calendar className="w-6 h-6 stroke-[2.5]" />
+            </div>
+            <h3 className="font-heading font-black text-lg text-[#171717] tracking-tight uppercase">
+              NO SESSIONS FOUND
+            </h3>
+            <p className="text-xs text-[#171717]/70 max-w-md mx-auto font-sans">
+              Complete a session in Live Workout or click <strong>Import Sheet CSV</strong> to populate your Day-by-Day training spreadsheet.
+            </p>
+          </div>
         </div>
       ) : (
-        <div className="space-y-4">
-          {filteredSessions.map((sess) => {
-            const isExpanded = expandedSessionId === sess.id;
-            const formattedDate = new Date(sess.completedAt || sess.startedAt).toLocaleDateString(
-              "en-US",
-              {
-                weekday: "short",
-                month: "short",
-                day: "numeric",
-                year: "numeric",
-              }
-            );
+        <div className="bg-white border-2 border-[#171717] rounded-xl shadow-neo overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse text-xs">
+              <tbody>
+                {filteredSessions.map((sess, sessIdx) => {
+                  const formattedDate = new Date(
+                    sess.completedAt || sess.startedAt
+                  ).toLocaleDateString("en-US", {
+                    weekday: "short",
+                    month: "short",
+                    day: "numeric",
+                    year: "numeric",
+                  });
 
-            // Compute total completed sets
-            let totalSets = 0;
-            sess.exercises.forEach((ex) => {
-              totalSets += ex.sets.filter((s) => s.isCompleted).length;
-            });
+                  const dayLabel = getSessionDayLabel(
+                    sess,
+                    filteredSessions.length - sessIdx,
+                    plans
+                  );
 
-            return (
-              <div
-                key={sess.id}
-                className="bg-white border-2 border-[#171717] rounded-xl shadow-neo hover:shadow-neo-lg transition-all overflow-hidden"
-              >
-                {/* Session Summary Header */}
-                <div
-                  onClick={() =>
-                    setExpandedSessionId(isExpanded ? null : sess.id)
-                  }
-                  className="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 cursor-pointer select-none bg-white border-b-2 border-[#171717]/10 hover:bg-[#F5F1E8]/50"
-                >
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2">
-                      <span className="text-[10px] font-mono uppercase px-2 py-0.5 rounded-md bg-[#3155F5] text-white border-2 border-[#171717] font-black shadow-neo-sm">
-                        {formattedDate}
-                      </span>
-                      {sess.phaseId && (
-                        <span className="text-[10px] font-mono uppercase px-2 py-0.5 rounded-md bg-[#B9A5EF] text-[#171717] border-2 border-[#171717] font-black shadow-neo-sm">
-                          {sess.phaseId}
-                        </span>
+                  const matchedPlan = sess.planId
+                    ? plans.find((p) => p.id === sess.planId)
+                    : undefined;
+                  const matchedPlanDay =
+                    matchedPlan && sess.planDayId
+                      ? matchedPlan.days.find((d) => d.id === sess.planDayId)
+                      : undefined;
+
+                  const totalColCount = 7 + maxSetColumns;
+
+                  return (
+                    <Fragment key={sess.id}>
+                      {/* Spacer row between Day blocks (matches blank separator rows in sheet) */}
+                      {sessIdx > 0 && (
+                        <tr>
+                          <td
+                            colSpan={totalColCount}
+                            className="h-5 bg-[#F5F1E8] border-y-2 border-[#171717]"
+                          />
+                        </tr>
                       )}
-                    </div>
-                    <h3 className="font-heading font-black text-lg text-[#171717] tracking-tight uppercase">{sess.name}</h3>
-                    {sess.notes && (
-                      <p className="text-xs text-[#171717]/70 line-clamp-1 italic font-sans">
-                        &ldquo;{sess.notes}&rdquo;
-                      </p>
-                    )}
-                  </div>
 
-                  {/* Right Metrics Pills */}
-                  <div className="flex items-center gap-4 text-xs font-mono">
-                    <div className="flex items-center gap-2 text-[#171717] font-bold">
-                      <span className="flex items-center gap-1 bg-[#F5F1E8] px-2.5 py-1 rounded-lg border-2 border-[#171717] shadow-neo-sm">
-                        <Clock className="w-3.5 h-3.5 text-[#3155F5]" />
-                        {formatDuration(sess.durationSeconds)}
-                      </span>
-                      <span className="flex items-center gap-1 bg-[#F5F1E8] px-2.5 py-1 rounded-lg border-2 border-[#171717] shadow-neo-sm">
-                        <Dumbbell className="w-3.5 h-3.5 text-[#FF7043]" />
-                        {sess.totalVolume.toLocaleString()} kg
-                      </span>
-                      <span className="bg-[#E9F56A] text-[#171717] px-2.5 py-1 rounded-lg border-2 border-[#171717] shadow-neo-sm font-black">
-                        {totalSets} sets
-                      </span>
-                    </div>
-
-                    <div className="flex items-center gap-1">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          openEditModal(sess);
-                        }}
-                        className="p-1.5 rounded-md border-2 border-[#171717] bg-[#F5F1E8] hover:bg-[#3155F5] hover:text-white text-[#171717] transition-all shadow-neo-sm cursor-pointer"
-                        title="Edit Session"
-                      >
-                        <Edit2 className="w-3.5 h-3.5" />
-                      </button>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleDelete(sess.id, sess.name);
-                        }}
-                        className="p-1.5 rounded-md border-2 border-[#171717] bg-[#FF7043] text-white hover:bg-[#e85d30] transition-all shadow-neo-sm cursor-pointer"
-                        title="Delete Session"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
-                      <div className="p-1 rounded text-[#171717] font-black">
-                        {isExpanded ? (
-                          <ChevronUp className="w-4 h-4 stroke-[2.5]" />
-                        ) : (
-                          <ChevronDown className="w-4 h-4 stroke-[2.5]" />
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Expanded Details: Exercise & Set Breakdown */}
-                {isExpanded && (
-                  <div className="p-4 sm:p-5 pt-0 bg-[#F5F1E8] space-y-4">
-                    <div className="text-xs font-mono uppercase font-black tracking-wider text-[#171717]/70 pt-4">
-                      Recorded Movements &amp; Sets
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {sess.exercises.map((sessionEx, idx) => {
-                        const exMeta = exercises.find(
-                          (ex) => ex.id === sessionEx.exerciseId
-                        );
-
-                        return (
-                          <div
-                            key={sessionEx.id}
-                            className="p-3.5 rounded-xl bg-white border-2 border-[#171717] shadow-neo-sm space-y-2.5"
-                          >
-                            <div className="flex items-center justify-between">
-                              <h4 className="font-heading font-black text-sm text-[#171717] uppercase">
-                                {idx + 1}. {exMeta?.name || "Exercise"}
-                              </h4>
-                              <span className="text-[10px] font-mono uppercase px-2 py-0.5 rounded-md bg-[#3155F5] text-white border-2 border-[#171717] font-black shadow-neo-sm">
-                                {exMeta?.primaryMuscleGroup}
+                      {/* Compact Session Meta & Action Bar */}
+                      <tr className="bg-[#F5F1E8] border-b border-[#171717]">
+                        <td colSpan={totalColCount} className="px-3 py-2">
+                          <div className="flex flex-wrap items-center justify-between gap-3">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className="text-[10px] font-mono uppercase px-2 py-0.5 rounded bg-white text-[#171717] border border-[#171717] font-bold">
+                                {formattedDate}
                               </span>
+                              <span className="font-heading font-black text-xs text-[#171717] uppercase tracking-tight">
+                                {sess.name}
+                              </span>
+                              {sess.phaseId && (
+                                <span className="text-[10px] font-mono uppercase px-2 py-0.5 rounded bg-[#B9A5EF] text-[#171717] border border-[#171717] font-bold">
+                                  {sess.phaseId}
+                                </span>
+                              )}
+                              {sess.notes && (
+                                <span className="text-[11px] font-sans italic text-[#171717]/70">
+                                  &ldquo;{sess.notes}&rdquo;
+                                </span>
+                              )}
                             </div>
 
-                            <div className="space-y-1">
-                              {sessionEx.sets.map((s) => (
-                                <div
-                                  key={s.id}
-                                  className={cn(
-                                    "flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs font-mono border-2 border-[#171717]/15",
-                                    s.isCompleted
-                                      ? "bg-[#F5F1E8] text-[#171717] font-bold"
-                                      : "bg-white text-[#171717]/40"
-                                  )}
-                                >
-                                  <div className="flex items-center gap-2">
-                                    <span className="w-4 text-center font-black text-[#3155F5]">
-                                      {s.setType === "warmup" ? "W" : s.setNumber}
-                                    </span>
-                                    <span>
-                                      {s.weight} kg × {s.reps} reps
-                                    </span>
-                                  </div>
-                                  <span className="text-[#171717]/60 text-[11px] font-bold">
-                                    {(s.weight * s.reps).toLocaleString()} kg vol
-                                  </span>
-                                </div>
-                              ))}
+                            <div className="flex items-center gap-2 font-mono text-[11px] font-bold text-[#171717]">
+                              {sess.durationSeconds > 0 && (
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-white border border-[#171717]">
+                                  <Clock className="w-3 h-3 text-[#3155F5]" />
+                                  {formatDuration(sess.durationSeconds)}
+                                </span>
+                              )}
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-white border border-[#171717]">
+                                <Dumbbell className="w-3 h-3 text-[#FF7043]" />
+                                {sess.totalVolume.toLocaleString()} kg
+                              </span>
+                              <button
+                                type="button"
+                                onClick={() => openEditModal(sess)}
+                                className="p-1 rounded bg-white hover:bg-[#3155F5] hover:text-white border border-[#171717] transition-colors cursor-pointer"
+                                title="Edit Session Info"
+                              >
+                                <Edit2 className="w-3 h-3" />
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => handleDelete(sess.id, sess.name)}
+                                className="p-1 rounded bg-[#FF7043] hover:bg-[#e85d30] text-white border border-[#171717] transition-colors cursor-pointer"
+                                title="Delete Session"
+                              >
+                                <Trash2 className="w-3 h-3" />
+                              </button>
                             </div>
                           </div>
+                        </td>
+                      </tr>
+
+                      {/* Exact Google Sheet Column Header Row */}
+                      <tr className="bg-[#3155F5] text-white border-b-2 border-[#171717]">
+                        <th className="px-3 py-2.5 bg-[#E9F56A] text-[#171717] font-heading font-black text-xs uppercase text-center border-r-2 border-[#171717] min-w-[88px] whitespace-nowrap">
+                          {dayLabel}
+                        </th>
+                        <th className="px-3 py-2.5 text-left font-heading font-black text-xs uppercase border-r border-white/25 min-w-[230px] whitespace-nowrap">
+                          Exercise
+                        </th>
+                        <th className="px-3 py-2.5 text-center font-heading font-black text-xs uppercase border-r border-white/25 w-16 whitespace-nowrap">
+                          Sets
+                        </th>
+                        <th className="px-3 py-2.5 text-center font-heading font-black text-xs uppercase border-r border-white/25 w-16 whitespace-nowrap">
+                          Reps
+                        </th>
+                        <th className="px-3 py-2.5 text-center font-heading font-black text-xs uppercase border-r border-white/25 w-32 whitespace-nowrap">
+                          Rest (Seconds)
+                        </th>
+                        <th className="px-3 py-2.5 text-center font-heading font-black text-xs uppercase border-r border-white/25 w-24 whitespace-nowrap">
+                          Weight
+                        </th>
+                        {setColumnHeaders.map((colHeader) => (
+                          <th
+                            key={colHeader}
+                            className="px-3 py-2.5 text-center font-heading font-black text-xs uppercase border-r border-white/25 min-w-[118px] whitespace-nowrap"
+                          >
+                            {colHeader}
+                          </th>
+                        ))}
+                        <th className="px-3 py-2.5 text-left font-heading font-black text-xs uppercase min-w-[240px] whitespace-nowrap">
+                          Note
+                        </th>
+                      </tr>
+
+                      {/* Exercise Rows */}
+                      {sess.exercises.map((sessionEx) => {
+                        const exMeta =
+                          exercises.find((ex) => ex.id === sessionEx.exerciseId) ||
+                          sessionEx.exercise;
+                        const planEx = matchedPlanDay?.exercises.find(
+                          (pe) => pe.exerciseId === sessionEx.exerciseId
+                        );
+                        const workingSets = getWorkingSets(sessionEx);
+
+                        const targetRepsVal =
+                          sessionEx.targetReps ??
+                          workingSets[0]?.targetReps ??
+                          planEx?.maxReps ??
+                          null;
+                        const restVal =
+                          sessionEx.restDuration ??
+                          planEx?.restDuration ??
+                          exMeta?.defaultRestDuration ??
+                          120;
+                        const weightDisplay = formatSheetWeight(workingSets);
+
+                        return (
+                          <tr
+                            key={sessionEx.id}
+                            className="border-b border-[#171717]/20 hover:bg-[#F5F1E8]/50 transition-colors"
+                          >
+                            {/* Blank Day gutter cell */}
+                            <td className="bg-[#F5F1E8]/50 border-r-2 border-[#171717] px-2 py-1.5" />
+
+                            {/* Exercise Name */}
+                            <td className="px-3 py-2 font-sans font-bold text-[#171717] border-r border-[#171717]/20">
+                              {exMeta?.name || "Exercise"}
+                            </td>
+
+                            {/* Sets */}
+                            <td className="px-2 py-2 text-center font-mono font-bold text-[#171717] border-r border-[#171717]/20">
+                              {workingSets.length || "—"}
+                            </td>
+
+                            {/* Target Reps */}
+                            <td className="p-0 border-r border-[#171717]/20">
+                              <EditableCell
+                                type="number"
+                                value={targetRepsVal !== null ? String(targetRepsVal) : ""}
+                                placeholder="—"
+                                onCommit={(val) =>
+                                  handleCommitTargetReps(sess, sessionEx, val)
+                                }
+                              />
+                            </td>
+
+                            {/* Rest (Seconds) */}
+                            <td className="p-0 border-r border-[#171717]/20">
+                              <EditableCell
+                                type="number"
+                                value={String(restVal)}
+                                onCommit={(val) =>
+                                  handleCommitRest(sess, sessionEx, val)
+                                }
+                              />
+                            </td>
+
+                            {/* Weight */}
+                            <td className="p-0 border-r border-[#171717]/20">
+                              <EditableCell
+                                type="text"
+                                value={weightDisplay}
+                                placeholder=""
+                                onCommit={(val) =>
+                                  handleCommitWeight(sess, sessionEx, val)
+                                }
+                              />
+                            </td>
+
+                            {/* First Set Reps, Second Set Reps, Third Set Reps, ... */}
+                            {setColumnHeaders.map((_, setIdx) => {
+                              const setItem = workingSets[setIdx];
+                              const displayVal =
+                                setItem && (setItem.isCompleted || (setItem.reps || 0) > 0)
+                                  ? String(setItem.reps)
+                                  : "";
+
+                              return (
+                                <td
+                                  key={setIdx}
+                                  className="p-0 border-r border-[#171717]/20"
+                                >
+                                  <EditableCell
+                                    type="number"
+                                    value={displayVal}
+                                    placeholder=""
+                                    onCommit={(val) =>
+                                      handleCommitSetReps(sess, sessionEx, setIdx, val)
+                                    }
+                                  />
+                                </td>
+                              );
+                            })}
+
+                            {/* Note */}
+                            <td className="p-0">
+                              <EditableCell
+                                type="text"
+                                align="left"
+                                value={sessionEx.notes || ""}
+                                placeholder="Add note..."
+                                onCommit={(val) =>
+                                  handleCommitNote(sess, sessionEx, val)
+                                }
+                                className="font-sans"
+                              />
+                            </td>
+                          </tr>
                         );
                       })}
-                    </div>
-                  </div>
-                )}
-              </div>
-            );
-          })}
+                    </Fragment>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
 
@@ -300,7 +793,9 @@ export default function HistoryPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-150">
           <div className="bg-white border-2 border-[#171717] rounded-xl shadow-neo-lg p-6 w-full max-w-md relative font-sans space-y-4">
             <div className="flex items-center justify-between border-b-2 border-[#171717]/15 pb-3">
-              <h3 className="font-heading font-black text-xl text-[#171717] tracking-tight uppercase">EDIT WORKOUT DETAILS</h3>
+              <h3 className="font-heading font-black text-xl text-[#171717] tracking-tight uppercase">
+                EDIT WORKOUT DETAILS
+              </h3>
               <button
                 onClick={() => setEditingSession(null)}
                 className="p-1.5 rounded-lg border-2 border-[#171717] bg-[#F5F1E8] hover:bg-[#3155F5] hover:text-white text-[#171717] transition-all cursor-pointer shadow-neo-sm"

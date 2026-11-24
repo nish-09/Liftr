@@ -69,6 +69,8 @@ export interface SessionExerciseItem {
   sessionId: string;
   exerciseId: string;
   orderInSession: number;
+  targetReps?: number | null;
+  restDuration?: number | null;
   notes?: string | null;
   isCompleted: boolean;
   exercise?: Exercise;
