@@ -9,7 +9,7 @@ import {
 import { WorkoutSessionItem, Exercise } from "@/types";
 import { Activity, AlertTriangle } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { PastelCard, PastelBadge } from "@/components/ui/DesignSystem";
+import { PastelCard } from "@/components/ui/DesignSystem";
 import { AnteriorBodySvg } from "./AnteriorBodySvg";
 import { PosteriorBodySvg } from "./PosteriorBodySvg";
 import { MuscleDetailModal } from "./MuscleDetailModal";
@@ -97,18 +97,10 @@ export default function MuscleHeatmap({
   return (
     <PastelCard tone="white" className="p-5 sm:p-6 space-y-5 relative">
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4 border-b border-[#142746]/15">
-        <div>
-          <div className="flex items-center gap-2.5 flex-wrap">
-            <h3 className="font-heading font-extrabold text-lg text-[#142746] flex items-center gap-2">
-              <Activity className="w-5 h-5 text-[#142746]" />
-              <span>Muscle Coverage Heatmap</span>
-            </h3>
-            <PastelBadge tone="green">15 Groups</PastelBadge>
-          </div>
-          <p className="text-xs text-[#8993A5] mt-1">
-            Hypertrophic stimulus mapping based on completed working sets vs weekly targets.
-          </p>
-        </div>
+        <h3 className="font-heading font-extrabold text-base text-[#142746] flex items-center gap-2">
+          <Activity className="w-4 h-4 text-[#142746]" />
+          <span>Muscle Coverage</span>
+        </h3>
 
         <div className="flex flex-wrap items-center gap-2.5">
           <div className="flex flex-wrap items-center p-1 rounded-xl bg-[#FAF9FD] border-[1.5px] border-[#142746]">

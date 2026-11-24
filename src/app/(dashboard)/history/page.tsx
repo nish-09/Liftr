@@ -396,8 +396,7 @@ export default function HistoryPage() {
     <div className="space-y-6">
       <PageHeader
         title="Workout History"
-        subtitle="Spreadsheet logbook matching your Day-by-Day sheet. Click any cell to edit inline."
-        badge={<PastelBadge tone="lavender">{filteredSessions.length} Logs</PastelBadge>}
+        subtitle="Click any cell to edit inline."
         actions={
           <>
             <input

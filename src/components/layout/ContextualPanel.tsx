@@ -168,24 +168,15 @@ export default function ContextualPanel({
 
       return (
         <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-heading font-extrabold uppercase tracking-wider text-[#142746]">
-              Session Monitor
-            </span>
-            <span className="px-2 py-0.5 rounded-full bg-[#E9FF91] border-[1.5px] border-[#142746] text-[10px] font-bold">
-              {activeSession ? "Live" : "Standby"}
-            </span>
-          </div>
-
           {/* Rest Timer Card */}
-          <div className="p-4 rounded-2xl bg-white border-[1.5px] border-[#142746] shadow-neo-sm space-y-3">
+          <div className="p-4 rounded-2xl bg-white border-[1.5px] border-[#142746] space-y-3">
             <div className="flex items-center justify-between">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-[#8993A5] flex items-center gap-1.5">
+              <span className="text-xs font-heading font-extrabold text-[#142746] flex items-center gap-1.5">
                 <Timer className="w-3.5 h-3.5 text-[#142746]" />
                 Rest Timer
               </span>
               {restTimer.setNumber && (
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#EBCBF7] border border-[#142746]">
+                <span className="text-[11px] font-bold text-[#142746]/70">
                   Set {restTimer.setNumber}
                 </span>
               )}
@@ -197,14 +188,14 @@ export default function ContextualPanel({
               <button
                 type="button"
                 onClick={() => addRestSeconds(15)}
-                className="flex-1 py-1.5 rounded-lg bg-[#E9FF91] hover:bg-[#dff67c] border-[1.5px] border-[#142746] text-[11px] font-bold cursor-pointer"
+                className="flex-1 min-h-[36px] py-1.5 rounded-lg bg-[#E9FF91] hover:bg-[#dff67c] border border-[#142746] text-[11px] font-bold cursor-pointer"
               >
                 +15s
               </button>
               <button
                 type="button"
                 onClick={() => addRestSeconds(30)}
-                className="flex-1 py-1.5 rounded-lg bg-[#EBCBF7] hover:bg-[#e1b9f1] border-[1.5px] border-[#142746] text-[11px] font-bold cursor-pointer"
+                className="flex-1 min-h-[36px] py-1.5 rounded-lg bg-[#EBCBF7] hover:bg-[#e1b9f1] border border-[#142746] text-[11px] font-bold cursor-pointer"
               >
                 +30s
               </button>
@@ -212,7 +203,7 @@ export default function ContextualPanel({
                 <button
                   type="button"
                   onClick={pauseRestTimer}
-                  className="p-1.5 rounded-lg bg-[#142746] text-white border-[1.5px] border-[#142746] cursor-pointer"
+                  className="min-w-[36px] min-h-[36px] flex items-center justify-center rounded-lg bg-[#142746] text-white border border-[#142746] cursor-pointer"
                   title="Pause Timer"
                 >
                   <Pause className="w-3.5 h-3.5" />
@@ -222,7 +213,7 @@ export default function ContextualPanel({
                   type="button"
                   onClick={resumeRestTimer}
                   disabled={restTimer.remainingSeconds <= 0}
-                  className="p-1.5 rounded-lg bg-[#BDF7B6] text-[#142746] border-[1.5px] border-[#142746] disabled:opacity-40 cursor-pointer"
+                  className="min-w-[36px] min-h-[36px] flex items-center justify-center rounded-lg bg-[#BDF7B6] text-[#142746] border border-[#142746] disabled:opacity-40 cursor-pointer"
                   title="Resume Timer"
                 >
                   <Play className="w-3.5 h-3.5 fill-[#142746]" />
@@ -231,7 +222,7 @@ export default function ContextualPanel({
               <button
                 type="button"
                 onClick={resetRestTimer}
-                className="p-1.5 rounded-lg bg-[#F8C3B5] text-[#142746] border-[1.5px] border-[#142746] cursor-pointer"
+                className="min-w-[36px] min-h-[36px] flex items-center justify-center rounded-lg bg-[#F8C3B5] text-[#142746] border border-[#142746] cursor-pointer"
                 title="Reset Timer"
               >
                 <RotateCcw className="w-3.5 h-3.5" />
@@ -241,14 +232,11 @@ export default function ContextualPanel({
 
           {activeSession ? (
             <>
-              <div className="p-4 rounded-2xl bg-[#E9FF91] border-[1.5px] border-[#142746] shadow-neo-sm space-y-2.5">
-                <div className="text-[11px] font-bold uppercase text-[#142746]/70">
-                  Active Summary
-                </div>
-                <div className="font-heading font-extrabold text-sm text-[#142746]">
+              <div className="p-4 rounded-2xl bg-[#E9FF91] border-[1.5px] border-[#142746] space-y-2.5">
+                <div className="font-heading font-extrabold text-sm text-[#142746] truncate">
                   {activeSession.name}
                 </div>
-                <div className="grid grid-cols-3 gap-2 pt-1 text-center">
+                <div className="grid grid-cols-3 gap-2 text-center">
                   <div className="p-2 rounded-xl bg-white border border-[#142746]">
                     <div className="text-[10px] text-[#8993A5] font-semibold">Time</div>
                     <div className="text-xs font-extrabold">{formatDuration(elapsedSeconds)}</div>
@@ -266,7 +254,7 @@ export default function ContextualPanel({
                 </div>
               </div>
 
-              <div className="p-4 rounded-2xl bg-white border-[1.5px] border-[#142746] shadow-neo-sm space-y-2.5">
+              <div className="p-4 rounded-2xl bg-white border-[1.5px] border-[#142746] space-y-2.5">
                 <div className="text-xs font-heading font-extrabold text-[#142746]">
                   Exercise Progress
                 </div>
@@ -285,7 +273,7 @@ export default function ContextualPanel({
                             "flex items-center justify-between px-2.5 py-2 rounded-xl border text-xs",
                             allDone
                               ? "bg-[#BDF7B6]/50 border-[#142746] font-bold"
-                              : "bg-[#FAF9FD] border-[#142746]/25"
+                              : "bg-[#FAF9FD] border-[#142746]/20"
                           )}
                         >
                           <span className="truncate pr-2">
@@ -302,18 +290,18 @@ export default function ContextualPanel({
               </div>
             </>
           ) : (
-            <div className="p-4 rounded-2xl bg-white border-[1.5px] border-[#142746] shadow-neo-sm space-y-2">
+            <div className="p-4 rounded-2xl bg-white border-[1.5px] border-[#142746] space-y-2">
               <div className="text-xs font-heading font-extrabold text-[#142746]">
-                Ready to Train
+                No Active Session
               </div>
-              <p className="text-xs text-[#8993A5] leading-relaxed">
-                Start an empty live workout or launch a split day from your active plan. Auto-rest countdown begins as soon as you check off a set.
+              <p className="text-xs text-[#8993A5]">
+                Start an empty workout or pick a plan day.
               </p>
               <Link
                 href="/plans"
                 className="inline-flex items-center gap-1 text-xs font-bold text-[#142746] underline underline-offset-2 pt-1"
               >
-                Open Workout Plans <ChevronRight className="w-3.5 h-3.5" />
+                Workout Plans <ChevronRight className="w-3.5 h-3.5" />
               </Link>
             </div>
           )}
@@ -344,26 +332,20 @@ export default function ContextualPanel({
 
       return (
         <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-heading font-extrabold uppercase tracking-wider text-[#142746]">
-              Body Composition Snapshot
-            </span>
-          </div>
-
-          <div className="p-4 rounded-2xl bg-[#E9FF91] border-[1.5px] border-[#142746] shadow-neo-sm space-y-2.5">
+          <div className="p-4 rounded-2xl bg-[#E9FF91] border-[1.5px] border-[#142746] space-y-2.5">
             <div className="flex items-center justify-between">
-              <span className="text-[11px] font-bold uppercase text-[#142746]/70 flex items-center gap-1">
+              <span className="text-xs font-heading font-extrabold text-[#142746] flex items-center gap-1.5">
                 <Target className="w-3.5 h-3.5" />
                 Target Weight
               </span>
-              <span className="text-[11px] font-bold">{goalPct}%</span>
+              <span className="text-xs font-bold">{goalPct}%</span>
             </div>
             <div className="flex items-baseline gap-2 font-heading font-extrabold text-xl text-[#142746]">
               <span>{currentW != null ? `${currentW} kg` : "--"}</span>
-              <span className="text-sm text-[#8993A5]">→</span>
+              <span className="text-sm text-[#142746]/50">→</span>
               <span>{targetW != null ? `${targetW} kg` : "--"}</span>
             </div>
-            <div className="w-full h-2.5 rounded-full bg-white border border-[#142746] overflow-hidden">
+            <div className="w-full h-2 rounded-full bg-white border border-[#142746] overflow-hidden">
               <div
                 className="h-full bg-[#142746] transition-all duration-500"
                 style={{ width: `${goalPct}%` }}
@@ -371,28 +353,28 @@ export default function ContextualPanel({
             </div>
           </div>
 
-          <div className="p-4 rounded-2xl bg-white border-[1.5px] border-[#142746] shadow-neo-sm space-y-2">
+          <div className="p-4 rounded-2xl bg-white border-[1.5px] border-[#142746] space-y-1.5">
             <div className="flex items-center justify-between">
-              <span className="text-[11px] font-bold uppercase text-[#8993A5]">BMI Status</span>
-              <span className="px-2 py-0.5 rounded-full bg-[#EBCBF7] border border-[#142746] text-[10px] font-bold">
-                {bmiRes ? bmiRes.category : "Unset"}
+              <span className="text-xs font-heading font-extrabold text-[#142746]">BMI</span>
+              <span className="text-[11px] font-bold text-[#142746]/75">
+                {bmiRes ? bmiRes.category : "Not set"}
               </span>
             </div>
             <div className="text-3xl font-extrabold stat-number text-[#142746]">
               {bmiRes ? bmiRes.bmi : "--"}
             </div>
-            <p className="text-[11px] text-[#8993A5]">
-              {heightCm ? `Height: ${heightCm} cm` : "Configure height in Body Metrics"}
-            </p>
+            {heightCm && (
+              <p className="text-[11px] text-[#8993A5]">Height: {heightCm} cm</p>
+            )}
           </div>
 
-          <div className="p-4 rounded-2xl bg-white border-[1.5px] border-[#142746] shadow-neo-sm space-y-2.5">
+          <div className="p-4 rounded-2xl bg-white border-[1.5px] border-[#142746] space-y-2.5">
             <div className="text-xs font-heading font-extrabold text-[#142746] flex items-center gap-1.5">
               <Scale className="w-3.5 h-3.5" />
               Recent Measurements
             </div>
             {bodyMeasurements.length === 0 ? (
-              <p className="text-xs text-[#8993A5]">No circumference logs yet.</p>
+              <p className="text-xs text-[#8993A5]">No measurements logged yet.</p>
             ) : (
               <div className="space-y-1.5">
                 {bodyMeasurements.slice(0, 4).map((m) => (
@@ -424,31 +406,27 @@ export default function ContextualPanel({
 
       return (
         <div className="space-y-4">
-          <div className="text-xs font-heading font-extrabold uppercase tracking-wider text-[#142746]">
-            Performance Insights
-          </div>
-
-          <div className="p-4 rounded-2xl bg-[#F2FA91] border-[1.5px] border-[#142746] shadow-neo-sm space-y-1">
-            <span className="text-[11px] font-bold uppercase text-[#142746]/70 flex items-center gap-1">
+          <div className="p-4 rounded-2xl bg-[#F2FA91] border-[1.5px] border-[#142746] space-y-1">
+            <span className="text-xs font-heading font-extrabold text-[#142746] flex items-center gap-1.5">
               <TrendingUp className="w-3.5 h-3.5" />
               Training Frequency
             </span>
             <div className="text-3xl font-extrabold stat-number text-[#142746]">
               {weeklySessions}{" "}
-              <span className="text-sm font-semibold text-[#142746]/70">sessions / 7d</span>
+              <span className="text-sm font-semibold text-[#142746]/70">/ 7 days</span>
             </div>
-            <p className="text-[11px] text-[#142746]/80">
-              {sessions.length} total completed workouts
+            <p className="text-[11px] text-[#142746]/75">
+              {sessions.length} total workouts
             </p>
           </div>
 
-          <div className="p-4 rounded-2xl bg-white border-[1.5px] border-[#142746] shadow-neo-sm space-y-2.5">
+          <div className="p-4 rounded-2xl bg-white border-[1.5px] border-[#142746] space-y-2.5">
             <div className="text-xs font-heading font-extrabold text-[#142746] flex items-center gap-1.5">
               <Activity className="w-3.5 h-3.5" />
-              Top Trained (30d)
+              Top Muscles (30d)
             </div>
             {muscleSummary.topTrained.length === 0 ? (
-              <p className="text-xs text-[#8993A5]">Log sets to analyze muscle coverage.</p>
+              <p className="text-xs text-[#8993A5]">Log sets to view muscle balance.</p>
             ) : (
               <div className="space-y-1.5">
                 {muscleSummary.topTrained.map((m) => (
@@ -464,38 +442,32 @@ export default function ContextualPanel({
             )}
           </div>
 
-          <div className="p-4 rounded-2xl bg-[#F8C3B5] border-[1.5px] border-[#142746] shadow-neo-sm space-y-2">
+          <div className="p-4 rounded-2xl bg-[#F8C3B5] border-[1.5px] border-[#142746] space-y-1">
             <div className="text-xs font-heading font-extrabold text-[#142746] flex items-center gap-1.5">
               <Award className="w-3.5 h-3.5" />
-              PR Summary
+              Personal Records
             </div>
             <div className="text-2xl font-extrabold stat-number text-[#142746]">
-              {personalRecords.length} Records
+              {personalRecords.length}
             </div>
-            <p className="text-[11px] text-[#142746]/80">
-              Verified peak weights and Epley 1RMs.
-            </p>
           </div>
         </div>
       );
     }
 
-    // 4. PLANS / EXERCISES / HISTORY / SETTINGS / NUTRITION
+    // 4. PLANS / EXERCISES
     if (pathname.startsWith("/exercises")) {
       const favorites = exercises.filter((e) => e.isFavorite);
       return (
         <div className="space-y-4">
-          <div className="text-xs font-heading font-extrabold uppercase tracking-wider text-[#142746]">
-            Library Overview
-          </div>
-          <div className="p-4 rounded-2xl bg-[#E9FF91] border-[1.5px] border-[#142746] shadow-neo-sm space-y-1">
-            <div className="text-[11px] font-bold uppercase text-[#142746]/70">Total Movements</div>
+          <div className="p-4 rounded-2xl bg-[#E9FF91] border-[1.5px] border-[#142746] space-y-1">
+            <div className="text-xs font-heading font-extrabold text-[#142746]">Exercises</div>
             <div className="text-3xl font-extrabold stat-number">{exercises.length}</div>
           </div>
-          <div className="p-4 rounded-2xl bg-white border-[1.5px] border-[#142746] shadow-neo-sm space-y-2">
+          <div className="p-4 rounded-2xl bg-white border-[1.5px] border-[#142746] space-y-2">
             <div className="text-xs font-heading font-extrabold flex items-center gap-1.5">
               <Star className="w-3.5 h-3.5 fill-[#F8C3B5]" />
-              Starred Favorites ({favorites.length})
+              Starred ({favorites.length})
             </div>
             {favorites.length === 0 ? (
               <p className="text-xs text-[#8993A5]">Star exercises for quick access.</p>
@@ -504,7 +476,7 @@ export default function ContextualPanel({
                 {favorites.slice(0, 5).map((ex) => (
                   <div
                     key={ex.id}
-                    className="text-xs font-semibold px-2.5 py-1.5 rounded-xl bg-[#FAF9FD] border border-[#142746]/25 truncate"
+                    className="text-xs font-semibold px-2.5 py-1.5 rounded-xl bg-[#FAF9FD] border border-[#142746]/20 truncate"
                   >
                     {ex.name}
                   </div>
@@ -519,58 +491,51 @@ export default function ContextualPanel({
     if (pathname.startsWith("/plans")) {
       return (
         <div className="space-y-4">
-          <div className="text-xs font-heading font-extrabold uppercase tracking-wider text-[#142746]">
-            Routine Summary
-          </div>
-          <div className="p-4 rounded-2xl bg-[#EBCBF7] border-[1.5px] border-[#142746] shadow-neo-sm space-y-1.5">
-            <div className="text-[11px] font-bold uppercase text-[#142746]/70">Active Plan</div>
+          <div className="p-4 rounded-2xl bg-[#EBCBF7] border-[1.5px] border-[#142746] space-y-1">
+            <div className="text-xs font-bold text-[#142746]/70">Active Plan</div>
             <div className="font-heading font-extrabold text-base text-[#142746]">
-              {activePlan ? activePlan.name : "No Active Routine"}
+              {activePlan ? activePlan.name : "None selected"}
             </div>
-            <div className="text-xs font-medium text-[#142746]/80">
-              {activePlan ? `${activePlan.days.length} split days configured` : "Select or create a routine"}
-            </div>
+            {activePlan && (
+              <div className="text-xs font-medium text-[#142746]/80">
+                {activePlan.days.length} split days
+              </div>
+            )}
           </div>
-          <div className="p-4 rounded-2xl bg-white border-[1.5px] border-[#142746] shadow-neo-sm space-y-2">
+          <div className="p-4 rounded-2xl bg-white border-[1.5px] border-[#142746] space-y-1.5">
             <div className="text-xs font-heading font-extrabold flex items-center gap-1.5">
               <Layers className="w-3.5 h-3.5" />
-              Double Progression Guide
+              Double Progression
             </div>
             <p className="text-xs text-[#8993A5] leading-relaxed">
-              Hit the top of your prescribed rep range across sets to automatically unlock your next weight step in Live Workout.
+              Hit top target reps across working sets to trigger a weight increase on your next session.
             </p>
           </div>
         </div>
       );
     }
 
-    // 5. DEFAULT / OVERVIEW CONTEXT (Calendar, Streak, Upcoming Plan, Daily Checklist)
+    // 5. DEFAULT / OVERVIEW CONTEXT
     return (
       <div className="space-y-4">
-        {/* Streak Card */}
-        <div className="p-4 rounded-2xl bg-[#E9FF91] border-[1.5px] border-[#142746] shadow-neo-sm flex items-center justify-between">
+        <div className="p-4 rounded-2xl bg-[#E9FF91] border-[1.5px] border-[#142746] flex items-center justify-between">
           <div>
-            <span className="text-[11px] font-bold uppercase tracking-wider text-[#142746]/70 block">
-              Current Streak
-            </span>
+            <span className="text-xs font-bold text-[#142746]/75 block">Current Streak</span>
             <div className="text-2xl font-extrabold stat-number text-[#142746]">
               {streakCount} {streakCount === 1 ? "Day" : "Days"}
             </div>
           </div>
-          <div className="w-11 h-11 rounded-xl bg-white border-[1.5px] border-[#142746] flex items-center justify-center shadow-neo-sm">
-            <Flame className="w-5 h-5 text-[#142746] fill-[#F8C3B5]" />
-          </div>
+          <Flame className="w-6 h-6 text-[#142746] fill-[#F8C3B5] shrink-0" />
         </div>
 
-        {/* Monthly Workout Calendar */}
-        <div className="p-4 rounded-2xl bg-white border-[1.5px] border-[#142746] shadow-neo-sm space-y-3">
+        <div className="p-4 rounded-2xl bg-white border-[1.5px] border-[#142746] space-y-3">
           <div className="flex items-center justify-between">
             <span className="text-xs font-heading font-extrabold text-[#142746] flex items-center gap-1.5">
               <CalendarIcon className="w-3.5 h-3.5" />
               {monthLabel}
             </span>
-            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#EBCBF7] border border-[#142746]">
-              {workoutDateSet.size} Logged
+            <span className="text-[11px] font-bold text-[#142746]/70">
+              {workoutDateSet.size} days
             </span>
           </div>
 
@@ -592,7 +557,7 @@ export default function ContextualPanel({
                 <div
                   key={cell.dateStr}
                   className={cn(
-                    "h-7 rounded-lg flex items-center justify-center font-semibold transition-colors",
+                    "h-7 rounded-lg flex items-center justify-center font-semibold",
                     isWorkoutDay
                       ? "bg-[#BDF7B6] border border-[#142746] text-[#142746] font-extrabold"
                       : isToday
@@ -607,28 +572,25 @@ export default function ContextualPanel({
           </div>
         </div>
 
-        {/* Upcoming Planned Workouts */}
-        <div className="p-4 rounded-2xl bg-white border-[1.5px] border-[#142746] shadow-neo-sm space-y-2.5">
+        <div className="p-4 rounded-2xl bg-white border-[1.5px] border-[#142746] space-y-2.5">
           <div className="flex items-center justify-between">
             <span className="text-xs font-heading font-extrabold text-[#142746] flex items-center gap-1.5">
               <Dumbbell className="w-3.5 h-3.5" />
               Upcoming Splits
             </span>
             <Link href="/plans" className="text-[11px] font-bold text-[#142746] underline">
-              Plans
+              Edit
             </Link>
           </div>
           {!activePlan || activePlan.days.length === 0 ? (
-            <p className="text-xs text-[#8993A5]">
-              No active routine yet. Create a plan to see your upcoming training days.
-            </p>
+            <p className="text-xs text-[#8993A5]">No workout plan selected.</p>
           ) : (
             <div className="space-y-1.5">
               {activePlan.days.slice(0, 3).map((day) => (
                 <Link
                   key={day.id}
                   href="/plans"
-                  className="flex items-center justify-between px-3 py-2 rounded-xl bg-[#FAF9FD] hover:bg-[#E9FF91]/60 border border-[#142746]/25 text-xs transition-colors"
+                  className="flex items-center justify-between px-3 py-2 rounded-xl bg-[#FAF9FD] hover:bg-[#E9FF91]/60 border border-[#142746]/20 text-xs transition-colors"
                 >
                   <span className="font-bold text-[#142746] truncate pr-2">{day.name}</span>
                   <span className="text-[10px] font-semibold text-[#8993A5] shrink-0">
@@ -640,10 +602,9 @@ export default function ContextualPanel({
           )}
         </div>
 
-        {/* Daily Fitness Checklist */}
-        <div className="p-4 rounded-2xl bg-[#F2FA91] border-[1.5px] border-[#142746] shadow-neo-sm space-y-2.5">
+        <div className="p-4 rounded-2xl bg-[#F2FA91] border-[1.5px] border-[#142746] space-y-2.5">
           <div className="text-xs font-heading font-extrabold text-[#142746]">
-            Daily Checklist
+            Today&apos;s Checklist
           </div>
           <div className="space-y-1.5 text-xs">
             <div className="flex items-center gap-2 font-semibold text-[#142746]">

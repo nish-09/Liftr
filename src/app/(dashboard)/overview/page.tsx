@@ -13,7 +13,7 @@ import {
   CHART_GRID_COLOR,
   CHART_AXIS_COLOR,
 } from "@/components/charts/chartStyles";
-import { PastelCard, PastelBadge } from "@/components/ui/DesignSystem";
+import { PastelCard } from "@/components/ui/DesignSystem";
 import {
   Play,
   CalendarDays,
@@ -185,11 +185,8 @@ export default function OverviewPage() {
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
         <div className="min-w-0">
           <h1 className="font-heading text-xl sm:text-2xl lg:text-3xl font-extrabold text-[#142746] tracking-tight break-words">
-            {greeting}, {displayName}!
+            {greeting}, {displayName}
           </h1>
-          <p className="text-xs sm:text-sm text-[#142746]/75 font-medium mt-0.5">
-            Your fitness journey at a glance.
-          </p>
         </div>
 
         <div className="flex flex-wrap items-center gap-2 sm:gap-2.5 w-full lg:w-auto">
@@ -199,8 +196,8 @@ export default function OverviewPage() {
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search recent workouts..."
-              className="w-full min-h-[44px] pl-9 pr-3 py-2 rounded-xl bg-white border-[1.5px] border-[#142746] text-xs text-[#142746] placeholder:text-[#8993A5] focus:outline-none focus:ring-2 focus:ring-[#142746]/30 shadow-neo-sm"
+              placeholder="Search workouts..."
+              className="w-full min-h-[44px] pl-9 pr-3 py-2 rounded-xl bg-white border-[1.5px] border-[#142746] text-xs text-[#142746] placeholder:text-[#8993A5] focus:outline-none focus:ring-2 focus:ring-[#142746]/30"
             />
           </div>
 
@@ -226,20 +223,13 @@ export default function OverviewPage() {
       <div className="grid grid-cols-1 sm:grid-cols-2 2xl:grid-cols-4 gap-4">
         <PastelCard tone="white" interactive className="p-4 sm:p-5 flex flex-col justify-between gap-3">
           <div className="flex items-center justify-between gap-2">
-            <span className="text-xs font-bold text-[#142746]/80">Workouts This Week</span>
-            <div className="p-2 rounded-xl bg-white border-[1.5px] border-[#142746] shrink-0">
-              <CalendarDays className="w-4 h-4 text-[#142746]" />
-            </div>
+            <span className="text-xs font-bold text-[#142746]/80">Workouts (7d)</span>
+            <CalendarDays className="w-4 h-4 text-[#142746] shrink-0" />
           </div>
-          <div>
-            <div className="stat-fluid-lg stat-number text-[#142746] break-words">
-              {workoutsThisWeek.length}
-            </div>
-            <span className="text-xs font-medium text-[#142746]/75 mt-1 block">
-              {workoutsThisWeek.length > 0 ? "Completed in last 7 days" : "No sessions this week"}
-            </span>
+          <div className="stat-fluid-lg stat-number text-[#142746] break-words">
+            {workoutsThisWeek.length}
           </div>
-          <div className="w-full h-2 rounded-full bg-white border border-[#142746] overflow-hidden">
+          <div className="w-full h-2 rounded-full bg-[#FAF9FD] border border-[#142746] overflow-hidden">
             <div
               className="h-full bg-[#142746] transition-all duration-500"
               style={{ width: `${Math.min(100, (workoutsThisWeek.length / 4) * 100)}%` }}
@@ -249,39 +239,25 @@ export default function OverviewPage() {
 
         <PastelCard tone="lime" interactive className="p-4 sm:p-5 flex flex-col justify-between gap-3">
           <div className="flex items-center justify-between gap-2">
-            <span className="text-xs font-bold text-[#142746]/80">Current Streak</span>
-            <div className="p-2 rounded-xl bg-white border-[1.5px] border-[#142746] shrink-0">
-              <Flame className="w-4 h-4 text-[#142746] fill-[#F8C3B5]" />
-            </div>
+            <span className="text-xs font-bold text-[#142746]/80">Streak</span>
+            <Flame className="w-4 h-4 text-[#142746] fill-[#F8C3B5] shrink-0" />
           </div>
-          <div>
-            <div className="stat-fluid-lg stat-number text-[#142746] break-words">
-              {streakCount}{" "}
-              <span className="text-base font-bold">{streakCount === 1 ? "Day" : "Days"}</span>
-            </div>
-            <span className="text-xs font-medium text-[#142746]/75 mt-1 block">
-              {streakStatus}
-            </span>
+          <div className="stat-fluid-lg stat-number text-[#142746] break-words">
+            {streakCount}{" "}
+            <span className="text-base font-bold">{streakCount === 1 ? "Day" : "Days"}</span>
           </div>
-          <PastelBadge tone="white" className="self-start text-[10px] max-w-full truncate">
+          <span className="text-xs font-semibold text-[#142746]/75 truncate">
             {activePlan ? activePlan.name : "No active plan"}
-          </PastelBadge>
+          </span>
         </PastelCard>
 
         <PastelCard tone="green" interactive className="p-4 sm:p-5 flex flex-col justify-between gap-3">
           <div className="flex items-center justify-between gap-2">
             <span className="text-xs font-bold text-[#142746]/80">Weekly Volume</span>
-            <div className="p-2 rounded-xl bg-white border-[1.5px] border-[#142746] shrink-0">
-              <Dumbbell className="w-4 h-4 text-[#142746]" />
-            </div>
+            <Dumbbell className="w-4 h-4 text-[#142746] shrink-0" />
           </div>
-          <div>
-            <div className="stat-fluid-lg stat-number text-[#142746] break-words">
-              {weeklyVolume.toLocaleString()} <span className="text-base font-bold">kg</span>
-            </div>
-            <span className="text-xs font-medium text-[#142746]/75 mt-1 block">
-              {weeklyVolume > 0 ? "Working set load" : "Log sets to track load"}
-            </span>
+          <div className="stat-fluid-lg stat-number text-[#142746] break-words">
+            {weeklyVolume.toLocaleString()} <span className="text-base font-bold">kg</span>
           </div>
           <Link
             href="/progress"
@@ -295,23 +271,16 @@ export default function OverviewPage() {
         <PastelCard tone="coral" interactive className="p-4 sm:p-5 flex flex-col justify-between gap-3">
           <div className="flex items-center justify-between gap-2">
             <span className="text-xs font-bold text-[#142746]/80">Personal Records</span>
-            <div className="p-2 rounded-xl bg-white border-[1.5px] border-[#142746] shrink-0">
-              <Award className="w-4 h-4 text-[#142746]" />
-            </div>
+            <Award className="w-4 h-4 text-[#142746] shrink-0" />
           </div>
-          <div>
-            <div className="stat-fluid-lg stat-number text-[#142746] break-words">
-              {personalRecords.length}
-            </div>
-            <span className="text-xs font-medium text-[#142746]/75 mt-1 block">
-              {personalRecords.length > 0 ? "Verified 1RM & max weights" : "No PRs logged yet"}
-            </span>
+          <div className="stat-fluid-lg stat-number text-[#142746] break-words">
+            {personalRecords.length}
           </div>
           <Link
             href="/progress"
             className="inline-flex items-center gap-1 text-xs font-bold text-[#142746] hover:underline"
           >
-            <span>View PR Hall</span>
+            <span>View PRs</span>
             <ArrowRight className="w-3.5 h-3.5" />
           </Link>
         </PastelCard>
@@ -322,12 +291,9 @@ export default function OverviewPage() {
         {/* Strength Progression Volume Chart */}
         <PastelCard tone="white" className="lg:col-span-7 p-5 space-y-4">
           <div className="flex items-center justify-between border-b border-[#142746]/10 pb-3">
-            <div>
-              <h3 className="font-heading font-extrabold text-base text-[#142746]">
-                Strength &amp; Volume Progression
-              </h3>
-              <p className="text-xs text-[#8993A5]">Total working volume per completed session</p>
-            </div>
+            <h3 className="font-heading font-extrabold text-base text-[#142746]">
+              Session Volume (kg)
+            </h3>
             <Link
               href="/progress"
               className="text-xs font-bold text-[#142746] hover:underline"
@@ -340,13 +306,13 @@ export default function OverviewPage() {
             {volumeChartData.length === 0 ? (
               <div className="h-full flex flex-col items-center justify-center text-center gap-2 bg-[#FAF9FD] rounded-xl border border-dashed border-[#142746]/25 p-4">
                 <p className="text-xs font-semibold text-[#8993A5]">
-                  No completed workouts recorded yet. Log a live session to graph progression.
+                  No completed workouts yet.
                 </p>
                 <Link
                   href="/workouts"
                   className="text-xs font-bold text-[#142746] underline"
                 >
-                  Launch Live Workout
+                  Start Workout
                 </Link>
               </div>
             ) : (
@@ -374,19 +340,16 @@ export default function OverviewPage() {
         {/* Weekly Training Activity (Sets Completed per Day) */}
         <PastelCard tone="white" className="lg:col-span-5 p-5 space-y-4">
           <div className="flex items-center justify-between border-b border-[#142746]/10 pb-3">
-            <div>
-              <h3 className="font-heading font-extrabold text-base text-[#142746]">
-                Weekly Training Activity
-              </h3>
-              <p className="text-xs text-[#8993A5]">Completed sets across the last 7 days</p>
-            </div>
-            <PastelBadge tone="yellow">7 Days</PastelBadge>
+            <h3 className="font-heading font-extrabold text-base text-[#142746]">
+              Weekly Sets
+            </h3>
+            <span className="text-xs font-bold text-[#8993A5]">Last 7 days</span>
           </div>
 
           <div className="h-[210px] sm:h-[240px] w-full min-w-0">
             {sessions.length === 0 ? (
               <div className="h-full flex items-center justify-center text-center bg-[#FAF9FD] rounded-xl border border-dashed border-[#142746]/25 p-4 text-xs font-semibold text-[#8993A5]">
-                Daily completed set activity will populate as you log sessions.
+                No sets logged in the last 7 days.
               </div>
             ) : (
               <ResponsiveContainer width="100%" height="100%">
@@ -412,25 +375,22 @@ export default function OverviewPage() {
         {/* Recent Workouts Card */}
         <PastelCard tone="white" className="lg:col-span-7 p-5 space-y-4">
           <div className="flex items-center justify-between border-b border-[#142746]/10 pb-3">
-            <div>
-              <h3 className="font-heading font-extrabold text-base text-[#142746]">
-                Recent Workouts
-              </h3>
-              <p className="text-xs text-[#8993A5]">Latest logged sessions and volume</p>
-            </div>
+            <h3 className="font-heading font-extrabold text-base text-[#142746]">
+              Recent Workouts
+            </h3>
             <Link href="/history" className="text-xs font-bold text-[#142746] hover:underline">
-              Open Spreadsheet →
+              History →
             </Link>
           </div>
 
           {recentWorkouts.length === 0 ? (
             <div className="py-8 text-center rounded-xl bg-[#FAF9FD] border border-dashed border-[#142746]/25 text-xs font-semibold text-[#8993A5]">
               {searchQuery
-                ? "No recent workouts match your search."
+                ? "No workouts match your search."
                 : "No recent workouts logged yet."}
             </div>
           ) : (
-            <div className="space-y-2.5">
+            <div className="space-y-2">
               {recentWorkouts.map((sess) => {
                 const dateLabel = new Date(
                   sess.completedAt || sess.startedAt
@@ -439,15 +399,15 @@ export default function OverviewPage() {
                   <Link
                     key={sess.id}
                     href="/history"
-                    className="flex items-center justify-between gap-3 p-3 rounded-xl bg-[#FAF9FD] hover:bg-[#E9FF91]/45 border-[1.5px] border-[#142746]/25 hover:border-[#142746] transition-all"
+                    className="flex items-center justify-between gap-3 p-3 rounded-xl bg-[#FAF9FD] hover:bg-[#E9FF91]/45 border border-[#142746]/20 hover:border-[#142746] transition-colors"
                   >
                     <div className="min-w-0">
                       <div className="font-heading font-bold text-sm text-[#142746] truncate">
                         {sess.name}
                       </div>
                       <div className="text-xs text-[#8993A5] mt-0.5">
-                        {dateLabel} • {sess.exercises.length} exercises
-                        {sess.durationSeconds > 0 && ` • ${formatDuration(sess.durationSeconds)}`}
+                        {dateLabel} · {sess.exercises.length} exercises
+                        {sess.durationSeconds > 0 && ` · ${formatDuration(sess.durationSeconds)}`}
                       </div>
                     </div>
                     <span className="px-2.5 py-1 rounded-lg bg-[#BDF7B6] border border-[#142746] text-xs font-bold text-[#142746] shrink-0">
@@ -460,13 +420,13 @@ export default function OverviewPage() {
           )}
         </PastelCard>
 
-        {/* Body Composition, Target Weight & BMI Overview */}
+        {/* Body Weight & BMI Summary */}
         <div className="lg:col-span-5 space-y-4">
           <PastelCard tone="yellow" className="p-5 space-y-3">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold uppercase tracking-wider text-[#142746]/75 flex items-center gap-1.5">
+              <span className="text-xs font-bold text-[#142746]/80 flex items-center gap-1.5">
                 <Target className="w-4 h-4" />
-                Body Weight &amp; Target
+                Target Weight
               </span>
               <Link href="/weight-tracker" className="text-xs font-bold text-[#142746] underline">
                 Manage
@@ -475,7 +435,7 @@ export default function OverviewPage() {
 
             {currentWeight == null && targetWeight == null ? (
               <p className="text-xs text-[#142746]/75">
-                No weight logs or target weight set yet. Record your baseline to track progress.
+                No weight logs or target set yet.
               </p>
             ) : (
               <>
@@ -499,24 +459,24 @@ export default function OverviewPage() {
             <div className="space-y-1 min-w-0">
               <span className="text-xs font-bold text-[#8993A5] flex items-center gap-1.5">
                 <Activity className="w-4 h-4 text-[#142746]" />
-                BMI Overview
+                BMI
               </span>
               <div className="flex items-baseline gap-2 flex-wrap">
                 <span className="stat-fluid-lg stat-number text-[#142746]">
                   {bmiData ? bmiData.bmi : "--"}
                 </span>
-                <PastelBadge tone="lavender">
-                  {bmiData ? bmiData.category : "Not configured"}
-                </PastelBadge>
+                <span className="text-xs font-bold text-[#142746]/75">
+                  {bmiData ? bmiData.category : "Not set"}
+                </span>
               </div>
-              <p className="text-xs text-[#8993A5]">
-                {heightCm ? `Height ${heightCm} cm` : "Add height in Body Metrics"}
-              </p>
+              {heightCm && (
+                <p className="text-xs text-[#8993A5]">Height {heightCm} cm</p>
+              )}
             </div>
 
             <Link
               href="/body-metrics"
-              className="neo-btn min-h-[44px] inline-flex items-center px-3.5 py-2 rounded-xl bg-[#BDF7B6] text-[#142746] text-xs font-heading font-bold shrink-0"
+              className="neo-btn min-h-[40px] inline-flex items-center px-3.5 py-2 rounded-xl bg-[#BDF7B6] text-[#142746] text-xs font-heading font-bold shrink-0"
             >
               Metrics →
             </Link>

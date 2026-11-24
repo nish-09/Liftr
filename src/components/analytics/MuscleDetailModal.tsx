@@ -25,20 +25,17 @@ export function MuscleDetailModal({
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#142746]/50 backdrop-blur-sm overflow-y-auto">
       <PastelCard tone="white" className="p-5 sm:p-6 w-full max-w-lg max-h-[calc(100dvh-2rem)] overflow-y-auto my-auto space-y-5 shadow-neo-xl">
         <div className="flex items-start justify-between gap-3 border-b border-[#142746]/15 pb-3">
-          <div>
-            <div className="flex items-center gap-2 mb-1">
-              <span
-                className="w-3 h-3 rounded-full border border-[#142746]"
-                style={{ backgroundColor: muscle.color }}
-              />
-              <span className="text-[11px] uppercase tracking-wider text-[#8993A5] font-bold">
-                Target Muscle Group
-              </span>
+          <div className="flex items-center gap-2.5">
+            <span
+              className="w-3.5 h-3.5 rounded-full border border-[#142746] shrink-0"
+              style={{ backgroundColor: muscle.color }}
+            />
+            <div>
+              <h3 className="font-heading font-extrabold text-xl text-[#142746]">
+                {muscle.name}
+              </h3>
+              <span className="text-xs text-[#8993A5] font-medium">{muscle.anatomicalName}</span>
             </div>
-            <h3 className="font-heading font-extrabold text-2xl text-[#142746]">
-              {muscle.name}
-            </h3>
-            <span className="text-xs text-[#8993A5] font-medium">{muscle.anatomicalName}</span>
           </div>
 
           <button

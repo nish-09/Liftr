@@ -30,7 +30,7 @@ export function PlanExerciseRow({
   onUpdate,
 }: PlanExerciseRowProps) {
   return (
-    <div className="p-4 rounded-2xl bg-[#FAF9FD] border-[1.5px] border-[#142746] shadow-neo-sm space-y-3">
+    <div className="p-4 rounded-2xl bg-[#FAF9FD] border-[1.5px] border-[#142746] space-y-3">
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-2.5 min-w-0">
           <span className="w-7 h-7 rounded-xl bg-[#E9FF91] text-[#142746] border-[1.5px] border-[#142746] text-xs flex items-center justify-center font-extrabold shrink-0">

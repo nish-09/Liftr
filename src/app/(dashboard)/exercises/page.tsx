@@ -18,7 +18,6 @@ import { cn } from "@/lib/utils";
 import {
   PageHeader,
   PastelCard,
-  PastelBadge,
   EmptyStateCard,
 } from "@/components/ui/DesignSystem";
 
@@ -140,16 +139,14 @@ export default function ExerciseLibraryPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Exercise Library"
-        subtitle="Biomechanics movement catalog with progressive overload calibrations."
-        badge={<PastelBadge tone="green">{filteredExercises.length} Movements</PastelBadge>}
+        title="Exercises"
         actions={
           <button
             onClick={openCreateModal}
-            className="neo-btn px-4 py-2.5 rounded-xl bg-[#142746] text-white text-xs font-heading font-bold inline-flex items-center gap-2 cursor-pointer"
+            className="neo-btn min-h-[44px] px-4 py-2.5 rounded-xl bg-[#142746] text-white text-xs font-heading font-bold inline-flex items-center gap-2 cursor-pointer"
           >
             <Plus className="w-4 h-4" />
-            <span>New Custom Exercise</span>
+            <span>New Exercise</span>
           </button>
         }
       />
@@ -269,24 +266,22 @@ export default function ExerciseLibraryPage() {
               className="p-4 flex flex-col justify-between"
             >
               <div>
-                <div className="flex items-start justify-between gap-2 mb-2.5">
-                  <div className="flex flex-wrap items-center gap-1.5">
-                    <PastelBadge tone="lavender" className="text-[10px] capitalize">
-                      {exercise.primaryMuscleGroup.replace("_", " ")}
-                    </PastelBadge>
-                    <PastelBadge tone="green" className="text-[10px] capitalize">
+                <div className="flex items-center justify-between gap-2 mb-1.5">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <span className="text-[11px] font-bold uppercase tracking-wide text-[#8993A5] capitalize truncate">
+                      {exercise.primaryMuscleGroup.replace("_", " ")} ·{" "}
                       {exercise.equipment.replace("_", " ")}
-                    </PastelBadge>
+                    </span>
                     {!exercise.isSystem && (
-                      <PastelBadge tone="yellow" className="text-[10px]">
+                      <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-[#F2FA91] border border-[#142746] text-[#142746] shrink-0">
                         Custom
-                      </PastelBadge>
+                      </span>
                     )}
                   </div>
 
                   <button
                     onClick={() => toggleFavorite(exercise.id)}
-                    className="p-1.5 rounded-lg hover:bg-[#F2FA91]/60 transition-colors cursor-pointer"
+                    className="p-1.5 rounded-lg hover:bg-[#F2FA91]/60 transition-colors cursor-pointer shrink-0"
                     title={exercise.isFavorite ? "Unfavorite" : "Favorite"}
                   >
                     <Star

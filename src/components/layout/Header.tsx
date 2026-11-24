@@ -22,50 +22,45 @@ export default function Header({
 }: HeaderProps) {
   const pathname = usePathname();
 
-  function getPageHeading() {
-    if (pathname.startsWith("/overview")) return { title: "Overview", subtitle: "Dashboard & daily momentum" };
-    if (pathname.startsWith("/workouts")) return { title: "Live Workout", subtitle: "Real-time double progression" };
-    if (pathname.startsWith("/plans")) return { title: "Workout Plans", subtitle: "Splits & progression rules" };
-    if (pathname.startsWith("/exercises")) return { title: "Exercise Library", subtitle: "Movements & targets" };
-    if (pathname.startsWith("/progress")) return { title: "Strength Analytics", subtitle: "1RM, volume & muscle heatmap" };
-    if (pathname.startsWith("/body-metrics")) return { title: "Body Metrics", subtitle: "BMI & circumference logs" };
-    if (pathname.startsWith("/weight-tracker")) return { title: "Weight Tracker", subtitle: "Weight trajectory & goal" };
-    if (pathname.startsWith("/nutrition")) return { title: "Nutrition", subtitle: "Coming soon" };
-    if (pathname.startsWith("/history")) return { title: "Workout History", subtitle: "Day-by-day spreadsheet archive" };
-    if (pathname.startsWith("/settings")) return { title: "Settings", subtitle: "Preferences & data export" };
-    return { title: "Liftr", subtitle: "Fitness Platform" };
+  function getPageTitle() {
+    if (pathname.startsWith("/overview")) return "Overview";
+    if (pathname.startsWith("/workouts")) return "Live Workout";
+    if (pathname.startsWith("/plans")) return "Workout Plans";
+    if (pathname.startsWith("/exercises")) return "Exercises";
+    if (pathname.startsWith("/progress")) return "Strength Analytics";
+    if (pathname.startsWith("/body-metrics")) return "Body Metrics";
+    if (pathname.startsWith("/weight-tracker")) return "Weight Tracker";
+    if (pathname.startsWith("/nutrition")) return "Nutrition";
+    if (pathname.startsWith("/history")) return "Workout History";
+    if (pathname.startsWith("/settings")) return "Settings";
+    return "Liftr";
   }
 
-  const { title, subtitle } = getPageHeading();
-  const displayLabel = userDisplayName || userEmail?.split("@")[0] || "Athlete";
+  const title = getPageTitle();
+  const displayLabel = userDisplayName || userEmail?.split("@")[0] || "Account";
 
   return (
-    <header className="sticky top-0 z-20 bg-[#EBCBF7]/95 backdrop-blur-sm border-b-[1.5px] border-[#142746]/20 px-3 sm:px-6 lg:px-8 py-2.5 sm:py-3.5 flex items-center justify-between gap-2 sm:gap-3 min-w-0">
-      {/* Left: Mobile Menu + Brand + Page Title */}
+    <header className="sticky top-0 z-20 bg-[#EBCBF7]/95 backdrop-blur-sm border-b border-[#142746]/15 px-3 sm:px-6 lg:px-8 py-2.5 sm:py-3 flex items-center justify-between gap-2 sm:gap-3 min-w-0">
+      {/* Left: Mobile Menu + Compact Mobile Title */}
       <div className="flex items-center gap-2 sm:gap-3 min-w-0">
         <button
           type="button"
           onClick={onOpenSidebar}
-          className="lg:hidden min-w-[42px] min-h-[42px] flex items-center justify-center rounded-xl bg-[#BDF7B6] border-[1.5px] border-[#142746] text-[#142746] shadow-neo-sm cursor-pointer shrink-0"
+          className="lg:hidden min-w-[42px] min-h-[42px] flex items-center justify-center rounded-xl bg-[#BDF7B6] border-[1.5px] border-[#142746] text-[#142746] cursor-pointer shrink-0"
           aria-label="Open navigation"
         >
           <Menu className="w-4 h-4 stroke-[2.5]" />
         </button>
 
         <Link href="/overview" className="hidden min-[380px]:flex lg:hidden items-center shrink-0">
-          <div className="w-10 h-10 rounded-xl bg-[#E9FF91] border-[1.5px] border-[#142746] flex items-center justify-center p-1.5 shadow-neo-sm">
+          <div className="w-9 h-9 rounded-xl bg-[#E9FF91] border-[1.5px] border-[#142746] flex items-center justify-center p-1.5">
             <LiftrMark className="w-full h-full" color="#142746" />
           </div>
         </Link>
 
-        <div className="min-w-0">
-          <h2 className="text-sm sm:text-lg font-heading font-extrabold text-[#142746] tracking-tight truncate">
-            {title}
-          </h2>
-          <p className="hidden sm:block text-xs text-[#142746]/70 font-medium truncate">
-            {subtitle}
-          </p>
-        </div>
+        <span className="lg:hidden text-sm sm:text-base font-heading font-extrabold text-[#142746] tracking-tight truncate">
+          {title}
+        </span>
       </div>
 
       {/* Right controls */}
@@ -76,24 +71,24 @@ export default function Header({
         <button
           type="button"
           onClick={onOpenContextPanel}
-          className="xl:hidden min-w-[42px] min-h-[42px] px-2.5 flex items-center justify-center gap-1.5 rounded-xl bg-white hover:bg-[#BDF7B6] border-[1.5px] border-[#142746] text-[#142746] shadow-neo-sm cursor-pointer"
-          title="Open Insights Panel"
-          aria-label="Open Insights Panel"
+          className="xl:hidden min-w-[42px] min-h-[42px] px-2.5 flex items-center justify-center gap-1.5 rounded-xl bg-white hover:bg-[#BDF7B6] border-[1.5px] border-[#142746] text-[#142746] cursor-pointer"
+          title="Open Summary Panel"
+          aria-label="Open Summary Panel"
         >
           <PanelRightOpen className="w-4 h-4 shrink-0" />
-          <span className="hidden md:inline text-xs font-heading font-bold">Insights</span>
+          <span className="hidden md:inline text-xs font-heading font-bold">Summary</span>
         </button>
 
-        {/* User profile pill & Logout */}
+        {/* User profile & Logout */}
         <div className="flex items-center gap-1.5 sm:gap-2 pl-1.5 sm:pl-2 border-l border-[#142746]/15">
           <Link
             href="/settings"
-            className="min-h-[42px] flex items-center gap-2 px-2 sm:px-2.5 py-1.5 rounded-xl bg-[#F2FA91] hover:bg-[#E9FF91] border-[1.5px] border-[#142746] shadow-neo-sm transition-all text-xs text-[#142746] font-bold"
+            className="min-h-[40px] flex items-center gap-2 px-2 sm:px-2.5 py-1.5 rounded-xl bg-white hover:bg-[#F2FA91] border-[1.5px] border-[#142746] transition-colors text-xs text-[#142746] font-bold"
           >
             <div className="w-6 h-6 rounded-lg bg-[#142746] text-white flex items-center justify-center font-bold text-[11px] shrink-0">
               {displayLabel[0].toUpperCase()}
             </div>
-            <span className="hidden md:inline font-semibold max-w-[110px] truncate">
+            <span className="hidden md:inline font-semibold max-w-[120px] truncate">
               {displayLabel}
             </span>
           </Link>
@@ -103,7 +98,7 @@ export default function Header({
               type="submit"
               title="Sign Out"
               aria-label="Sign Out"
-              className="min-w-[42px] min-h-[42px] flex items-center justify-center rounded-xl bg-[#F8C3B5] hover:bg-[#f4b3a2] text-[#142746] border-[1.5px] border-[#142746] shadow-neo-sm transition-all cursor-pointer"
+              className="min-w-[40px] min-h-[40px] flex items-center justify-center rounded-xl bg-white hover:bg-[#F8C3B5] text-[#142746] border-[1.5px] border-[#142746] transition-colors cursor-pointer"
             >
               <LogOut className="w-4 h-4 stroke-[2.2]" />
             </button>

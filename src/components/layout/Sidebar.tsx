@@ -40,91 +40,67 @@ export default function Sidebar({ isMobileOpen = false, onCloseMobile }: Sidebar
   const pathname = usePathname();
 
   const navContent = (
-    <div className="flex flex-col justify-between h-full">
-      <div>
-        {/* Brand Logo Header */}
-        <div className="flex items-center justify-between gap-2 mb-6">
-          <Link
-            href="/overview"
+    <div className="flex flex-col h-full">
+      {/* Brand Logo Header */}
+      <div className="flex items-center justify-between gap-2 mb-5">
+        <Link
+          href="/overview"
+          onClick={onCloseMobile}
+          className="flex-1 flex items-center px-3 py-2 rounded-xl bg-white border-[1.5px] border-[#142746]"
+        >
+          <LiftrLogo
+            className="h-6 w-auto"
+            symbolColor="#142746"
+            textColor="#142746"
+          />
+        </Link>
+
+        {onCloseMobile && (
+          <button
+            type="button"
             onClick={onCloseMobile}
-            className="flex-1 flex items-center px-3 py-2.5 rounded-2xl bg-white border-[1.5px] border-[#142746] shadow-neo-sm hover:-translate-x-0.5 hover:-translate-y-0.5 transition-all"
+            className="lg:hidden p-2 rounded-xl bg-white border-[1.5px] border-[#142746] text-[#142746] cursor-pointer"
+            aria-label="Close sidebar"
           >
-            <LiftrLogo
-              className="h-7 w-auto"
-              symbolColor="#142746"
-              textColor="#142746"
-            />
-          </Link>
+            <X className="w-4 h-4" />
+          </button>
+        )}
+      </div>
 
-          {onCloseMobile && (
-            <button
-              type="button"
+      {/* Navigation list */}
+      <nav className="space-y-1 flex-1">
+        {NAV_ITEMS.map((item) => {
+          const isActive =
+            pathname === item.href ||
+            (item.href !== "/overview" && pathname.startsWith(item.href));
+          const Icon = item.icon;
+
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
               onClick={onCloseMobile}
-              className="lg:hidden p-2 rounded-xl bg-white border-[1.5px] border-[#142746] text-[#142746] cursor-pointer"
-              aria-label="Close sidebar"
+              className={cn(
+                "flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-heading font-bold transition-colors",
+                isActive
+                  ? "bg-[#E9FF91] text-[#142746] border-[1.5px] border-[#142746]"
+                  : "text-[#142746]/85 hover:bg-white/60 border-[1.5px] border-transparent"
+              )}
             >
-              <X className="w-4 h-4" />
-            </button>
-          )}
-        </div>
+              <div className="flex items-center gap-2.5 min-w-0">
+                <Icon className="w-4 h-4 text-[#142746] shrink-0 stroke-[2.1]" />
+                <span className="truncate">{item.name}</span>
+              </div>
 
-        {/* Navigation list */}
-        <nav className="space-y-1.5">
-          {NAV_ITEMS.map((item) => {
-            const isActive =
-              pathname === item.href ||
-              (item.href !== "/overview" && pathname.startsWith(item.href));
-            const Icon = item.icon;
-
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                onClick={onCloseMobile}
-                className={cn(
-                  "flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-heading font-bold transition-all",
-                  isActive
-                    ? "bg-[#E9FF91] text-[#142746] border-[1.5px] border-[#142746] shadow-neo-sm"
-                    : "text-[#142746]/85 hover:bg-white/70 border-[1.5px] border-transparent"
-                )}
-              >
-                <div className="flex items-center gap-2.5 min-w-0">
-                  <Icon className="w-4 h-4 text-[#142746] shrink-0 stroke-[2.2]" />
-                  <span className="truncate">{item.name}</span>
-                </div>
-
-                {item.comingSoon ? (
-                  <span className="text-[9px] font-bold uppercase px-2 py-0.5 rounded-full bg-[#EBCBF7] text-[#142746] border border-[#142746] shrink-0">
-                    Soon
-                  </span>
-                ) : item.badge ? (
-                  <span
-                    className={cn(
-                      "text-[9px] font-bold uppercase px-2 py-0.5 rounded-full border border-[#142746] shrink-0",
-                      isActive ? "bg-[#142746] text-white" : "bg-[#F8C3B5] text-[#142746]"
-                    )}
-                  >
-                    {item.badge}
-                  </span>
-                ) : null}
-              </Link>
-            );
-          })}
-        </nav>
-      </div>
-
-      {/* Offline Status Pill */}
-      <div className="pt-4 mt-4 border-t border-[#142746]/15">
-        <div className="px-3 py-2.5 rounded-xl bg-white border-[1.5px] border-[#142746] shadow-neo-sm flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-[#BDF7B6] border border-[#142746]" />
-            <span className="text-xs font-semibold text-[#142746]">Offline Ready</span>
-          </div>
-          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#EBCBF7] border border-[#142746] text-[#142746]">
-            PWA
-          </span>
-        </div>
-      </div>
+              {item.comingSoon ? (
+                <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-white/80 text-[#142746] shrink-0">
+                  Soon
+                </span>
+              ) : null}
+            </Link>
+          );
+        })}
+      </nav>
     </div>
   );
 

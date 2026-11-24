@@ -10,7 +10,7 @@ import { Plus, Copy, Trash2, CheckCircle2, Play } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { PlanExerciseRow } from "@/components/plans/PlanExerciseRow";
 import { NewPlanModal, AddPlanExerciseModal } from "@/components/plans/PlanModals";
-import { PageHeader, PastelCard, PastelBadge } from "@/components/ui/DesignSystem";
+import { PageHeader, PastelCard } from "@/components/ui/DesignSystem";
 
 const PHASES = ["Bulking", "Recomp", "Cutting", "Strength", "Custom"];
 
@@ -125,15 +125,13 @@ export default function PlansPage() {
     <div className="space-y-6">
       <PageHeader
         title="Workout Plans"
-        subtitle="Architect your multi-day splits, rep target ranges, and double progression rules."
-        badge={<PastelBadge tone="lavender">{plans.length} Routines</PastelBadge>}
         actions={
           <button
             onClick={() => setIsNewPlanModalOpen(true)}
-            className="neo-btn px-4 py-2.5 rounded-xl bg-[#142746] text-white text-xs font-heading font-bold inline-flex items-center gap-2 cursor-pointer"
+            className="neo-btn min-h-[44px] px-4 py-2.5 rounded-xl bg-[#142746] text-white text-xs font-heading font-bold inline-flex items-center gap-2 cursor-pointer"
           >
             <Plus className="w-4 h-4" />
-            <span>New Workout Plan</span>
+            <span>New Plan</span>
           </button>
         }
       />
@@ -141,9 +139,6 @@ export default function PlansPage() {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
         {/* Left: Plan List */}
         <div className="lg:col-span-4 min-w-0 space-y-3">
-          <div className="text-xs font-bold uppercase tracking-wider text-[#142746]/70 px-1">
-            Available Routines
-          </div>
 
           {plans.length === 0 ? (
             <PastelCard tone="white" className="p-6 text-center space-y-3">
@@ -175,18 +170,16 @@ export default function PlansPage() {
                       "p-4 rounded-2xl border-[1.5px] border-[#142746] transition-all cursor-pointer",
                       isSelected
                         ? "bg-[#BDF7B6] shadow-neo"
-                        : "bg-white shadow-neo-sm hover:-translate-x-0.5"
+                        : "bg-white hover:bg-[#FAF9FD]"
                     )}
                   >
-                    <div className="flex items-start justify-between gap-2 mb-2">
-                      <div className="flex items-center gap-1.5 flex-wrap">
-                        <PastelBadge tone={isSelected ? "lime" : "lavender"} className="text-[10px]">
-                          {plan.phaseId || "General"}
-                        </PastelBadge>
+                    <div className="flex items-start justify-between gap-2 mb-1.5">
+                      <div className="flex items-center gap-2 flex-wrap text-[11px] font-bold text-[#142746]/70">
+                        <span>{plan.phaseId || "General"}</span>
                         {plan.isActive && (
-                          <PastelBadge tone="white" className="text-[10px]">
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-white border border-[#142746] text-[10px] font-bold text-[#142746]">
                             <CheckCircle2 className="w-3 h-3" /> Active
-                          </PastelBadge>
+                          </span>
                         )}
                       </div>
 
@@ -301,8 +294,8 @@ export default function PlansPage() {
               {/* Day Tabs */}
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-xs font-bold uppercase tracking-wider text-[#8993A5]">
-                    Plan Split Days
+                  <span className="text-xs font-bold text-[#142746]">
+                    Days
                   </span>
                   <button
                     onClick={() =>

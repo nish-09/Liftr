@@ -12,7 +12,7 @@ import {
   downloadWorkoutsCSV,
   parseCSV,
 } from "@/lib/export/dataHandler";
-import { PageHeader, PastelCard, PastelBadge } from "@/components/ui/DesignSystem";
+import { PageHeader, PastelCard } from "@/components/ui/DesignSystem";
 import {
   Settings as SettingsIcon,
   Download,
@@ -193,11 +193,7 @@ export default function SettingsPage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader
-        title="Settings & Data Hub"
-        subtitle="Configure double progression increments, timer alerts, and manage full data backups."
-        badge={<PastelBadge tone="lavender">Preferences</PastelBadge>}
-      />
+      <PageHeader title="Settings" />
 
       {savedSuccess && (
         <PastelCard tone="lime" className="p-4 text-xs font-bold flex items-center gap-2">
@@ -366,21 +362,21 @@ export default function SettingsPage() {
 
         <button
           type="submit"
-          className="neo-btn px-6 py-3 rounded-xl bg-[#142746] text-white text-xs font-heading font-bold cursor-pointer"
+          className="neo-btn min-h-[44px] px-6 py-3 rounded-xl bg-[#142746] text-white text-xs font-heading font-bold cursor-pointer"
         >
-          Save System Preferences
+          Save Preferences
         </button>
       </form>
 
-      {/* Data Sovereignty Hub */}
-      <PastelCard tone="white" className="p-6 space-y-5">
+      {/* Data Backup & Import */}
+      <PastelCard tone="white" className="p-5 sm:p-6 space-y-5">
         <div>
-          <div className="flex items-center gap-2 font-heading font-extrabold text-lg text-[#142746]">
-            <Database className="w-5 h-5" />
-            <span>Data Sovereignty &amp; Import / Export</span>
+          <div className="flex items-center gap-2 font-heading font-extrabold text-base text-[#142746]">
+            <Database className="w-4 h-4" />
+            <span>Import &amp; Export</span>
           </div>
-          <p className="text-xs text-[#8993A5] mt-1">
-            Download complete offline backups or migrate workout history via CSV spreadsheets.
+          <p className="text-xs text-[#8993A5] mt-0.5">
+            Download backups or import workout logs from CSV.
           </p>
         </div>
 
@@ -452,9 +448,8 @@ export default function SettingsPage() {
 
           {csvPreview && (
             <div className="space-y-3 pt-2">
-              <div className="flex flex-wrap items-center justify-between gap-2 text-xs font-bold text-[#142746]">
-                <span>Previewing {csvPreview.rows.length} rows found in CSV:</span>
-                <span>Validation OK</span>
+              <div className="text-xs font-bold text-[#142746]">
+                Previewing {csvPreview.rows.length} rows
               </div>
 
               <div className="overflow-x-auto border-[1.5px] border-[#142746] rounded-xl">
@@ -496,7 +491,7 @@ export default function SettingsPage() {
         <PastelCard tone="coral" className="p-5 space-y-3">
           <div className="flex items-center gap-2 font-heading font-extrabold text-sm text-[#142746]">
             <ShieldAlert className="w-4 h-4" />
-            <span>Danger Zone Safeguards</span>
+            <span>Danger Zone</span>
           </div>
 
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">

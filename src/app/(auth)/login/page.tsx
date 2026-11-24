@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { ArrowRight, ShieldCheck, Flame } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { LiftrLogo } from "@/components/common/LiftrLogo";
 
 export default function LoginPage() {
@@ -87,16 +87,13 @@ export default function LoginPage() {
       <div className="w-full max-w-md space-y-6">
         <div className="text-center">
           <Link href="/" className="inline-flex items-center justify-center mb-4">
-            <div className="px-4 py-2.5 rounded-2xl bg-[#BDF7B6] border-[1.5px] border-[#142746] shadow-neo-sm">
-              <LiftrLogo className="h-8 w-auto" symbolColor="#142746" textColor="#142746" />
+            <div className="px-4 py-2 rounded-2xl bg-[#BDF7B6] border-[1.5px] border-[#142746]">
+              <LiftrLogo className="h-7 w-auto" symbolColor="#142746" textColor="#142746" />
             </div>
           </Link>
           <h1 className="font-heading font-extrabold text-2xl tracking-tight text-[#142746]">
-            Welcome Back
+            Welcome back
           </h1>
-          <p className="text-sm text-[#142746]/70 mt-1 font-medium">
-            Progressive overload &amp; data-driven athletic performance.
-          </p>
         </div>
 
         <div className="bg-white border-[1.5px] border-[#142746] rounded-3xl p-5 sm:p-7 shadow-neo-lg">
@@ -172,17 +169,6 @@ export default function LoginPage() {
             >
               Create An Account
             </Link>
-          </div>
-        </div>
-
-        <div className="flex items-center justify-center gap-3 text-xs text-[#142746] font-semibold">
-          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#BDF7B6] border-[1.5px] border-[#142746] shadow-neo-sm">
-            <ShieldCheck className="w-3.5 h-3.5" />
-            <span>RLS Isolated</span>
-          </div>
-          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#F2FA91] border-[1.5px] border-[#142746] shadow-neo-sm">
-            <Flame className="w-3.5 h-3.5" />
-            <span>Double Progression</span>
           </div>
         </div>
       </div>

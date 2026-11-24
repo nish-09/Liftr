@@ -10,7 +10,7 @@ import {
   CHART_GRID_COLOR,
   CHART_AXIS_COLOR,
 } from "@/components/charts/chartStyles";
-import { PageHeader, PastelCard, PastelBadge } from "@/components/ui/DesignSystem";
+import { PageHeader, PastelCard } from "@/components/ui/DesignSystem";
 import { Award } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -127,14 +127,23 @@ export default function ProgressPage() {
     0
   );
 
+  const totalSetsInWindow = filteredSessions.reduce(
+    (acc, s) =>
+      acc +
+      s.exercises.reduce(
+        (eAcc, ex) =>
+          eAcc + ex.sets.filter((st) => st.isCompleted && st.setType !== "warmup").length,
+        0
+      ),
+    0
+  );
+
   return (
     <div className="space-y-6">
       <PageHeader
         title="Strength Analytics"
-        subtitle="Epley 1RM trajectory, training volume distribution, and verified personal record logs."
-        badge={<PastelBadge tone="lavender">Double Progression</PastelBadge>}
         actions={
-          <div className="flex flex-wrap sm:flex-nowrap items-center gap-1 p-1 rounded-xl bg-white border-[1.5px] border-[#142746] shadow-neo-sm w-full sm:w-auto">
+          <div className="flex flex-wrap sm:flex-nowrap items-center gap-1 p-1 rounded-xl bg-white border-[1.5px] border-[#142746] w-full sm:w-auto">
             {TIME_FILTERS.map((tf) => (
               <button
                 key={tf.value}
@@ -156,51 +165,39 @@ export default function ProgressPage() {
       {/* Top Pastel Stat Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 2xl:grid-cols-4 gap-4">
         <PastelCard tone="green" className="p-4 sm:p-5">
-          <span className="text-[11px] font-bold uppercase text-[#142746]/70 block mb-1">
+          <span className="text-xs font-bold text-[#142746]/75 block mb-1">
             Period Volume
           </span>
           <div className="stat-fluid-lg stat-number text-[#142746] break-words">
             {totalVolumeInWindow.toLocaleString()} kg
           </div>
-          <span className="text-[11px] font-medium text-[#142746]/75 mt-1 block">
-            Across {filteredSessions.length} sessions
-          </span>
         </PastelCard>
 
         <PastelCard tone="coral" className="p-4 sm:p-5">
-          <span className="text-[11px] font-bold uppercase text-[#142746]/70 block mb-1">
+          <span className="text-xs font-bold text-[#142746]/75 block mb-1">
             Personal Records
           </span>
           <div className="stat-fluid-lg stat-number text-[#142746]">
             {personalRecords.length}
           </div>
-          <span className="text-[11px] font-medium text-[#142746]/75 mt-1 block">
-            Max weights &amp; 1RM records
-          </span>
         </PastelCard>
 
         <PastelCard tone="white" className="p-4 sm:p-5">
-          <span className="text-[11px] font-bold uppercase text-[#142746]/70 block mb-1">
+          <span className="text-xs font-bold text-[#142746]/75 block mb-1">
             Workouts Logged
           </span>
           <div className="stat-fluid-lg stat-number text-[#142746]">
             {filteredSessions.length}
           </div>
-          <span className="text-[11px] font-medium text-[#142746]/75 mt-1 block">
-            In selected timeframe
-          </span>
         </PastelCard>
 
         <PastelCard tone="yellow" className="p-4 sm:p-5">
-          <span className="text-[11px] font-bold uppercase text-[#142746]/70 block mb-1">
-            Formula Used
+          <span className="text-xs font-bold text-[#142746]/75 block mb-1">
+            Working Sets
           </span>
-          <div className="font-heading font-extrabold text-lg text-[#142746] mt-1">
-            Epley 1RM
+          <div className="stat-fluid-lg stat-number text-[#142746]">
+            {totalSetsInWindow}
           </div>
-          <span className="text-[11px] font-medium text-[#142746]/75 mt-1 block">
-            Weight × (1 + Reps / 30)
-          </span>
         </PastelCard>
       </div>
 
@@ -214,14 +211,9 @@ export default function ProgressPage() {
       {/* Volume Chart & Muscle Distribution */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
         <PastelCard tone="white" className="lg:col-span-7 p-5 space-y-4">
-          <div>
-            <h3 className="font-heading font-extrabold text-lg text-[#142746]">
-              Training Volume Progression
-            </h3>
-            <p className="text-xs text-[#8993A5] mt-0.5">
-              Accumulated working set load per session (kg)
-            </p>
-          </div>
+          <h3 className="font-heading font-extrabold text-base text-[#142746]">
+            Session Volume (kg)
+          </h3>
 
           <div className="h-[220px] sm:h-[260px] w-full min-w-0">
             {volumeData.length === 0 ? (
@@ -251,14 +243,9 @@ export default function ProgressPage() {
         </PastelCard>
 
         <PastelCard tone="white" className="lg:col-span-5 p-5 space-y-4">
-          <div>
-            <h3 className="font-heading font-extrabold text-lg text-[#142746]">
-              Muscle Group Distribution
-            </h3>
-            <p className="text-xs text-[#8993A5] mt-0.5">
-              Working sets completed by anatomical zone
-            </p>
-          </div>
+          <h3 className="font-heading font-extrabold text-base text-[#142746]">
+            Sets by Muscle Group
+          </h3>
 
           <div className="h-[220px] sm:h-[260px] w-full min-w-0">
             {muscleDistributionData.length === 0 ? (
@@ -300,14 +287,9 @@ export default function ProgressPage() {
       {/* Specific Exercise 1RM Tracker */}
       <PastelCard tone="white" className="p-5 space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div>
-            <h3 className="font-heading font-extrabold text-lg text-[#142746]">
-              Estimated 1RM Progression
-            </h3>
-            <p className="text-xs text-[#8993A5] mt-0.5">
-              Tracking strength milestones over time using the Epley formula
-            </p>
-          </div>
+          <h3 className="font-heading font-extrabold text-base text-[#142746]">
+            Estimated 1RM Progression
+          </h3>
 
           <select
             value={activeExerciseId}
@@ -367,17 +349,12 @@ export default function ProgressPage() {
         </div>
       </PastelCard>
 
-      {/* Personal Records Hall of Fame */}
+      {/* Personal Records */}
       <PastelCard tone="white" className="p-5 space-y-4">
-        <div>
-          <h3 className="font-heading font-extrabold text-lg text-[#142746] flex items-center gap-2">
-            <Award className="w-5 h-5 text-[#142746]" />
-            <span>Personal Records Hall of Fame</span>
-          </h3>
-          <p className="text-xs text-[#8993A5] mt-0.5">
-            Verified peak achievements logged during completed workouts
-          </p>
-        </div>
+        <h3 className="font-heading font-extrabold text-base text-[#142746] flex items-center gap-2">
+          <Award className="w-4 h-4 text-[#142746]" />
+          <span>Personal Records</span>
+        </h3>
 
         {personalRecords.length === 0 ? (
           <p className="text-xs text-[#8993A5] font-semibold">No personal records logged yet.</p>

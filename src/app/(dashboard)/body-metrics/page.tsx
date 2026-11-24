@@ -11,7 +11,7 @@ import {
   CHART_AXIS_COLOR,
 } from "@/components/charts/chartStyles";
 import { PageHeader, PastelCard, PastelBadge } from "@/components/ui/DesignSystem";
-import { Info, Plus, X, Edit2 } from "lucide-react";
+import { Plus, X, Edit2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   ResponsiveContainer,
@@ -132,9 +132,7 @@ export default function BodyMetricsPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Body Metrics & Measurements"
-        subtitle="Dynamic BMI calculations, category classification, and circumference measurements."
-        badge={<PastelBadge tone="lavender">Biometric Engine</PastelBadge>}
+        title="Body Metrics"
         actions={
           <div className="flex items-center gap-1 p-1 rounded-xl bg-white border-[1.5px] border-[#142746] shadow-neo-sm w-full sm:w-auto">
             <button
@@ -164,24 +162,15 @@ export default function BodyMetricsPage() {
       />
 
       {activeTab === "bmi" ? (
-        <>
-          <PastelCard tone="yellow" className="p-4 flex items-start gap-3">
-            <Info className="w-5 h-5 text-[#142746] shrink-0 mt-0.5" />
-            <div className="text-xs text-[#142746] leading-relaxed">
-              <strong className="mr-1">Clinical Note:</strong>
-              BMI is a screening tool based on total body mass and height. It does not differentiate between skeletal muscle and adipose tissue. Use BMI alongside body measurements, strength progression, and target weight tracking.
-            </div>
-          </PastelCard>
-
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
             <PastelCard tone="green" className="lg:col-span-5 p-5 sm:p-6 flex flex-col justify-between space-y-5">
               <div>
                 <div className="flex items-center justify-between gap-2 mb-2 flex-wrap">
-                  <span className="text-xs uppercase font-bold tracking-wider text-[#142746]/70">
-                    Current BMI Status
+                  <span className="text-xs font-bold text-[#142746]/80">
+                    Body Mass Index
                   </span>
                   <PastelBadge tone={hasBMIData ? "lime" : "white"}>
-                    {hasBMIData ? category : "Not Configured"}
+                    {hasBMIData ? category : "Not set"}
                   </PastelBadge>
                 </div>
 
@@ -236,22 +225,22 @@ export default function BodyMetricsPage() {
                 )}
               </div>
 
-              <div className="pt-4 border-t border-[#142746]/15 flex items-center justify-between text-xs font-bold text-[#142746]">
-                <span>Healthy Target Range</span>
-                <span>18.5 — 24.9</span>
+              <div className="pt-4 border-t border-[#142746]/15 space-y-1">
+                <div className="flex items-center justify-between text-xs font-bold text-[#142746]">
+                  <span>Healthy Range</span>
+                  <span>18.5 – 24.9</span>
+                </div>
+                <p className="text-[11px] text-[#142746]/70">
+                  Weight-to-height screening only; does not distinguish muscle from body fat.
+                </p>
               </div>
             </PastelCard>
 
             <PastelCard tone="white" className="lg:col-span-7 p-5 sm:p-6 space-y-4">
               <div className="flex flex-wrap items-center justify-between gap-3">
-                <div>
-                  <h3 className="font-heading font-extrabold text-lg text-[#142746]">
-                    BMI Trend Over Time
-                  </h3>
-                  <p className="text-xs text-[#8993A5] mt-0.5">
-                    Dynamic history calculated per recorded weight log
-                  </p>
-                </div>
+                <h3 className="font-heading font-extrabold text-base text-[#142746]">
+                  BMI Trend
+                </h3>
                 <Link
                   href="/weight-tracker"
                   className="neo-btn min-h-[40px] inline-flex items-center px-3.5 py-2 rounded-xl bg-[#E9FF91] text-[#142746] text-xs font-bold"
@@ -263,7 +252,7 @@ export default function BodyMetricsPage() {
               <div className="h-[220px] sm:h-[260px] w-full min-w-0">
                 {historicalBMIData.length === 0 ? (
                   <div className="h-full flex items-center justify-center text-xs text-[#8993A5] font-semibold bg-[#FAF9FD] rounded-xl border border-dashed border-[#142746]/25 p-4 text-center">
-                    Log weights and height to visualize your BMI trajectory.
+                    Add your height and at least one weigh-in to plot BMI.
                   </div>
                 ) : (
                   <ResponsiveContainer width="100%" height="100%">
@@ -292,18 +281,12 @@ export default function BodyMetricsPage() {
               </div>
             </PastelCard>
           </div>
-        </>
       ) : (
         <div className="space-y-5">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <div>
-              <h2 className="font-heading font-extrabold text-xl text-[#142746]">
-                Circumference Tracker
-              </h2>
-              <p className="text-xs text-[#142746]/75 mt-0.5">
-                Track muscle growth across arms, chest, thighs, waist, and custom zones.
-              </p>
-            </div>
+            <h2 className="font-heading font-extrabold text-lg text-[#142746]">
+              Body Measurements
+            </h2>
 
             <button
               onClick={() => setIsMeasureModalOpen(true)}

@@ -101,7 +101,7 @@ export function PastelBadge({
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full border-[1.5px] border-[#142746] text-[11px] font-semibold tracking-tight shadow-neo-sm",
+        "inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full border border-[#142746] text-[11px] font-semibold tracking-tight",
         TONE_CLASSES[tone],
         className
       )}

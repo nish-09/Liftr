@@ -87,16 +87,13 @@ export default function SignUpPage() {
       <div className="w-full max-w-md space-y-6">
         <div className="text-center">
           <Link href="/" className="inline-flex items-center justify-center mb-4">
-            <div className="px-4 py-2.5 rounded-2xl bg-[#BDF7B6] border-[1.5px] border-[#142746] shadow-neo-sm">
-              <LiftrLogo className="h-8 w-auto" symbolColor="#142746" textColor="#142746" />
+            <div className="px-4 py-2 rounded-2xl bg-[#BDF7B6] border-[1.5px] border-[#142746]">
+              <LiftrLogo className="h-7 w-auto" symbolColor="#142746" textColor="#142746" />
             </div>
           </Link>
           <h1 className="font-heading font-extrabold text-2xl tracking-tight text-[#142746]">
-            Build Your Strength
+            Create your account
           </h1>
-          <p className="text-sm text-[#142746]/70 mt-1 font-medium">
-            Join the precision progressive overload fitness platform.
-          </p>
         </div>
 
         <div className="bg-white border-[1.5px] border-[#142746] rounded-3xl p-5 sm:p-7 shadow-neo-lg">

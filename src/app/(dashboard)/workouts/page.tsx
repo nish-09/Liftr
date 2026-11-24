@@ -150,23 +150,20 @@ export default function WorkoutsPage() {
   if (!activeSession) {
     return (
       <div className="space-y-6">
-        <PageHeader
-          title="Live Workout Tracker"
-          subtitle="Real-time double progression set logging with automated weight stepping and rest tracking."
-        />
+        <PageHeader title="Live Workout" />
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           <PastelCard tone="lime" className="p-6 flex flex-col justify-between space-y-6">
             <div className="space-y-3">
-              <div className="w-12 h-12 rounded-2xl bg-white border-[1.5px] border-[#142746] flex items-center justify-center shadow-neo-sm">
+              <div className="w-11 h-11 rounded-xl bg-white border-[1.5px] border-[#142746] flex items-center justify-center">
                 <Play className="w-5 h-5 fill-[#142746] text-[#142746] ml-0.5" />
               </div>
               <div>
                 <h2 className="text-xl font-heading font-extrabold text-[#142746]">
-                  Start Empty Workout
+                  Empty Workout
                 </h2>
                 <p className="text-xs sm:text-sm text-[#142746]/75 mt-1 leading-relaxed">
-                  Build your session on the fly. Select movements from your library, log sets, and track progressive overload automatically.
+                  Add exercises and log sets as you go.
                 </p>
               </div>
             </div>
@@ -176,30 +173,30 @@ export default function WorkoutsPage() {
               className="neo-btn w-full py-3.5 px-5 rounded-xl bg-[#142746] hover:bg-[#1e3863] text-white font-heading font-bold text-sm flex items-center justify-center gap-2 cursor-pointer"
             >
               <Play className="w-4 h-4 fill-[#E9FF91] text-[#E9FF91]" />
-              <span>Launch Live Workout</span>
+              <span>Start Empty Workout</span>
             </button>
           </PastelCard>
 
-          <PastelCard tone="lavender" className="p-6 flex flex-col justify-between space-y-6">
+          <PastelCard tone="white" className="p-6 flex flex-col justify-between space-y-6">
             <div className="space-y-3">
-              <div className="w-12 h-12 rounded-2xl bg-white border-[1.5px] border-[#142746] flex items-center justify-center shadow-neo-sm">
+              <div className="w-11 h-11 rounded-xl bg-[#BDF7B6] border-[1.5px] border-[#142746] flex items-center justify-center">
                 <Dumbbell className="w-5 h-5 text-[#142746]" />
               </div>
               <div>
                 <h2 className="text-xl font-heading font-extrabold text-[#142746]">
-                  Start From Workout Plan
+                  From a Plan
                 </h2>
                 <p className="text-xs sm:text-sm text-[#142746]/75 mt-1 leading-relaxed">
-                  Choose a prescribed training day from your routines to auto-populate rep ranges, rest durations, and baseline weights.
+                  Load exercises, target rep ranges, and rest durations from a routine.
                 </p>
               </div>
             </div>
 
             <Link
               href="/plans"
-              className="neo-btn w-full py-3.5 px-5 rounded-xl bg-white hover:bg-[#FAF9FD] text-[#142746] font-heading font-bold text-sm flex items-center justify-center gap-2"
+              className="neo-btn w-full py-3.5 px-5 rounded-xl bg-[#E9FF91] hover:bg-[#dff67c] text-[#142746] font-heading font-bold text-sm flex items-center justify-center gap-2"
             >
-              <span>Browse Workout Plans</span>
+              <span>Browse Plans</span>
               <ChevronRight className="w-4 h-4" />
             </Link>
           </PastelCard>
@@ -217,31 +214,25 @@ export default function WorkoutsPage() {
       {/* Sticky Active Session Header on desktop */}
       <PastelCard
         tone="lime"
-        className="p-4 sm:p-5 lg:sticky lg:top-[73px] z-20 flex flex-col lg:flex-row lg:items-center justify-between gap-4"
+        className="p-4 sm:p-5 lg:sticky lg:top-[65px] z-20 flex flex-col lg:flex-row lg:items-center justify-between gap-4"
       >
         <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-2 mb-1 flex-wrap">
-            <span className="w-2.5 h-2.5 rounded-full bg-[#142746] animate-ping" />
-            <span className="text-[11px] font-bold uppercase tracking-wider text-[#142746]">
-              Active Session
-            </span>
-            <PastelBadge tone="white" className="text-[10px]">
-              <RefreshCw className="w-2.5 h-2.5" />
-              {syncStatus}
-            </PastelBadge>
-          </div>
-
           <input
             type="text"
             value={activeSession.name}
             onChange={(e) => updateSessionMeta({ name: e.target.value })}
+            aria-label="Workout Name"
             className="w-full min-h-[40px] text-lg sm:text-xl font-heading font-extrabold text-[#142746] bg-transparent border-b border-transparent hover:border-[#142746]/40 focus:border-[#142746] focus:outline-none transition-colors"
           />
+          <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#142746]/65 capitalize">
+            <RefreshCw className="w-3 h-3" />
+            {syncStatus}
+          </span>
         </div>
 
         {/* Live Metrics & Controls */}
         <div className="flex flex-wrap items-center gap-2 sm:gap-2.5 w-full lg:w-auto">
-          <div className="flex items-center justify-between sm:justify-start gap-2.5 sm:gap-3 px-3 sm:px-3.5 py-2 rounded-xl bg-white border-[1.5px] border-[#142746] text-xs shadow-neo-sm w-full sm:w-auto">
+          <div className="flex items-center justify-between sm:justify-start gap-2.5 sm:gap-3 px-3 sm:px-3.5 py-2 rounded-xl bg-white border-[1.5px] border-[#142746] text-xs w-full sm:w-auto">
             <div>
               <span className="text-[10px] text-[#8993A5] block font-semibold">Time</span>
               <span className="font-extrabold stat-number text-[#142746]">
@@ -920,10 +911,10 @@ export default function WorkoutsPage() {
                 <Award className="w-7 h-7 stroke-[2.2]" />
               </div>
               <h2 className="font-heading text-2xl sm:text-3xl font-extrabold text-[#142746]">
-                Workout Completed!
+                Workout Completed
               </h2>
               <p className="text-xs text-[#142746]/75">
-                Performance saved to Workout History and Strength Analytics.
+                Saved to your workout history.
               </p>
             </div>
 
