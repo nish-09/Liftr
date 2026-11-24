@@ -2,22 +2,50 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { resetPassword } from "@/lib/auth/actions";
+import { useRouter } from "next/navigation";
+import { createClient } from "@/lib/supabase/client";
 import { Dumbbell, ArrowRight, Lock } from "lucide-react";
 
 export default function ResetPasswordPage() {
+  const router = useRouter();
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    if (loading) return;
+
+    if (!password || password.length < 6) {
+      setError("Password must contain at least 6 characters.");
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      setError("Passwords do not match.");
+      return;
+    }
+
     setError(null);
     setLoading(true);
 
-    const formData = new FormData(e.currentTarget);
-    const res = await resetPassword(formData);
-    if (res?.error) {
-      setError(res.error);
+    try {
+      const supabase = createClient();
+      const { error: updateError } = await supabase.auth.updateUser({
+        password,
+      });
+
+      if (updateError) {
+        setError(updateError.message);
+        setLoading(false);
+      } else {
+        router.push("/overview");
+        router.refresh();
+      }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Failed to update password.";
+      setError(msg);
       setLoading(false);
     }
   }
@@ -49,7 +77,7 @@ export default function ResetPasswordPage() {
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-5">
+          <form method="POST" action="#" onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="block text-xs font-mono uppercase font-black text-dark mb-2">
                 New Password
@@ -60,8 +88,33 @@ export default function ResetPasswordPage() {
                   name="password"
                   required
                   minLength={6}
+                  autoComplete="new-password"
+                  disabled={loading}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••••••"
-                  className="w-full px-4 py-3 rounded-lg bg-white border-2 border-dark text-dark placeholder:text-dark/40 focus:outline-none focus:ring-2 focus:ring-forest font-sans shadow-neo-sm text-sm"
+                  className="w-full px-4 py-3 rounded-lg bg-white border-2 border-dark text-dark placeholder:text-dark/40 focus:outline-none focus:ring-2 focus:ring-forest font-sans shadow-neo-sm text-sm disabled:opacity-50"
+                />
+                <Lock className="w-4 h-4 text-dark/40 absolute right-3.5 top-3.5" />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-xs font-mono uppercase font-black text-dark mb-2">
+                Confirm New Password
+              </label>
+              <div className="relative">
+                <input
+                  type="password"
+                  name="confirmPassword"
+                  required
+                  minLength={6}
+                  autoComplete="new-password"
+                  disabled={loading}
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder="••••••••••••"
+                  className="w-full px-4 py-3 rounded-lg bg-white border-2 border-dark text-dark placeholder:text-dark/40 focus:outline-none focus:ring-2 focus:ring-forest font-sans shadow-neo-sm text-sm disabled:opacity-50"
                 />
                 <Lock className="w-4 h-4 text-dark/40 absolute right-3.5 top-3.5" />
               </div>
@@ -70,7 +123,7 @@ export default function ResetPasswordPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3.5 px-6 rounded-lg bg-lime hover:bg-lime/90 text-dark font-mono font-black uppercase tracking-wider text-xs border-2 border-dark shadow-neo flex items-center justify-center gap-2 transition-all active:translate-x-0.5 active:translate-y-0.5 disabled:opacity-50 cursor-pointer"
+              className="w-full mt-2 py-3.5 px-6 rounded-lg bg-lime hover:bg-lime/90 text-dark font-mono font-black uppercase tracking-wider text-xs border-2 border-dark shadow-neo flex items-center justify-center gap-2 transition-all active:translate-x-0.5 active:translate-y-0.5 disabled:opacity-50 cursor-pointer"
             >
               {loading ? (
                 <div className="w-5 h-5 border-2 border-dark/30 border-t-dark rounded-full animate-spin" />

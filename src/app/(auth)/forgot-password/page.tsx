@@ -2,27 +2,46 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { forgotPassword } from "@/lib/auth/actions";
+import { createClient } from "@/lib/supabase/client";
 import { Dumbbell, ArrowLeft, Send, CheckCircle2 } from "lucide-react";
 
 export default function ForgotPasswordPage() {
+  const [email, setEmail] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [sent, setSent] = useState(false);
   const [loading, setLoading] = useState(false);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    if (loading) return;
+
+    const trimmedEmail = email.trim();
+    if (!trimmedEmail || !trimmedEmail.includes("@")) {
+      setError("Please provide a valid email address.");
+      return;
+    }
+
     setError(null);
     setLoading(true);
 
-    const formData = new FormData(e.currentTarget);
-    const res = await forgotPassword(formData);
-    setLoading(false);
+    try {
+      const supabase = createClient();
+      const origin = typeof window !== "undefined" ? window.location.origin : "http://localhost:3000";
+      const { error: resetError } = await supabase.auth.resetPasswordForEmail(trimmedEmail, {
+        redirectTo: `${origin}/auth/callback?next=/reset-password`,
+      });
 
-    if (res?.error) {
-      setError(res.error);
-    } else {
-      setSent(true);
+      if (resetError) {
+        setError(resetError.message);
+        setLoading(false);
+      } else {
+        setSent(true);
+        setLoading(false);
+      }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "An unexpected error occurred.";
+      setError(msg);
+      setLoading(false);
     }
   }
 
@@ -54,7 +73,7 @@ export default function ForgotPasswordPage() {
               </div>
               <h2 className="font-heading font-black text-2xl text-dark tracking-tight">Reset Link Sent</h2>
               <p className="text-sm font-sans text-dark/80">
-                Check your inbox for password reset instructions.
+                Check your inbox for password recovery instructions.
               </p>
               <Link
                 href="/login"
@@ -64,7 +83,7 @@ export default function ForgotPasswordPage() {
               </Link>
             </div>
           ) : (
-            <form onSubmit={handleSubmit} className="space-y-5">
+            <form method="POST" action="#" onSubmit={handleSubmit} className="space-y-5">
               {error && (
                 <div className="p-4 rounded-xl bg-orange/20 border-2 border-orange text-dark text-xs font-mono font-bold">
                   {error}
@@ -79,8 +98,12 @@ export default function ForgotPasswordPage() {
                   type="email"
                   name="email"
                   required
+                  autoComplete="email"
+                  disabled={loading}
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   placeholder="athlete@liftr.app"
-                  className="w-full px-4 py-3 rounded-lg bg-white border-2 border-dark text-dark placeholder:text-dark/40 focus:outline-none focus:ring-2 focus:ring-forest font-sans shadow-neo-sm text-sm"
+                  className="w-full px-4 py-3 rounded-lg bg-white border-2 border-dark text-dark placeholder:text-dark/40 focus:outline-none focus:ring-2 focus:ring-forest font-sans shadow-neo-sm text-sm disabled:opacity-50"
                 />
               </div>
 

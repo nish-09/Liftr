@@ -1,28 +1,83 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { signUp } from "@/lib/auth/actions";
+import { useRouter } from "next/navigation";
+import { createClient } from "@/lib/supabase/client";
 import { Dumbbell, ArrowRight, CheckCircle2 } from "lucide-react";
 
 export default function SignUpPage() {
+  const router = useRouter();
+  const [displayName, setDisplayName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
 
+  // Prevent already-authenticated users from staying on signup page
+  useEffect(() => {
+    const supabase = createClient();
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (user) {
+        router.replace("/overview");
+      }
+    });
+  }, [router]);
+
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    if (loading) return;
+
+    const trimmedEmail = email.trim();
+    const trimmedName = displayName.trim();
+
+    if (!trimmedEmail || !trimmedEmail.includes("@") || !trimmedEmail.includes(".")) {
+      setError("Please enter a valid email address.");
+      return;
+    }
+
+    if (!password || password.length < 6) {
+      setError("Password must contain at least 6 characters.");
+      return;
+    }
+
     setError(null);
     setLoading(true);
 
-    const formData = new FormData(e.currentTarget);
-    const res = await signUp(formData);
-    setLoading(false);
+    try {
+      const supabase = createClient();
+      const origin = typeof window !== "undefined" ? window.location.origin : "http://localhost:3000";
+      const { data, error: signUpError } = await supabase.auth.signUp({
+        email: trimmedEmail,
+        password,
+        options: {
+          data: {
+            display_name: trimmedName || trimmedEmail.split("@")[0],
+          },
+          emailRedirectTo: `${origin}/auth/callback?next=/overview`,
+        },
+      });
 
-    if (res?.error) {
-      setError(res.error);
-    } else {
-      setSuccess(true);
+      if (signUpError) {
+        setError(signUpError.message);
+        setLoading(false);
+        return;
+      }
+
+      // If user was auto-confirmed (session generated immediately)
+      if (data?.session) {
+        router.push("/overview");
+        router.refresh();
+      } else {
+        // Confirmation email dispatched
+        setSuccess(true);
+        setLoading(false);
+      }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "An unexpected error occurred during account creation.";
+      setError(msg);
+      setLoading(false);
     }
   }
 
@@ -67,12 +122,12 @@ export default function SignUpPage() {
             <>
               {error && (
                 <div className="mb-6 p-4 rounded-xl bg-orange/20 border-2 border-orange text-dark text-xs font-mono font-bold flex items-center gap-2">
-                  <span className="w-2.5 h-2.5 rounded-full bg-orange animate-pulse" />
+                  <span className="w-2.5 h-2.5 rounded-full bg-orange animate-pulse shrink-0" />
                   <span>{error}</span>
                 </div>
               )}
 
-              <form onSubmit={handleSubmit} className="space-y-4">
+              <form method="POST" action="#" onSubmit={handleSubmit} className="space-y-4">
                 <div>
                   <label className="block text-xs font-mono uppercase font-black text-dark mb-2">
                     Full Name / Handle
@@ -81,8 +136,11 @@ export default function SignUpPage() {
                     type="text"
                     name="displayName"
                     required
+                    disabled={loading}
+                    value={displayName}
+                    onChange={(e) => setDisplayName(e.target.value)}
                     placeholder="Alex Rivera"
-                    className="w-full px-4 py-3 rounded-lg bg-white border-2 border-dark text-dark placeholder:text-dark/40 focus:outline-none focus:ring-2 focus:ring-forest font-sans shadow-neo-sm text-sm"
+                    className="w-full px-4 py-3 rounded-lg bg-white border-2 border-dark text-dark placeholder:text-dark/40 focus:outline-none focus:ring-2 focus:ring-forest font-sans shadow-neo-sm text-sm disabled:opacity-50"
                   />
                 </div>
 
@@ -94,8 +152,12 @@ export default function SignUpPage() {
                     type="email"
                     name="email"
                     required
+                    autoComplete="email"
+                    disabled={loading}
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
                     placeholder="athlete@liftr.app"
-                    className="w-full px-4 py-3 rounded-lg bg-white border-2 border-dark text-dark placeholder:text-dark/40 focus:outline-none focus:ring-2 focus:ring-forest font-sans shadow-neo-sm text-sm"
+                    className="w-full px-4 py-3 rounded-lg bg-white border-2 border-dark text-dark placeholder:text-dark/40 focus:outline-none focus:ring-2 focus:ring-forest font-sans shadow-neo-sm text-sm disabled:opacity-50"
                   />
                 </div>
 
@@ -108,8 +170,12 @@ export default function SignUpPage() {
                     name="password"
                     required
                     minLength={6}
+                    autoComplete="new-password"
+                    disabled={loading}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••••••••"
-                    className="w-full px-4 py-3 rounded-lg bg-white border-2 border-dark text-dark placeholder:text-dark/40 focus:outline-none focus:ring-2 focus:ring-forest font-sans shadow-neo-sm text-sm"
+                    className="w-full px-4 py-3 rounded-lg bg-white border-2 border-dark text-dark placeholder:text-dark/40 focus:outline-none focus:ring-2 focus:ring-forest font-sans shadow-neo-sm text-sm disabled:opacity-50"
                   />
                 </div>
 

@@ -10,14 +10,15 @@ export interface AuthResponse {
 }
 
 export async function signUp(formData: FormData): Promise<AuthResponse> {
-  const email = formData.get("email") as string;
+  const email = (formData.get("email") as string)?.trim();
   const password = formData.get("password") as string;
-  const displayName = formData.get("displayName") as string;
+  const displayName = (formData.get("displayName") as string)?.trim();
 
   if (!email || !password) {
     return { error: "Email and password are required." };
   }
 
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
   const supabase = await createClient();
   const { data, error } = await supabase.auth.signUp({
     email,
@@ -26,6 +27,7 @@ export async function signUp(formData: FormData): Promise<AuthResponse> {
       data: {
         display_name: displayName || email.split("@")[0],
       },
+      emailRedirectTo: `${appUrl}/auth/callback?next=/overview`,
     },
   });
 
@@ -38,7 +40,7 @@ export async function signUp(formData: FormData): Promise<AuthResponse> {
 }
 
 export async function signIn(formData: FormData): Promise<AuthResponse> {
-  const email = formData.get("email") as string;
+  const email = (formData.get("email") as string)?.trim();
   const password = formData.get("password") as string;
 
   if (!email || !password) {
@@ -67,14 +69,15 @@ export async function signOut() {
 }
 
 export async function forgotPassword(formData: FormData): Promise<AuthResponse> {
-  const email = formData.get("email") as string;
+  const email = (formData.get("email") as string)?.trim();
   if (!email) {
     return { error: "Email is required." };
   }
 
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
   const supabase = await createClient();
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/reset-password`,
+    redirectTo: `${appUrl}/auth/callback?next=/reset-password`,
   });
 
   if (error) {

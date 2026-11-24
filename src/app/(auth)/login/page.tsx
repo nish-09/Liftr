@@ -1,23 +1,83 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { signIn } from "@/lib/auth/actions";
+import { useRouter } from "next/navigation";
+import { createClient } from "@/lib/supabase/client";
 import { Dumbbell, ArrowRight, ShieldCheck, Flame } from "lucide-react";
 
 export default function LoginPage() {
+  const router = useRouter();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
+  // Prevent already-authenticated users from staying on the login page
+  useEffect(() => {
+    const supabase = createClient();
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (user) {
+        router.replace("/overview");
+      }
+    });
+  }, [router]);
+
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    if (loading) return;
+
+    const trimmedEmail = email.trim();
+    if (!trimmedEmail) {
+      setError("Please enter your email address.");
+      return;
+    }
+
+    if (!trimmedEmail.includes("@") || !trimmedEmail.includes(".")) {
+      setError("Please enter a valid email address.");
+      return;
+    }
+
+    if (!password) {
+      setError("Please enter your password.");
+      return;
+    }
+
     setError(null);
     setLoading(true);
 
-    const formData = new FormData(e.currentTarget);
-    const res = await signIn(formData);
-    if (res?.error) {
-      setError(res.error);
+    try {
+      const supabase = createClient();
+      const { data, error: authError } = await supabase.auth.signInWithPassword({
+        email: trimmedEmail,
+        password,
+      });
+
+      if (authError) {
+        if (
+          authError.message.toLowerCase().includes("invalid login credentials") ||
+          authError.message.toLowerCase().includes("invalid grant")
+        ) {
+          setError("Invalid email or password. Please verify your credentials or create an account.");
+        } else if (authError.message.toLowerCase().includes("email not confirmed")) {
+          setError("Email not verified yet. Please check your inbox for the confirmation link.");
+        } else {
+          setError(authError.message);
+        }
+        setLoading(false);
+        return;
+      }
+
+      if (data?.session) {
+        router.push("/overview");
+        router.refresh();
+      } else {
+        setError("Unable to initialize session. Please try again.");
+        setLoading(false);
+      }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "An unexpected authentication error occurred.";
+      setError(msg);
       setLoading(false);
     }
   }
@@ -47,12 +107,13 @@ export default function LoginPage() {
         <div className="bg-cream border-3 border-dark rounded-xl p-8 shadow-neo-lg">
           {error && (
             <div className="mb-6 p-4 rounded-xl bg-orange/20 border-2 border-orange text-dark text-xs font-mono font-bold flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-orange animate-pulse" />
+              <span className="w-2.5 h-2.5 rounded-full bg-orange animate-pulse shrink-0" />
               <span>{error}</span>
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-5">
+          {/* Form strictly uses method="POST" and action="#" to guarantee credentials never leak to URL */}
+          <form method="POST" action="#" onSubmit={handleSubmit} className="space-y-5">
             <div>
               <label className="block text-xs font-mono uppercase font-black text-dark mb-2">
                 Email Address
@@ -61,8 +122,12 @@ export default function LoginPage() {
                 type="email"
                 name="email"
                 required
+                autoComplete="email"
+                disabled={loading}
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 placeholder="athlete@liftr.app"
-                className="w-full px-4 py-3 rounded-lg bg-white border-2 border-dark text-dark placeholder:text-dark/40 focus:outline-none focus:ring-2 focus:ring-forest font-sans shadow-neo-sm text-sm"
+                className="w-full px-4 py-3 rounded-lg bg-white border-2 border-dark text-dark placeholder:text-dark/40 focus:outline-none focus:ring-2 focus:ring-forest font-sans shadow-neo-sm text-sm disabled:opacity-50"
               />
             </div>
 
@@ -82,8 +147,12 @@ export default function LoginPage() {
                 type="password"
                 name="password"
                 required
+                autoComplete="current-password"
+                disabled={loading}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••••••"
-                className="w-full px-4 py-3 rounded-lg bg-white border-2 border-dark text-dark placeholder:text-dark/40 focus:outline-none focus:ring-2 focus:ring-forest font-sans shadow-neo-sm text-sm"
+                className="w-full px-4 py-3 rounded-lg bg-white border-2 border-dark text-dark placeholder:text-dark/40 focus:outline-none focus:ring-2 focus:ring-forest font-sans shadow-neo-sm text-sm disabled:opacity-50"
               />
             </div>
 
@@ -103,7 +172,7 @@ export default function LoginPage() {
             </button>
           </form>
 
-          {/* Quick Demo Preview Note */}
+          {/* Create Account link */}
           <div className="mt-6 pt-6 border-t-2 border-dark/15 text-center">
             <p className="text-xs font-sans text-dark/70 mb-3">
               Don&apos;t have an account yet?
