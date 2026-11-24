@@ -10,15 +10,15 @@ interface BodySvgProps {
 
 export function PosteriorBodySvg({ heatmapData, getFill, onHover, onSelect }: BodySvgProps) {
   return (
-    <div className="flex flex-col items-center">
-      <span className="text-[11px] font-mono uppercase tracking-widest text-dark font-black mb-2">
+    <div className="flex flex-col items-center w-full max-w-[230px] sm:max-w-[260px] md:max-w-[280px]">
+      <span className="text-[11px] uppercase tracking-widest text-[#142746] font-bold mb-2 text-center">
         Posterior (Back View)
       </span>
-      <div className="w-56 sm:w-64 md:w-72 h-[420px] relative">
-        <svg viewBox="0 0 280 440" className="w-full h-full drop-shadow-sm">
+      <div className="w-full aspect-[280/440] relative">
+        <svg viewBox="0 0 280 440" className="w-full h-full">
           {/* Body Background Silhouette / Contours */}
-          <g fill="none" stroke="#171717" strokeWidth="1.5">
-            <ellipse cx="140" cy="35" rx="18" ry="24" stroke="#171717" strokeWidth="2" />
+          <g fill="none" stroke="#142746" strokeWidth="1.5">
+            <ellipse cx="140" cy="35" rx="18" ry="24" stroke="#142746" strokeWidth="2" />
             <path d="M132 58 L128 75 M148 58 L152 75" />
             <path d="M105 85 L85 105 L65 170 L55 230 L70 232 L85 180 L95 190 L95 240 L105 320 L108 400 L125 405 L135 320 L140 250 L145 320 L155 405 L172 400 L175 320 L185 240 L185 190 L195 180 L210 232 L225 230 L215 170 L195 105 L175 85 Z" />
           </g>

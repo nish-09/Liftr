@@ -5,7 +5,12 @@ import { useHistoryStore } from "@/stores/useHistoryStore";
 import { useExerciseStore } from "@/stores/useExerciseStore";
 import { calculate1RM } from "@/lib/calculations/strength";
 import MuscleHeatmap from "@/components/analytics/MuscleHeatmap";
-import { NEO_TOOLTIP_STYLE } from "@/components/charts/chartStyles";
+import {
+  NEO_TOOLTIP_STYLE,
+  CHART_GRID_COLOR,
+  CHART_AXIS_COLOR,
+} from "@/components/charts/chartStyles";
+import { PageHeader, PastelCard, PastelBadge } from "@/components/ui/DesignSystem";
 import { Award } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -35,7 +40,6 @@ export default function ProgressPage() {
   const [selectedExerciseId, setSelectedExerciseId] = useState<string>("");
   const activeExerciseId = selectedExerciseId || exercises[0]?.id || "";
 
-  // Filter sessions by selected time window
   const filteredSessions = useMemo(() => {
     const cutoffDate = Date.now() - selectedTimeFilter * 24 * 60 * 60 * 1000;
     return sessions.filter(
@@ -43,7 +47,6 @@ export default function ProgressPage() {
     );
   }, [sessions, selectedTimeFilter]);
 
-  // Volume Progression over time
   const volumeData = useMemo(() => {
     return [...filteredSessions]
       .sort(
@@ -60,7 +63,6 @@ export default function ProgressPage() {
       }));
   }, [filteredSessions]);
 
-  // Exercise 1RM / Strength progression for selected exercise
   const exerciseProgressData = useMemo(() => {
     const dataPoints: { date: string; maxWeight: number; estimated1RM: number }[] = [];
 
@@ -100,7 +102,6 @@ export default function ProgressPage() {
     return dataPoints;
   }, [sessions, activeExerciseId]);
 
-  // Muscle group working set distribution
   const muscleDistributionData = useMemo(() => {
     const counts: Record<string, number> = {};
 
@@ -108,7 +109,9 @@ export default function ProgressPage() {
       sess.exercises.forEach((ex) => {
         const exMeta = exercises.find((e) => e.id === ex.exerciseId);
         const muscle = exMeta?.primaryMuscleGroup || "other";
-        const completedCount = ex.sets.filter((s) => s.isCompleted && s.setType !== "warmup").length;
+        const completedCount = ex.sets.filter(
+          (s) => s.isCompleted && s.setType !== "warmup"
+        ).length;
         counts[muscle] = (counts[muscle] || 0) + completedCount;
       });
     });
@@ -119,7 +122,6 @@ export default function ProgressPage() {
     }));
   }, [filteredSessions, exercises]);
 
-  // Aggregate stats
   const totalVolumeInWindow = filteredSessions.reduce(
     (acc, s) => acc + s.totalVolume,
     0
@@ -127,90 +129,79 @@ export default function ProgressPage() {
 
   return (
     <div className="space-y-6">
-      {/* Top Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-3">
-            <h1 className="font-heading font-black text-3xl md:text-4xl text-[#171717] tracking-tight uppercase">
-              STRENGTH ANALYTICS
-            </h1>
-            <span className="px-2.5 py-1 rounded-lg bg-[#3155F5] text-white border-2 border-[#171717] text-xs font-mono font-bold shadow-neo-sm">
-              Double Progression Engine
-            </span>
+      <PageHeader
+        title="Strength Analytics"
+        subtitle="Epley 1RM trajectory, training volume distribution, and verified personal record logs."
+        badge={<PastelBadge tone="lavender">Double Progression</PastelBadge>}
+        actions={
+          <div className="flex flex-wrap sm:flex-nowrap items-center gap-1 p-1 rounded-xl bg-white border-[1.5px] border-[#142746] shadow-neo-sm w-full sm:w-auto">
+            {TIME_FILTERS.map((tf) => (
+              <button
+                key={tf.value}
+                onClick={() => setSelectedTimeFilter(tf.value)}
+                className={cn(
+                  "flex-1 sm:flex-initial min-h-[38px] px-2.5 sm:px-3 py-1.5 rounded-lg text-xs transition-all cursor-pointer border font-bold whitespace-nowrap",
+                  selectedTimeFilter === tf.value
+                    ? "bg-[#E9FF91] text-[#142746] border-[#142746]"
+                    : "border-transparent text-[#8993A5] hover:text-[#142746]"
+                )}
+              >
+                {tf.label}
+              </button>
+            ))}
           </div>
-          <p className="text-sm text-[#171717]/70 font-sans mt-1">
-            Epley 1RM trajectory, training volume distribution, and verified personal record logs.
-          </p>
-        </div>
+        }
+      />
 
-        {/* Time Filter Pills */}
-        <div className="flex items-center gap-1.5 p-1 rounded-xl bg-white border-2 border-[#171717] shadow-neo-sm">
-          {TIME_FILTERS.map((tf) => (
-            <button
-              key={tf.value}
-              onClick={() => setSelectedTimeFilter(tf.value)}
-              className={cn(
-                "px-3 py-1.5 rounded-lg text-xs font-mono transition-all cursor-pointer border-2",
-                selectedTimeFilter === tf.value
-                  ? "bg-[#3155F5] text-[#E9F56A] border-[#171717] font-black shadow-neo-sm"
-                  : "border-transparent text-[#171717]/70 hover:text-[#171717] font-bold"
-              )}
-            >
-              {tf.label}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Top Bento Stat Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="bg-white border-2 border-[#171717] rounded-xl shadow-neo p-4">
-          <span className="text-[10px] font-mono uppercase font-black text-[#171717]/70 block mb-1">
+      {/* Top Pastel Stat Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 2xl:grid-cols-4 gap-4">
+        <PastelCard tone="green" className="p-4 sm:p-5">
+          <span className="text-[11px] font-bold uppercase text-[#142746]/70 block mb-1">
             Period Volume
           </span>
-          <div className="font-heading font-black text-2xl md:text-3xl text-[#3155F5] tracking-tight">
+          <div className="stat-fluid-lg stat-number text-[#142746] break-words">
             {totalVolumeInWindow.toLocaleString()} kg
           </div>
-          <span className="text-[11px] font-mono font-bold text-[#171717]/60 mt-1 block">
-            Across {filteredSessions.length} completed sessions
+          <span className="text-[11px] font-medium text-[#142746]/75 mt-1 block">
+            Across {filteredSessions.length} sessions
           </span>
-        </div>
+        </PastelCard>
 
-        <div className="bg-white border-2 border-[#171717] rounded-xl shadow-neo p-4">
-          <span className="text-[10px] font-mono uppercase font-black text-[#171717]/70 block mb-1">
+        <PastelCard tone="coral" className="p-4 sm:p-5">
+          <span className="text-[11px] font-bold uppercase text-[#142746]/70 block mb-1">
             Personal Records
           </span>
-          <div className="font-heading font-black text-2xl md:text-3xl text-[#FF7043] tracking-tight">
+          <div className="stat-fluid-lg stat-number text-[#142746]">
             {personalRecords.length}
           </div>
-          <span className="text-[11px] font-mono font-bold text-[#171717]/60 mt-1 block">
+          <span className="text-[11px] font-medium text-[#142746]/75 mt-1 block">
             Max weights &amp; 1RM records
           </span>
-        </div>
+        </PastelCard>
 
-        <div className="bg-white border-2 border-[#171717] rounded-xl shadow-neo p-4">
-          <span className="text-[10px] font-mono uppercase font-black text-[#171717]/70 block mb-1">
+        <PastelCard tone="white" className="p-4 sm:p-5">
+          <span className="text-[11px] font-bold uppercase text-[#142746]/70 block mb-1">
             Workouts Logged
           </span>
-          <div className="font-heading font-black text-2xl md:text-3xl text-[#171717] tracking-tight">
+          <div className="stat-fluid-lg stat-number text-[#142746]">
             {filteredSessions.length}
           </div>
-          <span className="text-[11px] font-mono font-bold text-[#171717]/60 mt-1 block">
+          <span className="text-[11px] font-medium text-[#142746]/75 mt-1 block">
             In selected timeframe
           </span>
-        </div>
+        </PastelCard>
 
-        <div className="bg-white border-2 border-[#171717] rounded-xl shadow-neo p-4">
-          <span className="text-[10px] font-mono uppercase font-black text-[#171717]/70 block mb-1">
+        <PastelCard tone="yellow" className="p-4 sm:p-5">
+          <span className="text-[11px] font-bold uppercase text-[#142746]/70 block mb-1">
             Formula Used
           </span>
-          <div className="font-heading font-black text-lg text-[#171717] mt-1">
+          <div className="font-heading font-extrabold text-lg text-[#142746] mt-1">
             Epley 1RM
           </div>
-          <span className="text-[10px] font-mono font-bold text-[#171717]/60 mt-1 block">
+          <span className="text-[11px] font-medium text-[#142746]/75 mt-1 block">
             Weight × (1 + Reps / 30)
           </span>
-        </div>
+        </PastelCard>
       </div>
 
       {/* Interactive 2D Human Body Muscle Heatmap */}
@@ -220,66 +211,58 @@ export default function ProgressPage() {
         defaultTimeFilter={selectedTimeFilter}
       />
 
-      {/* Volume Chart & Strength Progression Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* Left: Overall Volume Chart */}
-        <div className="lg:col-span-7 bg-white border-2 border-[#171717] rounded-xl shadow-neo p-5 space-y-4">
+      {/* Volume Chart & Muscle Distribution */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+        <PastelCard tone="white" className="lg:col-span-7 p-5 space-y-4">
           <div>
-            <h3 className="font-heading font-black text-lg text-[#171717] tracking-tight uppercase">
-              TRAINING VOLUME PROGRESSION
+            <h3 className="font-heading font-extrabold text-lg text-[#142746]">
+              Training Volume Progression
             </h3>
-            <p className="text-xs text-[#171717]/70 font-mono font-bold mt-0.5">
+            <p className="text-xs text-[#8993A5] mt-0.5">
               Accumulated working set load per session (kg)
             </p>
           </div>
 
-          <div className="h-64 w-full">
+          <div className="h-[220px] sm:h-[260px] w-full min-w-0">
             {volumeData.length === 0 ? (
-              <div className="h-full flex items-center justify-center text-xs text-[#171717]/60 font-mono font-bold">
+              <div className="h-full flex items-center justify-center text-xs text-[#8993A5] font-semibold bg-[#FAF9FD] rounded-xl border border-dashed border-[#142746]/25">
                 No volume records in this timeframe.
               </div>
             ) : (
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={volumeData}>
-                  <defs>
-                    <linearGradient id="volGradient" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#3155F5" stopOpacity={0.8} />
-                      <stop offset="95%" stopColor="#E9F56A" stopOpacity={0.1} />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#171717" opacity={0.15} />
-                  <XAxis dataKey="date" stroke="#171717" fontSize={11} tick={{ fill: "#171717", fontWeight: "bold" }} />
-                  <YAxis stroke="#171717" fontSize={11} tick={{ fill: "#171717", fontWeight: "bold" }} />
+                <AreaChart data={volumeData} margin={{ top: 8, right: 8, left: -12, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke={CHART_GRID_COLOR} />
+                  <XAxis dataKey="date" stroke={CHART_AXIS_COLOR} fontSize={11} interval="preserveStartEnd" />
+                  <YAxis stroke={CHART_AXIS_COLOR} fontSize={11} width={48} />
                   <Tooltip contentStyle={NEO_TOOLTIP_STYLE} />
                   <Area
                     type="monotone"
                     dataKey="volume"
                     name="Volume (kg)"
-                    stroke="#3155F5"
-                    strokeWidth={3}
-                    fillOpacity={1}
-                    fill="url(#volGradient)"
+                    stroke="#142746"
+                    strokeWidth={2.5}
+                    fill="#BDF7B6"
+                    fillOpacity={0.65}
                   />
                 </AreaChart>
               </ResponsiveContainer>
             )}
           </div>
-        </div>
+        </PastelCard>
 
-        {/* Right: Muscle Group Balance */}
-        <div className="lg:col-span-5 bg-white border-2 border-[#171717] rounded-xl shadow-neo p-5 space-y-4">
+        <PastelCard tone="white" className="lg:col-span-5 p-5 space-y-4">
           <div>
-            <h3 className="font-heading font-black text-lg text-[#171717] tracking-tight uppercase">
-              MUSCLE GROUP DISTRIBUTION
+            <h3 className="font-heading font-extrabold text-lg text-[#142746]">
+              Muscle Group Distribution
             </h3>
-            <p className="text-xs text-[#171717]/70 font-mono font-bold mt-0.5">
+            <p className="text-xs text-[#8993A5] mt-0.5">
               Working sets completed by anatomical zone
             </p>
           </div>
 
-          <div className="h-64 w-full">
+          <div className="h-[220px] sm:h-[260px] w-full min-w-0">
             {muscleDistributionData.length === 0 ? (
-              <div className="h-full flex items-center justify-center text-xs text-[#171717]/60 font-mono font-bold">
+              <div className="h-full flex items-center justify-center text-xs text-[#8993A5] font-semibold bg-[#FAF9FD] rounded-xl border border-dashed border-[#142746]/25">
                 No working set data recorded.
               </div>
             ) : (
@@ -287,36 +270,42 @@ export default function ProgressPage() {
                 <BarChart
                   data={muscleDistributionData}
                   layout="vertical"
-                  margin={{ left: 20 }}
+                  margin={{ top: 4, right: 12, left: 4, bottom: 0 }}
                 >
-                  <CartesianGrid strokeDasharray="3 3" stroke="#171717" opacity={0.15} />
-                  <XAxis type="number" stroke="#171717" fontSize={11} tick={{ fill: "#171717", fontWeight: "bold" }} />
+                  <CartesianGrid strokeDasharray="3 3" stroke={CHART_GRID_COLOR} />
+                  <XAxis type="number" stroke={CHART_AXIS_COLOR} fontSize={11} />
                   <YAxis
                     dataKey="name"
                     type="category"
-                    stroke="#171717"
+                    stroke={CHART_AXIS_COLOR}
                     fontSize={11}
-                    width={80}
-                    tick={{ fill: "#171717", fontWeight: "bold" }}
+                    width={72}
                   />
                   <Tooltip contentStyle={NEO_TOOLTIP_STYLE} />
-                  <Bar dataKey="value" name="Sets" fill="#3155F5" stroke="#171717" strokeWidth={2} radius={[0, 4, 4, 0]} />
+                  <Bar
+                    dataKey="value"
+                    name="Sets"
+                    fill="#EBCBF7"
+                    stroke="#142746"
+                    strokeWidth={1.5}
+                    radius={[0, 6, 6, 0]}
+                  />
                 </BarChart>
               </ResponsiveContainer>
             )}
           </div>
-        </div>
+        </PastelCard>
       </div>
 
       {/* Specific Exercise 1RM Tracker */}
-      <div className="bg-white border-2 border-[#171717] rounded-xl shadow-neo p-5 space-y-4">
+      <PastelCard tone="white" className="p-5 space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
-            <h3 className="font-heading font-black text-lg text-[#171717] tracking-tight uppercase">
-              ESTIMATED 1RM PROGRESSION
+            <h3 className="font-heading font-extrabold text-lg text-[#142746]">
+              Estimated 1RM Progression
             </h3>
-            <p className="text-xs text-[#171717]/70 font-mono font-bold mt-0.5">
-              Tracking strength milestones over time using Epley formula
+            <p className="text-xs text-[#8993A5] mt-0.5">
+              Tracking strength milestones over time using the Epley formula
             </p>
           </div>
 
@@ -324,7 +313,7 @@ export default function ProgressPage() {
             value={activeExerciseId}
             onChange={(e) => setSelectedExerciseId(e.target.value)}
             disabled={exercises.length === 0}
-            className="px-3 py-2 rounded-lg bg-[#F5F1E8] border-2 border-[#171717] text-xs font-mono font-bold text-[#171717] focus:outline-none focus:ring-2 focus:ring-[#3155F5] shadow-neo-sm cursor-pointer disabled:opacity-50"
+            className="w-full sm:w-auto max-w-full min-h-[42px] px-3 py-2 rounded-xl bg-[#FAF9FD] border-[1.5px] border-[#142746] text-xs font-bold text-[#142746] cursor-pointer disabled:opacity-50 focus:outline-none"
           >
             {exercises.length === 0 ? (
               <option value="">No exercises in library</option>
@@ -338,65 +327,60 @@ export default function ProgressPage() {
           </select>
         </div>
 
-        <div className="h-64 w-full">
+        <div className="h-[220px] sm:h-[260px] w-full min-w-0">
           {exercises.length === 0 ? (
-            <div className="h-full flex items-center justify-center text-xs text-[#171717]/60 font-mono font-bold">
+            <div className="h-full flex items-center justify-center text-xs text-[#8993A5] font-semibold bg-[#FAF9FD] rounded-xl border border-dashed border-[#142746]/25 p-4 text-center">
               Add movements to your exercise library and log sets to view 1RM trajectory.
             </div>
           ) : exerciseProgressData.length === 0 ? (
-            <div className="h-full flex items-center justify-center text-xs text-[#171717]/60 font-mono font-bold">
+            <div className="h-full flex items-center justify-center text-xs text-[#8993A5] font-semibold bg-[#FAF9FD] rounded-xl border border-dashed border-[#142746]/25 p-4 text-center">
               No historical logged sets for this movement yet.
             </div>
           ) : (
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={exerciseProgressData}>
-                <defs>
-                  <linearGradient id="strengthGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#FF7043" stopOpacity={0.6} />
-                    <stop offset="95%" stopColor="#FF7043" stopOpacity={0.05} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#171717" opacity={0.15} />
-                <XAxis dataKey="date" stroke="#171717" fontSize={11} tick={{ fill: "#171717", fontWeight: "bold" }} />
-                <YAxis stroke="#171717" fontSize={11} tick={{ fill: "#171717", fontWeight: "bold" }} />
+              <AreaChart data={exerciseProgressData} margin={{ top: 8, right: 8, left: -12, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke={CHART_GRID_COLOR} />
+                <XAxis dataKey="date" stroke={CHART_AXIS_COLOR} fontSize={11} interval="preserveStartEnd" />
+                <YAxis stroke={CHART_AXIS_COLOR} fontSize={11} width={44} />
                 <Tooltip contentStyle={NEO_TOOLTIP_STYLE} />
                 <Area
                   type="monotone"
                   dataKey="estimated1RM"
                   name="Est 1RM (kg)"
-                  stroke="#FF7043"
-                  strokeWidth={3}
-                  fillOpacity={1}
-                  fill="url(#strengthGradient)"
+                  stroke="#142746"
+                  strokeWidth={2.5}
+                  fill="#F8C3B5"
+                  fillOpacity={0.55}
                 />
                 <Area
                   type="monotone"
                   dataKey="maxWeight"
                   name="Max Weight (kg)"
-                  stroke="#3155F5"
-                  strokeWidth={3}
+                  stroke="#142746"
+                  strokeDasharray="4 4"
+                  strokeWidth={2}
                   fill="none"
                 />
               </AreaChart>
             </ResponsiveContainer>
           )}
         </div>
-      </div>
+      </PastelCard>
 
-      {/* Personal Records Archive Grid */}
-      <div className="bg-white border-2 border-[#171717] rounded-xl shadow-neo p-5 space-y-4">
+      {/* Personal Records Hall of Fame */}
+      <PastelCard tone="white" className="p-5 space-y-4">
         <div>
-          <h3 className="font-heading font-black text-lg text-[#171717] tracking-tight flex items-center gap-2 uppercase">
-            <Award className="w-5 h-5 text-[#FF7043] stroke-[2.5]" />
-            <span>PERSONAL RECORDS HALL OF FAME</span>
+          <h3 className="font-heading font-extrabold text-lg text-[#142746] flex items-center gap-2">
+            <Award className="w-5 h-5 text-[#142746]" />
+            <span>Personal Records Hall of Fame</span>
           </h3>
-          <p className="text-xs text-[#171717]/70 font-mono font-bold mt-0.5">
+          <p className="text-xs text-[#8993A5] mt-0.5">
             Verified peak achievements logged during completed workouts
           </p>
         </div>
 
         {personalRecords.length === 0 ? (
-          <p className="text-xs text-[#171717]/60 font-mono font-bold">No personal records logged yet.</p>
+          <p className="text-xs text-[#8993A5] font-semibold">No personal records logged yet.</p>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
             {personalRecords.map((pr) => {
@@ -405,28 +389,25 @@ export default function ProgressPage() {
               return (
                 <div
                   key={pr.id}
-                  className="p-3.5 rounded-xl bg-[#F5F1E8] border-2 border-[#171717] shadow-neo-sm flex items-center justify-between"
+                  className="p-3.5 rounded-2xl bg-[#FAF9FD] border-[1.5px] border-[#142746] shadow-neo-sm flex items-center justify-between gap-2"
                 >
-                  <div>
-                    <h4 className="font-heading font-black text-sm text-[#171717] uppercase">
+                  <div className="min-w-0">
+                    <h4 className="font-heading font-extrabold text-sm text-[#142746] truncate">
                       {exMeta?.name || pr.exerciseName || "Exercise"}
                     </h4>
-                    <span className="text-[10px] font-mono uppercase font-bold text-[#171717]/60">
+                    <span className="text-[11px] font-medium text-[#8993A5] capitalize">
                       {pr.prType.replace("_", " ")}: {pr.weight} kg × {pr.reps} reps
                     </span>
                   </div>
-
-                  <div className="text-right">
-                    <span className="font-heading font-black text-lg text-[#FF7043]">
-                      {pr.value} kg
-                    </span>
+                  <div className="px-2.5 py-1 rounded-xl bg-[#F8C3B5] border border-[#142746] font-extrabold text-xs text-[#142746] shrink-0">
+                    {pr.value} kg
                   </div>
                 </div>
               );
             })}
           </div>
         )}
-      </div>
+      </PastelCard>
     </div>
   );
 }

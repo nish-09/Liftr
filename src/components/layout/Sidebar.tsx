@@ -13,40 +13,60 @@ import {
   UtensilsCrossed,
   History,
   Settings,
-  ChevronRight,
+  X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { LiftrLogo } from "@/components/common/LiftrLogo";
 
 const NAV_ITEMS = [
   { name: "Overview", href: "/overview", icon: LayoutDashboard },
-  { name: "Live Workout", href: "/workouts", icon: Play, badge: "Live" },
-  { name: "Workout Plans", href: "/plans", icon: CalendarDays },
-  { name: "Exercise Library", href: "/exercises", icon: Dumbbell },
+  { name: "Workouts", href: "/workouts", icon: Play, badge: "Live" },
+  { name: "Plans", href: "/plans", icon: CalendarDays },
+  { name: "Exercises", href: "/exercises", icon: Dumbbell },
   { name: "Strength Analytics", href: "/progress", icon: TrendingUp },
-  { name: "Body Metrics & BMI", href: "/body-metrics", icon: Activity },
+  { name: "Body Metrics", href: "/body-metrics", icon: Activity },
   { name: "Weight Tracker", href: "/weight-tracker", icon: Scale },
+  { name: "History", href: "/history", icon: History },
   { name: "Nutrition", href: "/nutrition", icon: UtensilsCrossed, comingSoon: true },
-  { name: "Workout History", href: "/history", icon: History },
   { name: "Settings", href: "/settings", icon: Settings },
 ];
 
-export default function Sidebar() {
+interface SidebarProps {
+  isMobileOpen?: boolean;
+  onCloseMobile?: () => void;
+}
+
+export default function Sidebar({ isMobileOpen = false, onCloseMobile }: SidebarProps) {
   const pathname = usePathname();
 
-  return (
-    <aside className="hidden lg:flex w-64 flex-col justify-between border-r-2 border-[#171717] bg-[#3155F5] p-4 h-screen sticky top-0 z-30 select-none shadow-[2px_0px_0px_0px_#171717]">
+  const navContent = (
+    <div className="flex flex-col justify-between h-full">
       <div>
         {/* Brand Logo Header */}
-        <Link
-          href="/overview"
-          className="flex flex-col justify-center px-3.5 py-3.5 mb-5 rounded-xl bg-[#F5F1E8] border-2 border-[#171717] shadow-neo group hover:translate-x-0.5 hover:translate-y-0.5 transition-all"
-        >
-          <LiftrLogo className="w-full h-auto max-h-9" />
-          <span className="text-[9px] font-mono tracking-widest uppercase text-[#3155F5] font-black mt-1.5 pl-0.5">
-            Performance OS
-          </span>
-        </Link>
+        <div className="flex items-center justify-between gap-2 mb-6">
+          <Link
+            href="/overview"
+            onClick={onCloseMobile}
+            className="flex-1 flex items-center px-3 py-2.5 rounded-2xl bg-white border-[1.5px] border-[#142746] shadow-neo-sm hover:-translate-x-0.5 hover:-translate-y-0.5 transition-all"
+          >
+            <LiftrLogo
+              className="h-7 w-auto"
+              symbolColor="#142746"
+              textColor="#142746"
+            />
+          </Link>
+
+          {onCloseMobile && (
+            <button
+              type="button"
+              onClick={onCloseMobile}
+              className="lg:hidden p-2 rounded-xl bg-white border-[1.5px] border-[#142746] text-[#142746] cursor-pointer"
+              aria-label="Close sidebar"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          )}
+        </div>
 
         {/* Navigation list */}
         <nav className="space-y-1.5">
@@ -60,40 +80,32 @@ export default function Sidebar() {
               <Link
                 key={item.href}
                 href={item.href}
+                onClick={onCloseMobile}
                 className={cn(
-                  "flex items-center justify-between px-3 py-2 rounded-lg text-xs font-heading font-bold uppercase tracking-wider transition-all group",
+                  "flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-heading font-bold transition-all",
                   isActive
-                    ? "bg-[#E9F56A] text-[#171717] border-2 border-[#171717] shadow-neo translate-x-1"
-                    : "text-white/90 hover:bg-[#2542C7] hover:text-[#E9F56A] border-2 border-transparent"
+                    ? "bg-[#E9FF91] text-[#142746] border-[1.5px] border-[#142746] shadow-neo-sm"
+                    : "text-[#142746]/85 hover:bg-white/70 border-[1.5px] border-transparent"
                 )}
               >
-                <div className="flex items-center gap-2.5">
-                  <Icon
-                    className={cn(
-                      "w-4 h-4 transition-colors",
-                      isActive ? "text-[#171717] stroke-[2.5]" : "text-white/70 group-hover:text-[#E9F56A]"
-                    )}
-                  />
-                  <span>{item.name}</span>
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <Icon className="w-4 h-4 text-[#142746] shrink-0 stroke-[2.2]" />
+                  <span className="truncate">{item.name}</span>
                 </div>
 
                 {item.comingSoon ? (
-                  <span className="text-[9px] font-mono tracking-wider uppercase px-2 py-0.5 rounded bg-[#FF7043] text-white border border-[#171717] font-black shadow-neo-sm">
+                  <span className="text-[9px] font-bold uppercase px-2 py-0.5 rounded-full bg-[#EBCBF7] text-[#142746] border border-[#142746] shrink-0">
                     Soon
                   </span>
                 ) : item.badge ? (
                   <span
                     className={cn(
-                      "text-[9px] font-mono tracking-wider uppercase px-1.5 py-0.5 rounded font-black border",
-                      isActive
-                        ? "bg-[#3155F5] text-[#E9F56A] border-[#171717]"
-                        : "bg-[#E9F56A] text-[#171717] border-[#171717]"
+                      "text-[9px] font-bold uppercase px-2 py-0.5 rounded-full border border-[#142746] shrink-0",
+                      isActive ? "bg-[#142746] text-white" : "bg-[#F8C3B5] text-[#142746]"
                     )}
                   >
                     {item.badge}
                   </span>
-                ) : isActive ? (
-                  <ChevronRight className="w-4 h-4 text-[#171717] stroke-[3]" />
                 ) : null}
               </Link>
             );
@@ -101,18 +113,37 @@ export default function Sidebar() {
         </nav>
       </div>
 
-      {/* Footer / Status Box */}
-      <div className="pt-3 border-t-2 border-[#171717]/30">
-        <div className="p-3 rounded-xl bg-white border-2 border-[#171717] shadow-neo-sm flex items-center justify-between">
+      {/* Offline Status Pill */}
+      <div className="pt-4 mt-4 border-t border-[#142746]/15">
+        <div className="px-3 py-2.5 rounded-xl bg-white border-[1.5px] border-[#142746] shadow-neo-sm flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-[#E9F56A] border border-[#171717] animate-pulse" />
-            <span className="text-xs font-mono font-bold text-[#171717]">Offline Engine</span>
+            <span className="w-2.5 h-2.5 rounded-full bg-[#BDF7B6] border border-[#142746]" />
+            <span className="text-xs font-semibold text-[#142746]">Offline Ready</span>
           </div>
-          <span className="text-[10px] font-mono text-[#171717] font-black uppercase px-2 py-0.5 rounded bg-[#E9F56A] border border-[#171717]">
-            v2.0
+          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#EBCBF7] border border-[#142746] text-[#142746]">
+            PWA
           </span>
         </div>
       </div>
-    </aside>
+    </div>
+  );
+
+  return (
+    <>
+      {/* Desktop Pastel Green Sidebar */}
+      <aside className="hidden lg:flex w-56 2xl:w-60 shrink-0 flex-col bg-[#BDF7B6] border-r-[1.5px] border-[#142746] p-3.5 2xl:p-4 select-none lg:sticky lg:top-0 lg:h-screen lg:overflow-y-auto">
+        {navContent}
+      </aside>
+
+      {/* Tablet/Mobile Slide-In Sidebar */}
+      {isMobileOpen && (
+        <div className="lg:hidden fixed inset-0 z-50 flex bg-[#142746]/45 backdrop-blur-sm">
+          <aside className="w-[min(17rem,85vw)] h-full bg-[#BDF7B6] border-r-[1.5px] border-[#142746] p-4 shadow-neo-xl overflow-y-auto">
+            {navContent}
+          </aside>
+          <div className="flex-1" onClick={onCloseMobile} />
+        </div>
+      )}
+    </>
   );
 }

@@ -3,15 +3,14 @@
 import { useState, useMemo } from "react";
 import { useBodyStore } from "@/stores/useBodyStore";
 import { GoalType, WeightLogItem } from "@/types";
-import {
-  Scale,
-  Plus,
-  Trash2,
-  Target,
-  Edit2,
-} from "lucide-react";
+import { Scale, Plus, Trash2, Target, Edit2 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { NEO_TOOLTIP_STYLE } from "@/components/charts/chartStyles";
+import {
+  NEO_TOOLTIP_STYLE,
+  CHART_GRID_COLOR,
+  CHART_AXIS_COLOR,
+} from "@/components/charts/chartStyles";
+import { PageHeader, PastelCard, PastelBadge } from "@/components/ui/DesignSystem";
 import {
   LogWeightModal,
   TargetWeightModal,
@@ -49,14 +48,12 @@ export default function WeightTrackerPage() {
 
   const [selectedTimeFilter, setSelectedTimeFilter] = useState(30);
 
-  // Log Modal State
   const [isLogModalOpen, setIsLogModalOpen] = useState(false);
   const [logWeightValue, setLogWeightValue] = useState("");
   const [logDate, setLogDate] = useState(new Date().toISOString().split("T")[0]);
   const [logNotes, setLogNotes] = useState("");
   const [logError, setLogError] = useState<string | null>(null);
 
-  // Target Settings Modal State
   const [isTargetModalOpen, setIsTargetModalOpen] = useState(false);
   const [targetWeightVal, setTargetWeightVal] = useState(
     userBodyProfile.targetWeight != null ? String(userBodyProfile.targetWeight) : ""
@@ -64,14 +61,11 @@ export default function WeightTrackerPage() {
   const [startWeightVal, setStartWeightVal] = useState(
     userBodyProfile.startingWeight != null ? String(userBodyProfile.startingWeight) : ""
   );
-  const [targetDateVal, setTargetDateVal] = useState(
-    userBodyProfile.targetDate || ""
-  );
+  const [targetDateVal, setTargetDateVal] = useState(userBodyProfile.targetDate || "");
   const [goalTypeVal, setGoalTypeVal] = useState<GoalType>(
     userBodyProfile.goalType || "gain"
   );
 
-  // Edit Log State
   const [editingLog, setEditingLog] = useState<WeightLogItem | null>(null);
   const [editWeightVal, setEditWeightVal] = useState("");
   const [editDateVal, setEditDateVal] = useState("");
@@ -83,22 +77,20 @@ export default function WeightTrackerPage() {
     : userBodyProfile.startingWeight != null
     ? userBodyProfile.startingWeight
     : null;
-  const startWeight = userBodyProfile.startingWeight != null
-    ? userBodyProfile.startingWeight
-    : hasLogs
-    ? weightLogs[weightLogs.length - 1].weight
-    : null;
-  const targetWeight = userBodyProfile.targetWeight != null
-    ? userBodyProfile.targetWeight
-    : null;
+  const startWeight =
+    userBodyProfile.startingWeight != null
+      ? userBodyProfile.startingWeight
+      : hasLogs
+      ? weightLogs[weightLogs.length - 1].weight
+      : null;
+  const targetWeight =
+    userBodyProfile.targetWeight != null ? userBodyProfile.targetWeight : null;
 
-  // Filter weight logs by time
   const filteredLogs = useMemo(() => {
     const cutoff = Date.now() - selectedTimeFilter * 24 * 60 * 60 * 1000;
     return weightLogs.filter((w) => new Date(w.recordedAt).getTime() >= cutoff);
   }, [weightLogs, selectedTimeFilter]);
 
-  // Chart data sorted chronologically
   const chartData = useMemo(() => {
     return [...filteredLogs]
       .reverse()
@@ -112,7 +104,6 @@ export default function WeightTrackerPage() {
       }));
   }, [filteredLogs, targetWeight]);
 
-  // Trajectory Calculations
   const totalChange =
     currentWeight != null && startWeight != null
       ? Number((currentWeight - startWeight).toFixed(2))
@@ -135,7 +126,6 @@ export default function WeightTrackerPage() {
       ? Math.min(100, Math.round((currentProgressDelta / totalGoalDelta) * 100))
       : 0;
 
-  // Calculate average weekly change
   const weeklyChangeRate = useMemo(() => {
     if (weightLogs.length < 2) return 0;
     const oldest = weightLogs[weightLogs.length - 1];
@@ -146,8 +136,7 @@ export default function WeightTrackerPage() {
         (1000 * 60 * 60 * 24)
     );
     const diffKg = newest.weight - oldest.weight;
-    const weeklyRate = (diffKg / diffDays) * 7;
-    return Number(weeklyRate.toFixed(2));
+    return Number(((diffKg / diffDays) * 7).toFixed(2));
   }, [weightLogs]);
 
   function handleLogWeightSubmit(e: React.FormEvent) {
@@ -204,68 +193,54 @@ export default function WeightTrackerPage() {
 
   return (
     <div className="space-y-6">
-      {/* Top Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-3">
-            <h1 className="font-heading font-black text-3xl md:text-4xl text-dark tracking-tight">
-              WEIGHT TRACKER
-            </h1>
-            <span className="px-2.5 py-1 rounded bg-forest text-cream border-2 border-dark text-xs font-mono font-bold shadow-neo-sm">
-              {weightLogs.length} Checkpoints
-            </span>
-          </div>
-          <p className="text-sm text-dark/70 font-sans mt-1">
-            Body weight trajectory, progressive surplus/deficit tracking, and target milestones.
-          </p>
-        </div>
+      <PageHeader
+        title="Weight Tracker"
+        subtitle="Body weight trajectory, progressive surplus/deficit tracking, and target milestones."
+        badge={<PastelBadge tone="green">{weightLogs.length} Checkpoints</PastelBadge>}
+        actions={
+          <>
+            <button
+              onClick={() => setIsTargetModalOpen(true)}
+              className="neo-btn px-4 py-2.5 rounded-xl bg-white text-xs font-bold text-[#142746] inline-flex items-center gap-1.5 cursor-pointer"
+            >
+              <Target className="w-4 h-4" />
+              <span>Target Config</span>
+            </button>
 
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => setIsTargetModalOpen(true)}
-            className="px-4 py-2.5 rounded-lg bg-white hover:bg-cream border-2 border-dark text-xs font-mono uppercase font-bold text-dark shadow-neo-sm transition-all flex items-center gap-1.5 cursor-pointer"
-          >
-            <Target className="w-4 h-4 text-forest stroke-[2.5]" />
-            <span>Target Config</span>
-          </button>
+            <button
+              onClick={() => {
+                setLogWeightValue(currentWeight != null ? String(currentWeight) : "");
+                setLogDate(new Date().toISOString().split("T")[0]);
+                setLogError(null);
+                setIsLogModalOpen(true);
+              }}
+              className="neo-btn px-4 py-2.5 rounded-xl bg-[#142746] text-white text-xs font-heading font-bold inline-flex items-center gap-1.5 cursor-pointer"
+            >
+              <Plus className="w-4 h-4" />
+              <span>Log Weight</span>
+            </button>
+          </>
+        }
+      />
 
-          <button
-            onClick={() => {
-              setLogWeightValue(currentWeight != null ? String(currentWeight) : "");
-              setLogDate(new Date().toISOString().split("T")[0]);
-              setLogError(null);
-              setIsLogModalOpen(true);
-            }}
-            className="px-5 py-2.5 rounded-lg bg-lime hover:bg-lime/90 text-dark border-2 border-dark text-xs font-mono uppercase font-black tracking-wider shadow-neo flex items-center gap-1.5 cursor-pointer transition-all active:translate-x-0.5 active:translate-y-0.5"
-          >
-            <Plus className="w-4 h-4 stroke-[3]" />
-            <span>Log Weight</span>
-          </button>
-        </div>
-      </div>
-
-      {/* Prominent Bento Hero Card: Target Progress */}
+      {/* Target Weight Card */}
       {currentWeight == null || targetWeight == null ? (
-        <div className="bg-forest text-cream border-2 border-dark rounded-xl shadow-neo p-6 space-y-4">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <span className="text-xs font-mono uppercase tracking-wider text-lime font-black">
+        <PastelCard tone="lime" className="p-6 space-y-4">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <span className="text-xs uppercase font-bold tracking-wider text-[#142746]/70">
               Weight Trajectory Engine
             </span>
-            <span className="text-[10px] font-mono uppercase px-2.5 py-0.5 rounded bg-lime text-dark border-2 border-dark font-black shadow-neo-sm">
-              Ready for Setup
-            </span>
+            <PastelBadge tone="white">Ready for Setup</PastelBadge>
           </div>
-
-          <div className="py-2">
-            <h2 className="text-2xl sm:text-3xl font-heading font-black text-cream uppercase tracking-tight">
-              NO WEIGHT CHECKPOINTS LOGGED
+          <div>
+            <h2 className="text-2xl font-heading font-extrabold text-[#142746]">
+              No Weight Checkpoints Configured
             </h2>
-            <p className="text-xs sm:text-sm text-cream/80 font-mono mt-1 max-w-xl">
-              Record your initial weigh-in and configure your target body weight to track progressive surplus/deficit trajectories and weekly rates of change.
+            <p className="text-xs sm:text-sm text-[#142746]/80 mt-1 max-w-xl">
+              Record your initial weigh-in and set a target body weight to track progress and weekly rate of change.
             </p>
           </div>
-
-          <div className="flex flex-wrap items-center gap-3 pt-2">
+          <div className="flex flex-wrap items-center gap-3">
             <button
               onClick={() => {
                 setLogWeightValue("");
@@ -273,162 +248,146 @@ export default function WeightTrackerPage() {
                 setLogError(null);
                 setIsLogModalOpen(true);
               }}
-              className="px-5 py-2.5 rounded-lg bg-lime hover:bg-lime/90 text-dark border-2 border-dark text-xs font-mono uppercase font-black tracking-wider shadow-neo flex items-center gap-1.5 cursor-pointer"
+              className="neo-btn px-4 py-2.5 rounded-xl bg-[#142746] text-white text-xs font-bold inline-flex items-center gap-1.5 cursor-pointer"
             >
-              <Plus className="w-4 h-4 stroke-[3]" />
+              <Plus className="w-4 h-4" />
               <span>Log Starting Weight</span>
             </button>
             <button
               onClick={() => setIsTargetModalOpen(true)}
-              className="px-4 py-2.5 rounded-lg bg-white hover:bg-cream border-2 border-dark text-xs font-mono uppercase font-bold text-dark shadow-neo-sm transition-all flex items-center gap-1.5 cursor-pointer"
+              className="neo-btn px-4 py-2.5 rounded-xl bg-white text-[#142746] text-xs font-bold inline-flex items-center gap-1.5 cursor-pointer"
             >
-              <Target className="w-4 h-4 text-forest stroke-[2.5]" />
+              <Target className="w-4 h-4" />
               <span>Configure Target</span>
             </button>
           </div>
-        </div>
+        </PastelCard>
       ) : (
-        <div className="bg-forest text-cream border-2 border-dark rounded-xl shadow-neo p-6 space-y-5">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <PastelCard tone="lime" className="p-6 space-y-5">
+          <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-2">
-              <span className="text-xs font-mono uppercase tracking-wider text-lime font-black">
+              <span className="text-xs uppercase font-bold tracking-wider text-[#142746]/70">
                 Goal Objective
               </span>
-              <span className="text-[10px] font-mono uppercase px-2.5 py-0.5 rounded bg-lime text-dark border-2 border-dark font-black shadow-neo-sm">
-                {userBodyProfile.goalType.toUpperCase()}
-              </span>
+              <PastelBadge tone="white" className="uppercase">
+                {userBodyProfile.goalType}
+              </PastelBadge>
             </div>
-
-            <span className="text-xs font-mono font-bold text-cream/80">
+            <span className="text-xs font-bold text-[#142746]">
               {progressPercent}% Journey Completed
             </span>
           </div>
 
-          {/* Big Numbers Display */}
-          <div className="flex flex-wrap items-baseline gap-4 sm:gap-6">
-            <div className="flex items-baseline gap-2">
-              <span className="text-5xl sm:text-6xl font-heading font-black text-cream tracking-tight">
+          <div className="flex flex-wrap items-baseline gap-3 sm:gap-6">
+            <div className="flex items-baseline gap-1.5">
+              <span className="stat-fluid-xl stat-number text-[#142746]">
                 {currentWeight}
               </span>
-              <span className="text-lg font-mono font-bold text-cream/70">kg</span>
+              <span className="text-base font-bold text-[#142746]/70">kg</span>
             </div>
 
-            <div className="flex items-center text-lime font-mono text-2xl font-black">
-              →
-            </div>
+            <div className="text-xl sm:text-2xl font-bold text-[#142746]">→</div>
 
-            <div className="flex items-baseline gap-2">
-              <span className="text-5xl sm:text-6xl font-heading font-black text-lime tracking-tight">
+            <div className="flex items-baseline gap-1.5">
+              <span className="stat-fluid-xl stat-number text-[#142746]">
                 {targetWeight}
               </span>
-              <span className="text-lg font-mono font-bold text-cream/70">kg</span>
+              <span className="text-base font-bold text-[#142746]/70">kg</span>
             </div>
 
-            <div className="sm:ml-auto px-4 py-2 rounded-xl bg-cream text-dark border-2 border-dark shadow-neo-sm font-mono">
-              <span className="text-dark/60 block text-[10px] uppercase font-black">Remaining</span>
-              <span className="font-heading font-black text-lg text-orange">
+            <div className="w-full sm:w-auto sm:ml-auto px-4 py-2 rounded-2xl bg-white border-[1.5px] border-[#142746] shadow-neo-sm flex sm:block items-center justify-between">
+              <span className="text-[#8993A5] block text-[10px] uppercase font-bold">
+                Remaining
+              </span>
+              <span className="font-heading font-extrabold text-lg text-[#142746]">
                 {userBodyProfile.goalType === "gain" ? "+" : "-"}
                 {remainingWeight} kg
               </span>
             </div>
           </div>
 
-          {/* Progress Bar */}
-          <div className="w-full bg-forest-dark border-2 border-dark h-3 rounded-full overflow-hidden shadow-neo-sm">
+          <div className="w-full bg-white border-[1.5px] border-[#142746] h-3 rounded-full overflow-hidden">
             <div
-              className="bg-lime h-full transition-all duration-700 ease-out"
+              className="bg-[#142746] h-full transition-all duration-700 ease-out"
               style={{ width: `${progressPercent}%` }}
             />
           </div>
-        </div>
+        </PastelCard>
       )}
 
-      {/* Metrics Row: Starting, Target, Net, Rate */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="bg-cream border-2 border-dark rounded-xl shadow-neo p-4">
-          <span className="text-[10px] font-mono uppercase font-black text-dark/70 block mb-1">
+      {/* Metrics Row */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 2xl:grid-cols-4 gap-4">
+        <PastelCard tone="white" className="p-4 sm:p-5">
+          <span className="text-[11px] uppercase font-bold text-[#8993A5] block mb-1">
             Starting Baseline
           </span>
-          <div className="text-2xl font-heading font-black text-dark tracking-tight">
+          <div className="stat-fluid-lg stat-number text-[#142746]">
             {startWeight != null ? `${startWeight} kg` : "--"}
           </div>
-          <span className="text-[11px] font-mono font-bold text-dark/60 mt-1 block">
-            Initial weigh-in
-          </span>
-        </div>
+          <span className="text-[11px] text-[#8993A5] mt-1 block">Initial weigh-in</span>
+        </PastelCard>
 
-        <div className="bg-cream border-2 border-dark rounded-xl shadow-neo p-4">
-          <span className="text-[10px] font-mono uppercase font-black text-dark/70 block mb-1">
+        <PastelCard tone="green" className="p-4 sm:p-5">
+          <span className="text-[11px] uppercase font-bold text-[#142746]/70 block mb-1">
             Total Net Shift
           </span>
-          <div
-            className={cn(
-              "text-2xl font-heading font-black tracking-tight",
-              totalChange != null && totalChange >= 0 ? "text-forest" : "text-orange"
-            )}
-          >
+          <div className="stat-fluid-lg stat-number text-[#142746]">
             {totalChange != null
               ? totalChange > 0
                 ? `+${totalChange} kg`
                 : `${totalChange} kg`
               : "--"}
           </div>
-          <span className="text-[11px] font-mono font-bold text-dark/60 mt-1 block">
-            Since tracking began
-          </span>
-        </div>
+          <span className="text-[11px] text-[#142746]/75 mt-1 block">Since tracking began</span>
+        </PastelCard>
 
-        <div className="bg-cream border-2 border-dark rounded-xl shadow-neo p-4">
-          <span className="text-[10px] font-mono uppercase font-black text-dark/70 block mb-1">
+        <PastelCard tone="coral" className="p-4 sm:p-5">
+          <span className="text-[11px] uppercase font-bold text-[#142746]/70 block mb-1">
             Weekly Cadence
           </span>
-          <div className="text-2xl font-heading font-black text-orange tracking-tight">
+          <div className="stat-fluid-lg stat-number text-[#142746]">
             {weeklyChangeRate !== 0
               ? weeklyChangeRate > 0
                 ? `+${weeklyChangeRate} kg`
                 : `${weeklyChangeRate} kg`
               : "--"}
           </div>
-          <span className="text-[11px] font-mono font-bold text-dark/60 mt-1 block">
-            Rate per 7 days
-          </span>
-        </div>
+          <span className="text-[11px] text-[#142746]/75 mt-1 block">Rate per 7 days</span>
+        </PastelCard>
 
-        <div className="bg-cream border-2 border-dark rounded-xl shadow-neo p-4">
-          <span className="text-[10px] font-mono uppercase font-black text-dark/70 block mb-1">
+        <PastelCard tone="yellow" className="p-4 sm:p-5">
+          <span className="text-[11px] uppercase font-bold text-[#142746]/70 block mb-1">
             Target Horizon
           </span>
-          <div className="text-sm font-mono font-black text-dark mt-1 truncate">
+          <div className="text-base sm:text-lg font-extrabold text-[#142746] mt-1 break-words">
             {userBodyProfile.targetDate || "Not configured"}
           </div>
-          <span className="text-[10px] font-mono font-bold text-dark/60 mt-1 block">
-            Goal target date
-          </span>
-        </div>
+          <span className="text-[11px] text-[#142746]/75 mt-1 block">Goal target date</span>
+        </PastelCard>
       </div>
 
-      {/* Weight History Chart with Target Line */}
-      <div className="bg-cream border-2 border-dark rounded-xl shadow-neo p-5 space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      {/* Weight History Chart */}
+      <PastelCard tone="white" className="p-5 space-y-4">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
           <div>
-            <h3 className="font-heading font-black text-lg text-dark tracking-tight">
-              WEIGHT TRAJECTORY &amp; TARGET
+            <h3 className="font-heading font-extrabold text-lg text-[#142746]">
+              Weight Trajectory &amp; Target
             </h3>
-            <p className="text-xs text-dark/70 font-mono font-bold mt-0.5">
+            <p className="text-xs text-[#8993A5] mt-0.5">
               Historical body weight with target milestone guideline
             </p>
           </div>
 
-          <div className="flex items-center gap-1 p-1 rounded-xl bg-white border-2 border-dark shadow-neo-sm overflow-x-auto">
+          <div className="flex flex-wrap items-center gap-1 p-1 rounded-xl bg-[#FAF9FD] border-[1.5px] border-[#142746] w-full md:w-auto">
             {TIME_FILTERS.map((tf) => (
               <button
                 key={tf.value}
                 onClick={() => setSelectedTimeFilter(tf.value)}
                 className={cn(
-                  "px-3 py-1 rounded-lg text-xs font-mono transition-all border-2 cursor-pointer",
+                  "flex-1 sm:flex-initial min-h-[36px] px-2.5 sm:px-3 py-1 rounded-lg text-xs transition-all border cursor-pointer font-bold whitespace-nowrap",
                   selectedTimeFilter === tf.value
-                    ? "bg-forest text-lime border-dark font-black shadow-neo-sm"
-                    : "border-transparent text-dark/70 hover:text-dark font-bold"
+                    ? "bg-[#E9FF91] text-[#142746] border-[#142746]"
+                    : "border-transparent text-[#8993A5] hover:text-[#142746]"
                 )}
               >
                 {tf.label}
@@ -437,38 +396,32 @@ export default function WeightTrackerPage() {
           </div>
         </div>
 
-        <div className="h-64 w-full">
+        <div className="h-[220px] sm:h-[260px] w-full min-w-0">
           {chartData.length === 0 ? (
-            <div className="h-full flex items-center justify-center text-xs text-dark/60 font-mono font-bold">
+            <div className="h-full flex items-center justify-center text-xs text-[#8993A5] font-semibold bg-[#FAF9FD] rounded-xl border border-dashed border-[#142746]/25 p-4 text-center">
               No weight records in this timeframe.
             </div>
           ) : (
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={chartData}>
-                <defs>
-                  <linearGradient id="weightGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#3155F5" stopOpacity={0.8} />
-                    <stop offset="95%" stopColor="#E9F56A" stopOpacity={0.1} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#171717" opacity={0.15} />
-                <XAxis dataKey="date" stroke="#171717" fontSize={11} tick={{ fill: "#171717", fontWeight: "bold" }} />
+              <AreaChart data={chartData} margin={{ top: 8, right: 8, left: -12, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke={CHART_GRID_COLOR} />
+                <XAxis dataKey="date" stroke={CHART_AXIS_COLOR} fontSize={11} interval="preserveStartEnd" />
                 <YAxis
                   domain={["dataMin - 2", "dataMax + 2"]}
-                  stroke="#171717"
+                  stroke={CHART_AXIS_COLOR}
                   fontSize={11}
-                  tick={{ fill: "#171717", fontWeight: "bold" }}
+                  width={44}
                 />
                 <Tooltip contentStyle={NEO_TOOLTIP_STYLE} />
                 {targetWeight != null && (
                   <ReferenceLine
                     y={targetWeight}
-                    stroke="#FF7043"
+                    stroke="#142746"
                     strokeWidth={2}
                     strokeDasharray="4 4"
                     label={{
                       value: `Target: ${targetWeight} kg`,
-                      fill: "#FF7043",
+                      fill: "#142746",
                       fontSize: 11,
                       fontWeight: "bold",
                       position: "insideTopRight",
@@ -479,32 +432,34 @@ export default function WeightTrackerPage() {
                   type="monotone"
                   dataKey="weight"
                   name="Weight (kg)"
-                  stroke="#3155F5"
-                  strokeWidth={3}
-                  fillOpacity={1}
-                  fill="url(#weightGrad)"
+                  stroke="#142746"
+                  strokeWidth={2.5}
+                  fill="#BDF7B6"
+                  fillOpacity={0.65}
                 />
               </AreaChart>
             </ResponsiveContainer>
           )}
         </div>
-      </div>
+      </PastelCard>
 
-      {/* Historical Weight Entries Table */}
-      <div className="bg-cream border-2 border-dark rounded-xl shadow-neo p-5 space-y-4">
+      {/* Weight History Table */}
+      <PastelCard tone="white" className="p-5 space-y-4">
         <div className="flex items-center justify-between">
-          <h3 className="font-heading font-black text-lg text-dark tracking-tight">LOG ARCHIVE</h3>
-          <span className="text-xs font-mono font-bold text-dark/60">
+          <h3 className="font-heading font-extrabold text-lg text-[#142746]">Weight History</h3>
+          <span className="text-xs font-semibold text-[#8993A5]">
             {weightLogs.length} total entries
           </span>
         </div>
 
         {weightLogs.length === 0 ? (
-          <div className="bg-white border-2 border-dark rounded-xl p-8 text-center space-y-2">
-            <Scale className="w-8 h-8 text-dark/40 mx-auto" />
-            <div className="font-heading font-black text-sm text-dark uppercase">No Weight Checkpoints Recorded</div>
-            <p className="text-xs text-dark/60 font-mono max-w-sm mx-auto">
-              Your weigh-in archive is empty. Log your body weight regularly to track weekly rate of change and historical checkpoints.
+          <div className="bg-[#FAF9FD] border border-dashed border-[#142746]/25 rounded-2xl p-8 text-center space-y-2">
+            <Scale className="w-8 h-8 text-[#8993A5] mx-auto" />
+            <div className="font-heading font-extrabold text-sm text-[#142746]">
+              No Weight Checkpoints Recorded
+            </div>
+            <p className="text-xs text-[#8993A5] max-w-sm mx-auto">
+              Log your body weight regularly to track weekly rate of change and checkpoints.
             </p>
           </div>
         ) : (
@@ -512,17 +467,17 @@ export default function WeightTrackerPage() {
             {weightLogs.map((log) => (
               <div
                 key={log.id}
-                className="p-3 rounded-xl bg-white border-2 border-dark shadow-neo-sm flex items-center justify-between gap-3 text-xs font-mono"
+                className="p-3.5 rounded-2xl bg-[#FAF9FD] border-[1.5px] border-[#142746]/25 flex flex-wrap sm:flex-nowrap items-center justify-between gap-3 text-xs"
               >
-                <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-lg bg-forest text-cream border-2 border-dark flex items-center justify-center font-bold shadow-neo-sm">
-                    <Scale className="w-4 h-4 stroke-[2.5]" />
+                <div className="flex items-center gap-3 min-w-0 flex-1">
+                  <div className="w-9 h-9 shrink-0 rounded-xl bg-[#BDF7B6] text-[#142746] border-[1.5px] border-[#142746] flex items-center justify-center">
+                    <Scale className="w-4 h-4" />
                   </div>
-                  <div>
-                    <div className="font-heading font-black text-dark text-base">
+                  <div className="min-w-0">
+                    <div className="font-heading font-extrabold text-[#142746] text-base">
                       {log.weight} {log.unit}
                     </div>
-                    <span className="text-[10px] text-dark/60 font-bold">
+                    <span className="text-[11px] text-[#8993A5] font-medium block truncate">
                       {new Date(log.recordedAt).toLocaleDateString("en-US", {
                         weekday: "short",
                         month: "short",
@@ -534,11 +489,12 @@ export default function WeightTrackerPage() {
                   </div>
                 </div>
 
-                <div className="flex items-center gap-1.5">
+                <div className="flex items-center gap-1.5 shrink-0">
                   <button
                     onClick={() => openEditLog(log)}
-                    className="p-1.5 rounded-md border-2 border-dark bg-white hover:bg-forest hover:text-cream text-dark transition-all shadow-neo-sm cursor-pointer"
+                    className="min-w-[40px] min-h-[40px] flex items-center justify-center rounded-lg border border-[#142746] bg-white hover:bg-[#E9FF91] cursor-pointer"
                     title="Edit Entry"
+                    aria-label="Edit Entry"
                   >
                     <Edit2 className="w-3.5 h-3.5" />
                   </button>
@@ -548,8 +504,9 @@ export default function WeightTrackerPage() {
                         deleteWeightLog(log.id);
                       }
                     }}
-                    className="p-1.5 rounded-md border-2 border-dark bg-orange text-cream hover:bg-orange/90 transition-all shadow-neo-sm cursor-pointer"
+                    className="min-w-[40px] min-h-[40px] flex items-center justify-center rounded-lg border border-[#142746] bg-[#F8C3B5] text-[#142746] cursor-pointer"
                     title="Delete Entry"
+                    aria-label="Delete Entry"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
                   </button>
@@ -558,7 +515,7 @@ export default function WeightTrackerPage() {
             ))}
           </div>
         )}
-      </div>
+      </PastelCard>
 
       <LogWeightModal
         isOpen={isLogModalOpen}

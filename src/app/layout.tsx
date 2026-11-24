@@ -1,33 +1,26 @@
 import type { Metadata, Viewport } from "next";
-import { Space_Grotesk, DM_Sans, IBM_Plex_Mono } from "next/font/google";
+import { Plus_Jakarta_Sans, Inter } from "next/font/google";
 import "@/styles/globals.css";
 import StorageSanitizer from "@/components/common/StorageSanitizer";
 
-const spaceGrotesk = Space_Grotesk({
+const plusJakartaSans = Plus_Jakarta_Sans({
   subsets: ["latin"],
-  variable: "--font-space-grotesk",
+  variable: "--font-plus-jakarta",
   display: "swap",
-  weight: ["500", "600", "700"],
+  weight: ["500", "600", "700", "800"],
 });
 
-const dmSans = DM_Sans({
+const inter = Inter({
   subsets: ["latin"],
-  variable: "--font-dm-sans",
+  variable: "--font-inter",
   display: "swap",
-  weight: ["400", "500", "600", "700"],
-});
-
-const ibmPlexMono = IBM_Plex_Mono({
-  subsets: ["latin"],
-  variable: "--font-ibm-plex-mono",
-  display: "swap",
-  weight: ["400", "500", "600", "700"],
+  weight: ["400", "500", "600", "700", "800"],
 });
 
 export const metadata: Metadata = {
   title: "Liftr — Progressive Overload & Athletic Performance",
   description:
-    "Neo-Brutalist athletic performance platform connecting workout tracking, progressive overload, and body composition.",
+    "Pastel Neo-Brutalist athletic performance platform connecting workout tracking, progressive overload, and body composition.",
   manifest: "/manifest.json",
   icons: {
     icon: [
@@ -39,13 +32,13 @@ export const metadata: Metadata = {
   },
   appleWebApp: {
     capable: true,
-    statusBarStyle: "black-translucent",
+    statusBarStyle: "default",
     title: "Liftr",
   },
 };
 
 export const viewport: Viewport = {
-  themeColor: "#3155F5",
+  themeColor: "#EBCBF7",
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
@@ -59,9 +52,9 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${spaceGrotesk.variable} ${dmSans.variable} ${ibmPlexMono.variable}`}
+      className={`${plusJakartaSans.variable} ${inter.variable}`}
     >
-      <body className="min-h-screen bg-[#F5F1E8] text-[#171717] antialiased selection:bg-[#E9F56A] selection:text-[#171717]">
+      <body className="min-h-screen bg-[#EBCBF7] text-[#142746] antialiased selection:bg-[#E9FF91] selection:text-[#142746]">
         <StorageSanitizer />
         {children}
       </body>

@@ -5,12 +5,14 @@ import { useHistoryStore } from "@/stores/useHistoryStore";
 import { useExerciseStore } from "@/stores/useExerciseStore";
 import { usePlanStore } from "@/stores/usePlanStore";
 import { useBodyStore } from "@/stores/useBodyStore";
+import { useDashboardUser } from "@/components/common/UserContext";
 import { WorkoutSessionItem, SessionExerciseItem } from "@/types";
 import {
   downloadJSONBackup,
   downloadWorkoutsCSV,
   parseCSV,
 } from "@/lib/export/dataHandler";
+import { PageHeader, PastelCard, PastelBadge } from "@/components/ui/DesignSystem";
 import {
   Settings as SettingsIcon,
   Download,
@@ -25,13 +27,13 @@ import {
 } from "lucide-react";
 
 export default function SettingsPage() {
+  const { displayName: authName } = useDashboardUser();
   const { sessions, deleteHistoricalSession, addCompletedSession } = useHistoryStore();
   const { exercises, addExercise } = useExerciseStore();
   const { plans } = usePlanStore();
   const { weightLogs, bodyMeasurements } = useBodyStore();
 
-  // Settings State
-  const [displayName, setDisplayName] = useState("Athlete");
+  const [displayName, setDisplayName] = useState(authName);
   const [weightUnit, setWeightUnit] = useState<"kg" | "lb">("kg");
   const [defaultRest, setDefaultRest] = useState(90);
   const [defaultMinReps, setDefaultMinReps] = useState(8);
@@ -42,7 +44,6 @@ export default function SettingsPage() {
   const [timerVibrate, setTimerVibrate] = useState(true);
   const [savedSuccess, setSavedSuccess] = useState(false);
 
-  // CSV Import State
   const [csvPreview, setCsvPreview] = useState<{
     headers: string[];
     rows: Record<string, string>[];
@@ -93,7 +94,6 @@ export default function SettingsPage() {
   function handleConfirmCSVImport() {
     if (!csvPreview || csvPreview.rows.length === 0) return;
 
-    // Group rows into workouts by Date and Workout Name
     const workoutGroups: Record<string, WorkoutSessionItem> = {};
     const resolvedExercises = new Map(
       exercises.map((ex) => [ex.name.toLowerCase(), ex])
@@ -153,7 +153,10 @@ export default function SettingsPage() {
 
       const weight = parseFloat(row["Weight (kg)"] || row["weight"] || "0") || 0;
       const reps = parseInt(row["Reps"] || row["reps"] || "0", 10) || 0;
-      const setNum = parseInt(row["Set Number"] || row["set"] || String(sessionEx.sets.length + 1), 10);
+      const setNum = parseInt(
+        row["Set Number"] || row["set"] || String(sessionEx.sets.length + 1),
+        10
+      );
 
       sessionEx.sets.push({
         id: `set-${crypto.randomUUID()}`,
@@ -190,76 +193,64 @@ export default function SettingsPage() {
 
   return (
     <div className="space-y-6">
-      {/* Top Header */}
-      <div>
-        <div className="flex items-center gap-3">
-          <h1 className="font-heading font-black text-3xl md:text-4xl text-dark tracking-tight">
-            SETTINGS &amp; DATA HUB
-          </h1>
-          <span className="px-2.5 py-1 rounded bg-forest text-cream border-2 border-dark text-xs font-mono font-bold shadow-neo-sm">
-            System Preferences
-          </span>
-        </div>
-        <p className="text-sm text-dark/70 font-sans mt-1">
-          Configure double progression increments, notification alarms, and manage full data backups.
-        </p>
-      </div>
+      <PageHeader
+        title="Settings & Data Hub"
+        subtitle="Configure double progression increments, timer alerts, and manage full data backups."
+        badge={<PastelBadge tone="lavender">Preferences</PastelBadge>}
+      />
 
       {savedSuccess && (
-        <div className="p-4 rounded-xl bg-lime border-2 border-dark shadow-neo-sm text-dark text-xs font-mono font-black flex items-center gap-2">
-          <CheckCircle2 className="w-4 h-4 stroke-[2.5]" />
+        <PastelCard tone="lime" className="p-4 text-xs font-bold flex items-center gap-2">
+          <CheckCircle2 className="w-4 h-4" />
           <span>Settings successfully updated and saved locally.</span>
-        </div>
+        </PastelCard>
       )}
 
-      {/* Main Settings Form */}
-      <form onSubmit={handleSavePreferences} className="space-y-6">
-        {/* General & Profile */}
-        <div className="bg-cream border-2 border-dark rounded-xl shadow-neo p-5 space-y-4">
-          <div className="flex items-center gap-2 text-dark font-black font-heading text-base tracking-tight">
-            <Sliders className="w-5 h-5 text-forest stroke-[2.5]" />
-            <span>GENERAL PREFERENCES</span>
+      <form onSubmit={handleSavePreferences} className="space-y-5">
+        <PastelCard tone="white" className="p-5 space-y-4">
+          <div className="flex items-center gap-2 font-heading font-extrabold text-base text-[#142746]">
+            <Sliders className="w-4 h-4" />
+            <span>General Preferences</span>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-mono uppercase font-bold text-dark mb-1.5">
+              <label className="block text-xs font-bold text-[#142746] mb-1.5">
                 Display Athlete Name
               </label>
               <input
                 type="text"
                 value={displayName}
                 onChange={(e) => setDisplayName(e.target.value)}
-                className="w-full px-3.5 py-2.5 rounded-lg bg-white border-2 border-dark text-dark text-sm focus:outline-none focus:ring-2 focus:ring-forest font-sans shadow-neo-sm"
+                className="w-full px-3.5 py-2.5 rounded-xl bg-white border-[1.5px] border-[#142746] text-[#142746] text-sm focus:outline-none"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-mono uppercase font-bold text-dark mb-1.5">
+              <label className="block text-xs font-bold text-[#142746] mb-1.5">
                 Preferred Weight Unit
               </label>
               <select
                 value={weightUnit}
                 onChange={(e) => setWeightUnit(e.target.value as "kg" | "lb")}
-                className="w-full px-3.5 py-2.5 rounded-lg bg-white border-2 border-dark text-dark text-xs font-mono font-bold focus:outline-none focus:ring-2 focus:ring-forest shadow-neo-sm cursor-pointer"
+                className="w-full px-3.5 py-2.5 rounded-xl bg-white border-[1.5px] border-[#142746] text-[#142746] text-xs font-bold cursor-pointer focus:outline-none"
               >
                 <option value="kg">Kilograms (kg)</option>
                 <option value="lb">Pounds (lb)</option>
               </select>
             </div>
           </div>
-        </div>
+        </PastelCard>
 
-        {/* Workout & Progression Defaults */}
-        <div className="bg-cream border-2 border-dark rounded-xl shadow-neo p-5 space-y-4">
-          <div className="flex items-center gap-2 text-dark font-black font-heading text-base tracking-tight">
-            <SettingsIcon className="w-5 h-5 text-forest stroke-[2.5]" />
-            <span>PROGRESSIVE OVERLOAD &amp; REST ENGINE</span>
+        <PastelCard tone="white" className="p-5 space-y-4">
+          <div className="flex items-center gap-2 font-heading font-extrabold text-base text-[#142746]">
+            <SettingsIcon className="w-4 h-4" />
+            <span>Progressive Overload &amp; Rest Engine</span>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
-              <label className="block text-xs font-mono uppercase font-bold text-dark mb-1.5">
+              <label className="block text-xs font-bold text-[#142746] mb-1.5">
                 Default Rest Timer (sec)
               </label>
               <input
@@ -269,12 +260,12 @@ export default function SettingsPage() {
                 step={15}
                 value={defaultRest}
                 onChange={(e) => setDefaultRest(Number(e.target.value))}
-                className="w-full px-3.5 py-2.5 rounded-lg bg-white border-2 border-dark text-dark text-sm focus:outline-none focus:ring-2 focus:ring-forest font-mono font-bold shadow-neo-sm"
+                className="w-full px-3.5 py-2.5 rounded-xl bg-white border-[1.5px] border-[#142746] text-[#142746] text-sm font-bold focus:outline-none"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-mono uppercase font-bold text-dark mb-1.5">
+              <label className="block text-xs font-bold text-[#142746] mb-1.5">
                 Default Step Increment (kg)
               </label>
               <input
@@ -284,13 +275,13 @@ export default function SettingsPage() {
                 step={0.5}
                 value={defaultIncrement}
                 onChange={(e) => setDefaultIncrement(Number(e.target.value))}
-                className="w-full px-3.5 py-2.5 rounded-lg bg-white border-2 border-dark text-dark text-sm focus:outline-none focus:ring-2 focus:ring-forest font-mono font-bold shadow-neo-sm"
+                className="w-full px-3.5 py-2.5 rounded-xl bg-white border-[1.5px] border-[#142746] text-[#142746] text-sm font-bold focus:outline-none"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-mono uppercase font-bold text-dark mb-1.5">
-                Default Working Rep Range
+              <label className="block text-xs font-bold text-[#142746] mb-1.5">
+                Default Rep Range
               </label>
               <div className="flex items-center gap-2">
                 <input
@@ -298,50 +289,51 @@ export default function SettingsPage() {
                   min={1}
                   value={defaultMinReps}
                   onChange={(e) => setDefaultMinReps(Number(e.target.value))}
-                  className="w-full px-3.5 py-2.5 rounded-lg bg-white border-2 border-dark text-dark text-sm text-center font-mono font-bold shadow-neo-sm"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-white border-[1.5px] border-[#142746] text-[#142746] text-sm text-center font-bold focus:outline-none"
                 />
-                <span className="text-dark font-mono font-black">-</span>
+                <span className="font-bold">-</span>
                 <input
                   type="number"
                   min={1}
                   value={defaultMaxReps}
                   onChange={(e) => setDefaultMaxReps(Number(e.target.value))}
-                  className="w-full px-3.5 py-2.5 rounded-lg bg-white border-2 border-dark text-dark text-sm text-center font-mono font-bold shadow-neo-sm"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-white border-[1.5px] border-[#142746] text-[#142746] text-sm text-center font-bold focus:outline-none"
                 />
               </div>
             </div>
           </div>
 
-          <div className="pt-3 flex items-center justify-between border-t-2 border-dark/15">
-            <div>
-              <div className="text-xs font-black font-heading text-dark">
-                TRANSPARENT PROGRESSION SUGGESTIONS
+          <div className="pt-3 flex items-center justify-between gap-4 border-t border-[#142746]/15">
+            <div className="min-w-0">
+              <div className="text-xs font-extrabold text-[#142746]">
+                Transparent Progression Suggestions
               </div>
-              <span className="text-[11px] text-dark/70 font-sans">
-                Automatically calculate target reps and weight increases in the Live Workout Tracker.
+              <span className="text-xs text-[#8993A5]">
+                Automatically calculate target reps and weight increases in Live Workout.
               </span>
             </div>
             <input
               type="checkbox"
               checked={progressionSuggestions}
               onChange={(e) => setProgressionSuggestions(e.target.checked)}
-              className="w-5 h-5 rounded border-2 border-dark text-forest focus:ring-0 cursor-pointer accent-forest"
+              className="w-5 h-5 shrink-0 rounded border-[#142746] cursor-pointer accent-[#142746]"
             />
           </div>
-        </div>
+        </PastelCard>
 
-        {/* Notifications & Audio */}
-        <div className="bg-cream border-2 border-dark rounded-xl shadow-neo p-5 space-y-4">
-          <div className="flex items-center gap-2 text-dark font-black font-heading text-base tracking-tight">
-            <Bell className="w-5 h-5 text-forest stroke-[2.5]" />
-            <span>REST TIMER ALARMS &amp; VIBRATION</span>
+        <PastelCard tone="white" className="p-5 space-y-4">
+          <div className="flex items-center gap-2 font-heading font-extrabold text-base text-[#142746]">
+            <Bell className="w-4 h-4" />
+            <span>Rest Timer Alarms &amp; Vibration</span>
           </div>
 
           <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <div>
-                <div className="text-xs font-black font-heading text-dark">AUDIO ALERT ON TIMER ZERO</div>
-                <span className="text-[11px] text-dark/70 font-sans">
+            <div className="flex items-center justify-between gap-4">
+              <div className="min-w-0">
+                <div className="text-xs font-extrabold text-[#142746]">
+                  Audio Alert on Timer Zero
+                </div>
+                <span className="text-xs text-[#8993A5]">
                   Play audio chime when rest interval ends.
                 </span>
               </div>
@@ -349,127 +341,125 @@ export default function SettingsPage() {
                 type="checkbox"
                 checked={timerSound}
                 onChange={(e) => setTimerSound(e.target.checked)}
-                className="w-5 h-5 rounded border-2 border-dark text-forest focus:ring-0 cursor-pointer accent-forest"
+                className="w-5 h-5 shrink-0 rounded border-[#142746] cursor-pointer accent-[#142746]"
               />
             </div>
 
-            <div className="flex items-center justify-between">
-              <div>
-                <div className="text-xs font-black font-heading text-dark">HAPTIC VIBRATION ON MOBILE</div>
-                <span className="text-[11px] text-dark/70 font-sans">
-                  Vibrate supported phones and wearables when rest time concludes.
+            <div className="flex items-center justify-between gap-4">
+              <div className="min-w-0">
+                <div className="text-xs font-extrabold text-[#142746]">
+                  Haptic Vibration on Mobile
+                </div>
+                <span className="text-xs text-[#8993A5]">
+                  Vibrate supported devices when rest time concludes.
                 </span>
               </div>
               <input
                 type="checkbox"
                 checked={timerVibrate}
                 onChange={(e) => setTimerVibrate(e.target.checked)}
-                className="w-5 h-5 rounded border-2 border-dark text-forest focus:ring-0 cursor-pointer accent-forest"
+                className="w-5 h-5 shrink-0 rounded border-[#142746] cursor-pointer accent-[#142746]"
               />
             </div>
           </div>
-        </div>
+        </PastelCard>
 
         <button
           type="submit"
-          className="px-6 py-3 rounded-lg bg-forest hover:bg-forest/90 text-cream text-xs font-mono uppercase font-black tracking-wider border-2 border-dark shadow-neo cursor-pointer transition-all active:translate-x-0.5 active:translate-y-0.5"
+          className="neo-btn px-6 py-3 rounded-xl bg-[#142746] text-white text-xs font-heading font-bold cursor-pointer"
         >
           Save System Preferences
         </button>
       </form>
 
-      {/* Complete Data Management Hub: Export / Import / Erase */}
-      <div className="bg-cream border-2 border-dark rounded-xl shadow-neo p-6 space-y-6">
+      {/* Data Sovereignty Hub */}
+      <PastelCard tone="white" className="p-6 space-y-5">
         <div>
-          <div className="flex items-center gap-2 text-dark font-black font-heading text-xl tracking-tight">
-            <Database className="w-5 h-5 text-forest stroke-[2.5]" />
-            <span>DATA SOVEREIGNTY &amp; IMPORT / EXPORT</span>
+          <div className="flex items-center gap-2 font-heading font-extrabold text-lg text-[#142746]">
+            <Database className="w-5 h-5" />
+            <span>Data Sovereignty &amp; Import / Export</span>
           </div>
-          <p className="text-xs text-dark/70 font-sans mt-1">
-            Download complete offline backups or migrate workout history via standard CSV spreadsheets.
+          <p className="text-xs text-[#8993A5] mt-1">
+            Download complete offline backups or migrate workout history via CSV spreadsheets.
           </p>
         </div>
 
-        {/* Action Buttons: JSON Backup & CSV Export */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div className="p-4 rounded-xl bg-white border-2 border-dark shadow-neo-sm flex flex-col justify-between space-y-3">
+          <PastelCard tone="green" className="p-4 flex flex-col justify-between space-y-3">
             <div>
-              <div className="flex items-center gap-2 text-dark font-heading font-black text-sm">
-                <FileText className="w-4 h-4 text-forest" />
+              <div className="flex items-center gap-2 font-heading font-extrabold text-sm">
+                <FileText className="w-4 h-4" />
                 <span>Full JSON Archive</span>
               </div>
-              <p className="text-xs text-dark/70 mt-1 font-sans">
-                Download every workout, custom plan, exercise, weight log, and measurement in a portable JSON file.
+              <p className="text-xs text-[#142746]/75 mt-1">
+                Download every workout, plan, exercise, weight log, and measurement.
               </p>
             </div>
             <button
               onClick={handleExportJSON}
-              className="py-2.5 px-4 rounded-lg bg-lime hover:bg-lime/90 text-dark text-xs font-mono uppercase font-black border-2 border-dark shadow-neo-sm flex items-center justify-center gap-2 transition-all cursor-pointer active:translate-x-0.5 active:translate-y-0.5"
+              className="neo-btn py-2.5 px-4 rounded-xl bg-white text-[#142746] text-xs font-bold flex items-center justify-center gap-2 cursor-pointer"
             >
               <Download className="w-4 h-4" />
               <span>Download Full Backup</span>
             </button>
-          </div>
+          </PastelCard>
 
-          <div className="p-4 rounded-xl bg-white border-2 border-dark shadow-neo-sm flex flex-col justify-between space-y-3">
+          <PastelCard tone="lime" className="p-4 flex flex-col justify-between space-y-3">
             <div>
-              <div className="flex items-center gap-2 text-dark font-heading font-black text-sm">
-                <FileSpreadsheet className="w-4 h-4 text-forest" />
+              <div className="flex items-center gap-2 font-heading font-extrabold text-sm">
+                <FileSpreadsheet className="w-4 h-4" />
                 <span>Workouts CSV Export</span>
               </div>
-              <p className="text-xs text-dark/70 mt-1 font-sans">
-                Export all session logs into clean tabular CSV format compatible with Excel and Google Sheets.
+              <p className="text-xs text-[#142746]/75 mt-1">
+                Export all session logs into tabular CSV format for Excel and Sheets.
               </p>
             </div>
             <button
               onClick={handleExportCSV}
-              className="py-2.5 px-4 rounded-lg bg-lime hover:bg-lime/90 text-dark text-xs font-mono uppercase font-black border-2 border-dark shadow-neo-sm flex items-center justify-center gap-2 transition-all cursor-pointer active:translate-x-0.5 active:translate-y-0.5"
+              className="neo-btn py-2.5 px-4 rounded-xl bg-white text-[#142746] text-xs font-bold flex items-center justify-center gap-2 cursor-pointer"
             >
               <Download className="w-4 h-4" />
               <span>Export Sessions CSV</span>
             </button>
-          </div>
+          </PastelCard>
         </div>
 
         {/* CSV Import Wizard */}
-        <div className="p-5 rounded-xl bg-white border-2 border-dark shadow-neo-sm space-y-4">
+        <div className="p-5 rounded-2xl bg-[#FAF9FD] border-[1.5px] border-[#142746] space-y-4">
           <div>
-            <h3 className="text-sm font-heading font-black text-dark flex items-center gap-2">
-              <Upload className="w-4 h-4 text-forest stroke-[2.5]" />
-              <span>IMPORT WORKOUTS FROM CSV</span>
+            <h3 className="text-sm font-heading font-extrabold text-[#142746] flex items-center gap-2">
+              <Upload className="w-4 h-4" />
+              <span>Import Workouts From CSV</span>
             </h3>
-            <p className="text-xs text-dark/70 font-sans mt-0.5">
-              Upload past records from Strong, Hevy, or custom CSV logs without losing data.
+            <p className="text-xs text-[#8993A5] mt-0.5">
+              Upload past records from Strong, Hevy, or custom CSV logs.
             </p>
           </div>
 
           {importStatus && (
-            <div className="p-3 rounded-lg bg-lime border-2 border-dark shadow-neo-sm text-dark text-xs font-mono font-black flex items-center gap-2">
+            <div className="p-3 rounded-xl bg-[#BDF7B6] border-[1.5px] border-[#142746] text-[#142746] text-xs font-bold flex items-center gap-2">
               <CheckCircle2 className="w-4 h-4" />
               <span>{importStatus}</span>
             </div>
           )}
 
-          <div className="flex flex-col sm:flex-row items-center gap-3">
-            <input
-              type="file"
-              accept=".csv"
-              onChange={handleCSVFileUpload}
-              className="text-xs font-mono font-bold text-dark file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-2 file:border-dark file:text-xs file:font-mono file:font-black file:uppercase file:bg-cream file:text-dark hover:file:bg-lime cursor-pointer"
-            />
-          </div>
+          <input
+            type="file"
+            accept=".csv"
+            onChange={handleCSVFileUpload}
+            className="w-full max-w-full overflow-hidden text-xs font-semibold text-[#142746] file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-[1.5px] file:border-[#142746] file:text-xs file:font-bold file:bg-white file:text-[#142746] hover:file:bg-[#E9FF91] cursor-pointer"
+          />
 
-          {/* CSV Preview Table */}
           {csvPreview && (
             <div className="space-y-3 pt-2">
-              <div className="flex items-center justify-between text-xs font-mono font-bold text-dark">
+              <div className="flex flex-wrap items-center justify-between gap-2 text-xs font-bold text-[#142746]">
                 <span>Previewing {csvPreview.rows.length} rows found in CSV:</span>
-                <span className="text-forest font-black">Validation OK</span>
+                <span>Validation OK</span>
               </div>
 
-              <div className="overflow-x-auto max-h-48 border-2 border-dark rounded-lg shadow-neo-sm">
-                <table className="w-full text-left text-xs font-mono">
-                  <thead className="bg-cream border-b-2 border-dark text-dark sticky top-0 font-black">
+              <div className="overflow-x-auto border-[1.5px] border-[#142746] rounded-xl">
+                <table className="w-full text-left text-xs">
+                  <thead className="bg-[#BDF7B6] border-b border-[#142746] text-[#142746] sticky top-0 font-bold">
                     <tr>
                       {csvPreview.headers.slice(0, 5).map((h) => (
                         <th key={h} className="py-2 px-3">
@@ -478,11 +468,11 @@ export default function SettingsPage() {
                       ))}
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-dark/15 bg-white">
+                  <tbody className="divide-y divide-[#142746]/15 bg-white">
                     {csvPreview.rows.slice(0, 4).map((r, i) => (
-                      <tr key={i} className="hover:bg-cream/40">
+                      <tr key={i}>
                         {csvPreview.headers.slice(0, 5).map((h) => (
-                          <td key={h} className="py-1.5 px-3 text-dark font-medium">
+                          <td key={h} className="py-1.5 px-3 text-[#142746]">
                             {r[h] || "—"}
                           </td>
                         ))}
@@ -494,7 +484,7 @@ export default function SettingsPage() {
 
               <button
                 onClick={handleConfirmCSVImport}
-                className="px-5 py-2.5 rounded-lg bg-lime hover:bg-lime/90 text-dark text-xs font-mono uppercase font-black tracking-wider border-2 border-dark shadow-neo cursor-pointer transition-all active:translate-x-0.5 active:translate-y-0.5"
+                className="neo-btn px-5 py-2.5 rounded-xl bg-[#142746] text-white text-xs font-bold cursor-pointer"
               >
                 Confirm &amp; Import {csvPreview.rows.length} Records
               </button>
@@ -503,28 +493,28 @@ export default function SettingsPage() {
         </div>
 
         {/* Danger Zone */}
-        <div className="p-5 rounded-xl bg-white border-2 border-orange shadow-neo space-y-4">
-          <div className="flex items-center gap-2 text-orange font-heading font-black text-sm">
-            <ShieldAlert className="w-4 h-4 stroke-[2.5]" />
-            <span>DANGER ZONE SAFEGUARDS</span>
+        <PastelCard tone="coral" className="p-5 space-y-3">
+          <div className="flex items-center gap-2 font-heading font-extrabold text-sm text-[#142746]">
+            <ShieldAlert className="w-4 h-4" />
+            <span>Danger Zone Safeguards</span>
           </div>
 
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
-              <div className="text-xs font-heading font-black text-dark">CLEAR WORKOUT HISTORY</div>
-              <span className="text-[11px] text-dark/70 font-sans">
-                Removes all completed sessions. Plans and exercise library remain intact.
+              <div className="text-xs font-extrabold text-[#142746]">Clear Workout History</div>
+              <span className="text-xs text-[#142746]/80">
+                Removes all completed sessions. Plans and exercises remain intact.
               </span>
             </div>
             <button
               onClick={handleClearAllHistory}
-              className="px-4 py-2 rounded-lg bg-orange text-cream hover:bg-orange/90 text-xs font-mono uppercase font-black border-2 border-dark shadow-neo-sm cursor-pointer transition-all active:translate-x-0.5 active:translate-y-0.5"
+              className="neo-btn px-4 py-2 rounded-xl bg-[#142746] text-white text-xs font-bold cursor-pointer"
             >
               Clear Sessions
             </button>
           </div>
-        </div>
-      </div>
+        </PastelCard>
+      </PastelCard>
     </div>
   );
 }

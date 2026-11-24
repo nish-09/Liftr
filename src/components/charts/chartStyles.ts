@@ -2,11 +2,15 @@ import type { CSSProperties } from "react";
 
 export const NEO_TOOLTIP_STYLE: CSSProperties = {
   backgroundColor: "#FFFFFF",
-  border: "2px solid #171717",
-  borderRadius: "8px",
-  boxShadow: "4px 4px 0px #171717",
+  border: "1.5px solid #142746",
+  borderRadius: "10px",
+  boxShadow: "3px 3px 0px #142746",
   fontSize: "12px",
-  fontFamily: "monospace",
-  fontWeight: "bold",
-  color: "#171717",
+  fontFamily: "var(--font-inter), sans-serif",
+  fontWeight: 600,
+  color: "#142746",
 };
+
+export const CHART_GRID_COLOR = "rgba(20, 39, 70, 0.12)";
+export const CHART_AXIS_COLOR = "#142746";
+export const CHART_MUTED_TEXT = "#8993A5";

@@ -1,10 +1,19 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState, useEffect } from "react";
 import Link from "next/link";
 import { useHistoryStore } from "@/stores/useHistoryStore";
 import { usePlanStore } from "@/stores/usePlanStore";
-import { NEO_TOOLTIP_STYLE } from "@/components/charts/chartStyles";
+import { useBodyStore } from "@/stores/useBodyStore";
+import { useDashboardUser } from "@/components/common/UserContext";
+import { calculateBMI } from "@/lib/calculations/strength";
+import { formatDuration } from "@/lib/utils";
+import {
+  NEO_TOOLTIP_STYLE,
+  CHART_GRID_COLOR,
+  CHART_AXIS_COLOR,
+} from "@/components/charts/chartStyles";
+import { PastelCard, PastelBadge } from "@/components/ui/DesignSystem";
 import {
   Play,
   CalendarDays,
@@ -13,11 +22,16 @@ import {
   Award,
   Flame,
   ArrowRight,
+  Search,
+  Target,
+  Activity,
 } from "lucide-react";
 import {
   ResponsiveContainer,
   AreaChart,
   Area,
+  BarChart,
+  Bar,
   XAxis,
   YAxis,
   Tooltip,
@@ -25,67 +39,64 @@ import {
 } from "recharts";
 
 export default function OverviewPage() {
+  const { displayName } = useDashboardUser();
   const { sessions, personalRecords } = useHistoryStore();
   const { plans } = usePlanStore();
+  const { userBodyProfile, weightLogs } = useBodyStore();
+
+  const [mounted, setMounted] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const activePlan = plans.find((p) => p.isActive) || plans[0];
 
-  // Dynamic Time Greeting
   const greeting = useMemo(() => {
     const hour = new Date().getHours();
-    if (hour < 12) return "Good Morning";
-    if (hour < 18) return "Good Afternoon";
-    return "Good Evening";
+    if (hour < 12) return "Good morning";
+    if (hour < 18) return "Good afternoon";
+    return "Good evening";
   }, []);
 
-  const currentDateString = useMemo(() => {
-    return new Date().toLocaleDateString("en-US", {
-      weekday: "long",
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    });
-  }, []);
-
-  // Compute Weekly metrics
+  // Weekly metrics
   const oneWeekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
-  const workoutsThisWeek = sessions.filter(
-    (s) => new Date(s.completedAt || s.startedAt).getTime() >= oneWeekAgo
+  const workoutsThisWeek = useMemo(
+    () =>
+      sessions.filter(
+        (s) => new Date(s.completedAt || s.startedAt).getTime() >= oneWeekAgo
+      ),
+    [sessions, oneWeekAgo]
   );
 
-  const weeklyVolume = workoutsThisWeek.reduce(
-    (acc, s) => acc + s.totalVolume,
-    0
+  const weeklyVolume = useMemo(
+    () => workoutsThisWeek.reduce((acc, s) => acc + s.totalVolume, 0),
+    [workoutsThisWeek]
   );
 
-  // Dynamic Streak Calculation from real session history
-  const { streakCount, streakUnit, streakStatus } = useMemo(() => {
+  // Dynamic streak
+  const { streakCount, streakStatus } = useMemo(() => {
     if (sessions.length === 0) {
-      return { streakCount: 0, streakUnit: "Days", streakStatus: "No Active Streak" };
+      return { streakCount: 0, streakStatus: "No active streak" };
     }
-
     const workoutDates = Array.from(
       new Set(sessions.map((s) => (s.completedAt || s.startedAt).split("T")[0]))
     ).sort((a, b) => new Date(b).getTime() - new Date(a).getTime());
 
     const today = new Date().toISOString().split("T")[0];
-    const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString().split("T")[0];
+    const yesterday = new Date(Date.now() - 86400000).toISOString().split("T")[0];
 
     if (workoutDates[0] !== today && workoutDates[0] !== yesterday) {
-      return { streakCount: 0, streakUnit: "Days", streakStatus: "Streak Inactive" };
+      return { streakCount: 0, streakStatus: "Streak inactive" };
     }
 
     let streak = 1;
-    let currentDate = new Date(workoutDates[0]);
-
+    const currentDate = new Date(workoutDates[0]);
     for (let i = 1; i < workoutDates.length; i++) {
-      const prevExpectedDate = new Date(currentDate);
-      prevExpectedDate.setDate(prevExpectedDate.getDate() - 1);
-      const prevExpectedStr = prevExpectedDate.toISOString().split("T")[0];
-
-      if (workoutDates[i] === prevExpectedStr) {
+      currentDate.setDate(currentDate.getDate() - 1);
+      if (workoutDates[i] === currentDate.toISOString().split("T")[0]) {
         streak++;
-        currentDate = prevExpectedDate;
       } else {
         break;
       }
@@ -93,15 +104,14 @@ export default function OverviewPage() {
 
     return {
       streakCount: streak,
-      streakUnit: streak === 1 ? "Day" : "Days",
-      streakStatus: streak > 2 ? "High Momentum" : "Active Streak",
+      streakStatus: streak > 2 ? "High momentum" : "Active streak",
     };
   }, [sessions]);
 
-  // Volume chart data for the last 5 sessions
-  const chartData = useMemo(() => {
+  // Strength volume chart data (last 7 sessions)
+  const volumeChartData = useMemo(() => {
     return [...sessions]
-      .slice(0, 5)
+      .slice(0, 7)
       .reverse()
       .map((s) => ({
         date: new Date(s.completedAt || s.startedAt).toLocaleDateString("en-US", {
@@ -112,256 +122,405 @@ export default function OverviewPage() {
       }));
   }, [sessions]);
 
+  // Weekly 7-day activity bars (real working sets completed per weekday)
+  const weeklyActivityData = useMemo(() => {
+    const days: { label: string; sets: number }[] = [];
+    for (let offset = 6; offset >= 0; offset--) {
+      const d = new Date(Date.now() - offset * 86400000);
+      const iso = d.toISOString().split("T")[0];
+      const setsCount = sessions
+        .filter((s) => (s.completedAt || s.startedAt).split("T")[0] === iso)
+        .reduce(
+          (acc, s) =>
+            acc +
+            s.exercises.reduce(
+              (eAcc, ex) => eAcc + ex.sets.filter((st) => st.isCompleted).length,
+              0
+            ),
+          0
+        );
+      days.push({
+        label: d.toLocaleDateString("en-US", { weekday: "short" }),
+        sets: setsCount,
+      });
+    }
+    return days;
+  }, [sessions]);
+
+  const recentWorkouts = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+    const list = q
+      ? sessions.filter((s) => s.name.toLowerCase().includes(q))
+      : sessions;
+    return list.slice(0, 4);
+  }, [sessions, searchQuery]);
+
+  // Body composition snapshot
+  const currentWeight =
+    weightLogs[0]?.weight ?? userBodyProfile.startingWeight ?? null;
+  const startWeight =
+    userBodyProfile.startingWeight ??
+    (weightLogs.length > 0 ? weightLogs[weightLogs.length - 1].weight : null);
+  const targetWeight = userBodyProfile.targetWeight ?? null;
+  const heightCm = userBodyProfile.height ?? null;
+  const bmiData =
+    currentWeight != null && heightCm != null && heightCm > 0
+      ? calculateBMI(currentWeight, heightCm)
+      : null;
+
+  const targetProgressPct =
+    currentWeight != null && startWeight != null && targetWeight != null
+      ? (() => {
+          const span = Math.abs(targetWeight - startWeight);
+          if (span <= 0) return 100;
+          return Math.min(100, Math.round((Math.abs(currentWeight - startWeight) / span) * 100));
+        })()
+      : 0;
+
+  if (!mounted) return null;
+
   return (
     <div className="space-y-6">
-      {/* Editorial Welcome Header Banner in Electric Blue */}
-      <div className="bento-card-electric p-6 sm:p-7 rounded-xl border-2 border-[#171717] shadow-neo-lg flex flex-col md:flex-row md:items-end justify-between gap-5">
-        <div>
-          <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-md bg-[#E9F56A] text-[#171717] border border-[#171717] text-xs font-mono font-black uppercase mb-2 shadow-neo-sm">
-            <span>{currentDateString}</span>
-          </div>
-          <h1 className="font-heading text-3xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight leading-none uppercase">
-            {greeting}, Athlete.
+      {/* Greeting Header + Search + Quick Actions */}
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+        <div className="min-w-0">
+          <h1 className="font-heading text-xl sm:text-2xl lg:text-3xl font-extrabold text-[#142746] tracking-tight break-words">
+            {greeting}, {displayName}!
           </h1>
-          <p className="text-xs sm:text-sm text-white/90 font-mono mt-2">
-            {activePlan ? (
-              <>
-                Double progression active on{" "}
-                <span className="text-[#E9F56A] font-black underline decoration-white underline-offset-4">
-                  {activePlan.name}
-                </span>
-              </>
-            ) : (
-              "No active workout routine set. Create or activate a plan to track overload."
-            )}
+          <p className="text-xs sm:text-sm text-[#142746]/75 font-medium mt-0.5">
+            Your fitness journey at a glance.
           </p>
         </div>
 
-        {/* Quick Action Buttons */}
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-2.5 w-full lg:w-auto">
+          <div className="relative w-full sm:w-56">
+            <Search className="w-4 h-4 text-[#8993A5] absolute left-3 top-1/2 -translate-y-1/2" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search recent workouts..."
+              className="w-full min-h-[44px] pl-9 pr-3 py-2 rounded-xl bg-white border-[1.5px] border-[#142746] text-xs text-[#142746] placeholder:text-[#8993A5] focus:outline-none focus:ring-2 focus:ring-[#142746]/30 shadow-neo-sm"
+            />
+          </div>
+
           <Link
             href="/workouts"
-            className="px-5 py-3 rounded-lg bg-[#E9F56A] hover:bg-[#dae852] text-[#171717] text-xs font-heading font-black uppercase tracking-wider border-2 border-[#171717] shadow-neo flex items-center gap-2 transition-all active:translate-x-0.5 active:translate-y-0.5 cursor-pointer"
+            className="neo-btn min-h-[44px] px-4 py-2 rounded-xl bg-[#142746] text-white text-xs font-heading font-bold inline-flex items-center justify-center gap-1.5 flex-1 sm:flex-initial"
           >
-            <Play className="w-4 h-4 fill-[#171717]" />
-            <span>Launch Workout</span>
+            <Play className="w-3.5 h-3.5 fill-[#E9FF91] text-[#E9FF91]" />
+            <span>Start Workout</span>
           </Link>
+
           <Link
             href="/weight-tracker"
-            className="px-4 py-3 rounded-lg bg-white hover:bg-[#F5F1E8] text-[#171717] text-xs font-heading font-black uppercase tracking-wider border-2 border-[#171717] shadow-neo flex items-center gap-2 transition-all active:translate-x-0.5 active:translate-y-0.5 cursor-pointer"
+            className="neo-btn min-h-[44px] px-3.5 py-2 rounded-xl bg-[#E9FF91] text-[#142746] text-xs font-heading font-bold inline-flex items-center justify-center gap-1.5 flex-1 sm:flex-initial"
           >
-            <Scale className="w-4 h-4 stroke-[2.5]" />
+            <Scale className="w-3.5 h-3.5" />
             <span>Log Weight</span>
           </Link>
         </div>
       </div>
 
-      {/* Bento Grid Command Center: 4 Major Metric Bento Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Card 1: Workouts this week (Pure White) */}
-        <div className="bento-card p-5 flex flex-col justify-between">
-          <div className="flex items-center justify-between">
-            <span className="text-[11px] font-mono uppercase tracking-wider text-[#171717]/70 font-bold">
-              Workouts / Week
-            </span>
-            <div className="p-1.5 rounded-lg bg-[#3155F5] text-[#E9F56A] border border-[#171717] shadow-neo-sm">
-              <CalendarDays className="w-4 h-4 stroke-[2.5]" />
+      {/* Four Primary Pastel Metric Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 2xl:grid-cols-4 gap-4">
+        <PastelCard tone="white" interactive className="p-4 sm:p-5 flex flex-col justify-between gap-3">
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-xs font-bold text-[#142746]/80">Workouts This Week</span>
+            <div className="p-2 rounded-xl bg-white border-[1.5px] border-[#142746] shrink-0">
+              <CalendarDays className="w-4 h-4 text-[#142746]" />
             </div>
           </div>
-          <div className="my-3">
-            <div className="text-4xl font-bold stat-number text-[#171717]">
+          <div>
+            <div className="stat-fluid-lg stat-number text-[#142746] break-words">
               {workoutsThisWeek.length}
             </div>
-            <span className="text-xs font-mono font-bold text-[#3155F5] mt-1 block">
-              {workoutsThisWeek.length > 0
-                ? "● On track for weekly quota"
-                : "○ No sessions completed this week"}
+            <span className="text-xs font-medium text-[#142746]/75 mt-1 block">
+              {workoutsThisWeek.length > 0 ? "Completed in last 7 days" : "No sessions this week"}
             </span>
           </div>
-          <div className="w-full bg-[#F5F1E8] border border-[#171717] h-2 rounded-full overflow-hidden">
+          <div className="w-full h-2 rounded-full bg-white border border-[#142746] overflow-hidden">
             <div
-              className="bg-[#3155F5] h-full"
-              style={{
-                width: `${Math.min(100, (workoutsThisWeek.length / 4) * 100)}%`,
-              }}
+              className="h-full bg-[#142746] transition-all duration-500"
+              style={{ width: `${Math.min(100, (workoutsThisWeek.length / 4) * 100)}%` }}
             />
           </div>
-        </div>
+        </PastelCard>
 
-        {/* Card 2: Current Streak (Acid Yellow) */}
-        <div className="bento-card-acid p-5 flex flex-col justify-between rounded-xl">
-          <div className="flex items-center justify-between">
-            <span className="text-[11px] font-mono uppercase tracking-wider text-[#171717] font-black">
-              Training Streak
-            </span>
-            <div className="p-1.5 rounded-lg bg-[#3155F5] text-[#E9F56A] border border-[#171717] shadow-neo-sm">
-              <Flame className="w-4 h-4 fill-[#E9F56A]" />
+        <PastelCard tone="lime" interactive className="p-4 sm:p-5 flex flex-col justify-between gap-3">
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-xs font-bold text-[#142746]/80">Current Streak</span>
+            <div className="p-2 rounded-xl bg-white border-[1.5px] border-[#142746] shrink-0">
+              <Flame className="w-4 h-4 text-[#142746] fill-[#F8C3B5]" />
             </div>
           </div>
-          <div className="my-3">
-            <div className="text-4xl font-bold stat-number text-[#171717]">
+          <div>
+            <div className="stat-fluid-lg stat-number text-[#142746] break-words">
               {streakCount}{" "}
-              <span className="text-xl font-mono font-bold">{streakUnit}</span>
+              <span className="text-base font-bold">{streakCount === 1 ? "Day" : "Days"}</span>
             </div>
-            <span className="text-xs font-mono font-semibold text-[#171717]/80 mt-1 block">
-              {streakCount > 0
-                ? "Consistent hypertrophic stimuli"
-                : "Complete a session to begin streak"}
+            <span className="text-xs font-medium text-[#142746]/75 mt-1 block">
+              {streakStatus}
             </span>
           </div>
-          <span className="text-[10px] font-mono text-[#171717] uppercase font-black px-2 py-0.5 rounded bg-white border border-[#171717] inline-block self-start shadow-neo-sm">
-            {streakStatus}
-          </span>
-        </div>
+          <PastelBadge tone="white" className="self-start text-[10px] max-w-full truncate">
+            {activePlan ? activePlan.name : "No active plan"}
+          </PastelBadge>
+        </PastelCard>
 
-        {/* Card 3: Weekly Volume (Electric Blue) */}
-        <div className="bento-card-electric p-5 flex flex-col justify-between rounded-xl">
-          <div className="flex items-center justify-between">
-            <span className="text-[11px] font-mono uppercase tracking-wider text-white/90 font-bold">
-              Weekly Volume
-            </span>
-            <div className="p-1.5 rounded-lg bg-[#E9F56A] text-[#171717] border border-[#171717] shadow-neo-sm">
-              <Dumbbell className="w-4 h-4 stroke-[2.5]" />
+        <PastelCard tone="green" interactive className="p-4 sm:p-5 flex flex-col justify-between gap-3">
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-xs font-bold text-[#142746]/80">Weekly Volume</span>
+            <div className="p-2 rounded-xl bg-white border-[1.5px] border-[#142746] shrink-0">
+              <Dumbbell className="w-4 h-4 text-[#142746]" />
             </div>
           </div>
-          <div className="my-3">
-            <div className="text-3xl sm:text-4xl font-bold stat-number text-[#E9F56A]">
-              {weeklyVolume.toLocaleString()}{" "}
-              <span className="text-sm font-normal text-white">kg</span>
+          <div>
+            <div className="stat-fluid-lg stat-number text-[#142746] break-words">
+              {weeklyVolume.toLocaleString()} <span className="text-base font-bold">kg</span>
             </div>
-            <span className="text-xs font-mono text-white/80 mt-1 block">
-              {weeklyVolume > 0
-                ? "Cumulative working set load"
-                : "No sets logged this week"}
+            <span className="text-xs font-medium text-[#142746]/75 mt-1 block">
+              {weeklyVolume > 0 ? "Working set load" : "Log sets to track load"}
             </span>
           </div>
           <Link
             href="/progress"
-            className="text-[11px] font-heading font-black text-[#E9F56A] hover:underline flex items-center gap-1 uppercase tracking-wider"
+            className="inline-flex items-center gap-1 text-xs font-bold text-[#142746] hover:underline"
           >
-            <span>Analyze Volume Trend</span>
-            <ArrowRight className="w-3.5 h-3.5 stroke-[2.5]" />
+            <span>Analytics</span>
+            <ArrowRight className="w-3.5 h-3.5" />
           </Link>
-        </div>
+        </PastelCard>
 
-        {/* Card 4: Personal Records (Signal Orange) */}
-        <div className="bento-card-orange p-5 flex flex-col justify-between rounded-xl">
-          <div className="flex items-center justify-between">
-            <span className="text-[11px] font-mono uppercase tracking-wider text-white font-black">
-              Personal Records
-            </span>
-            <div className="p-1.5 rounded-lg bg-white text-[#FF7043] border border-[#171717] shadow-neo-sm">
-              <Award className="w-4 h-4 text-[#FF7043] fill-[#FF7043]" />
+        <PastelCard tone="coral" interactive className="p-4 sm:p-5 flex flex-col justify-between gap-3">
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-xs font-bold text-[#142746]/80">Personal Records</span>
+            <div className="p-2 rounded-xl bg-white border-[1.5px] border-[#142746] shrink-0">
+              <Award className="w-4 h-4 text-[#142746]" />
             </div>
           </div>
-          <div className="my-3">
-            <div className="text-4xl font-bold stat-number text-white">
+          <div>
+            <div className="stat-fluid-lg stat-number text-[#142746] break-words">
               {personalRecords.length}
             </div>
-            <span className="text-xs font-mono text-white/90 mt-1 block">
-              {personalRecords.length > 0
-                ? "Peak strength milestones"
-                : "No PRs recorded yet"}
+            <span className="text-xs font-medium text-[#142746]/75 mt-1 block">
+              {personalRecords.length > 0 ? "Verified 1RM & max weights" : "No PRs logged yet"}
             </span>
           </div>
           <Link
             href="/progress"
-            className="text-[11px] font-heading font-black text-white hover:underline flex items-center gap-1 uppercase tracking-wider"
+            className="inline-flex items-center gap-1 text-xs font-bold text-[#142746] hover:underline"
           >
-            <span>View PR Wall</span>
-            <ArrowRight className="w-3.5 h-3.5 stroke-[2.5]" />
+            <span>View PR Hall</span>
+            <ArrowRight className="w-3.5 h-3.5" />
           </Link>
-        </div>
+        </PastelCard>
       </div>
 
-      {/* Middle Row: Volume Trajectory Chart & Quick Routine Launcher */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* Left: Volume Trajectory Chart (Pure White Container) */}
-        <div className="lg:col-span-8 bento-card p-6 space-y-4">
-          <div className="flex items-center justify-between border-b-2 border-[#171717]/15 pb-3">
+      {/* Main Bento Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+        {/* Strength Progression Volume Chart */}
+        <PastelCard tone="white" className="lg:col-span-7 p-5 space-y-4">
+          <div className="flex items-center justify-between border-b border-[#142746]/10 pb-3">
             <div>
-              <h3 className="text-lg font-heading font-black text-[#171717] uppercase tracking-tight">
-                Recent Training Volume Trajectory
+              <h3 className="font-heading font-extrabold text-base text-[#142746]">
+                Strength &amp; Volume Progression
               </h3>
-              <p className="text-xs text-[#171717]/70 font-mono mt-0.5">
-                Total load lifted per completed session (kg)
-              </p>
+              <p className="text-xs text-[#8993A5]">Total working volume per completed session</p>
             </div>
             <Link
-              href="/history"
-              className="text-xs font-mono font-bold text-[#3155F5] hover:underline uppercase"
+              href="/progress"
+              className="text-xs font-bold text-[#142746] hover:underline"
             >
-              Full History →
+              Details →
             </Link>
           </div>
 
-          <div className="h-60 w-full">
-            {chartData.length === 0 ? (
-              <div className="h-full flex items-center justify-center text-xs text-[#171717]/60 font-mono">
-                Log a workout to view volume trajectory.
+          <div className="h-[210px] sm:h-[240px] w-full min-w-0">
+            {volumeChartData.length === 0 ? (
+              <div className="h-full flex flex-col items-center justify-center text-center gap-2 bg-[#FAF9FD] rounded-xl border border-dashed border-[#142746]/25 p-4">
+                <p className="text-xs font-semibold text-[#8993A5]">
+                  No completed workouts recorded yet. Log a live session to graph progression.
+                </p>
+                <Link
+                  href="/workouts"
+                  className="text-xs font-bold text-[#142746] underline"
+                >
+                  Launch Live Workout
+                </Link>
               </div>
             ) : (
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={chartData}>
-                  <defs>
-                    <linearGradient id="volGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#3155F5" stopOpacity={0.6} />
-                      <stop offset="95%" stopColor="#E9F56A" stopOpacity={0.1} />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#E2DAC9" />
-                  <XAxis dataKey="date" stroke="#171717" fontSize={11} fontStyle="bold" />
-                  <YAxis stroke="#171717" fontSize={11} fontStyle="bold" />
+                <AreaChart data={volumeChartData} margin={{ top: 8, right: 8, left: -12, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke={CHART_GRID_COLOR} />
+                  <XAxis dataKey="date" stroke={CHART_AXIS_COLOR} fontSize={11} interval="preserveStartEnd" />
+                  <YAxis stroke={CHART_AXIS_COLOR} fontSize={11} width={44} />
                   <Tooltip contentStyle={NEO_TOOLTIP_STYLE} />
                   <Area
                     type="monotone"
                     dataKey="volume"
                     name="Volume (kg)"
-                    stroke="#3155F5"
-                    strokeWidth={3}
-                    fillOpacity={1}
-                    fill="url(#volGrad)"
+                    stroke="#142746"
+                    strokeWidth={2.5}
+                    fill="#BDF7B6"
+                    fillOpacity={0.65}
                   />
                 </AreaChart>
               </ResponsiveContainer>
             )}
           </div>
-        </div>
+        </PastelCard>
 
-        {/* Right: Active Routine Bento Card (Acid Yellow) */}
-        <div className="lg:col-span-4 bento-card-acid p-6 flex flex-col justify-between space-y-4 rounded-xl">
-          <div>
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-[10px] font-mono uppercase tracking-wider text-[#171717] font-black">
-                Active Routine
-              </span>
-              {activePlan && (
-                <span className="text-[10px] font-mono uppercase px-2 py-0.5 rounded-md bg-[#3155F5] text-white font-black border border-[#171717] shadow-neo-sm">
-                  {activePlan.phaseId || "Bulking"}
-                </span>
-              )}
+        {/* Weekly Training Activity (Sets Completed per Day) */}
+        <PastelCard tone="white" className="lg:col-span-5 p-5 space-y-4">
+          <div className="flex items-center justify-between border-b border-[#142746]/10 pb-3">
+            <div>
+              <h3 className="font-heading font-extrabold text-base text-[#142746]">
+                Weekly Training Activity
+              </h3>
+              <p className="text-xs text-[#8993A5]">Completed sets across the last 7 days</p>
             </div>
-            <h3 className="text-2xl font-heading font-black text-[#171717] leading-tight uppercase">
-              {activePlan ? activePlan.name : "No Active Routine"}
-            </h3>
-            <p className="text-xs text-[#171717]/80 mt-2 line-clamp-2 leading-relaxed font-sans">
-              {activePlan
-                ? activePlan.description || "Routine split active."
-                : "No workout split currently active. Build a plan to track volume & double progression."}
-            </p>
+            <PastelBadge tone="yellow">7 Days</PastelBadge>
           </div>
 
-          <div className="space-y-3 pt-3 border-t-2 border-[#171717]/20">
-            <div className="text-xs font-mono font-bold text-[#171717]">
-              Prescribed Days: {activePlan ? `${activePlan.days.length} Routine Splits` : "0 Routine Splits"}
+          <div className="h-[210px] sm:h-[240px] w-full min-w-0">
+            {sessions.length === 0 ? (
+              <div className="h-full flex items-center justify-center text-center bg-[#FAF9FD] rounded-xl border border-dashed border-[#142746]/25 p-4 text-xs font-semibold text-[#8993A5]">
+                Daily completed set activity will populate as you log sessions.
+              </div>
+            ) : (
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={weeklyActivityData} margin={{ top: 8, right: 8, left: -16, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke={CHART_GRID_COLOR} />
+                  <XAxis dataKey="label" stroke={CHART_AXIS_COLOR} fontSize={11} />
+                  <YAxis stroke={CHART_AXIS_COLOR} fontSize={11} allowDecimals={false} width={34} />
+                  <Tooltip contentStyle={NEO_TOOLTIP_STYLE} />
+                  <Bar
+                    dataKey="sets"
+                    name="Sets"
+                    fill="#EBCBF7"
+                    stroke="#142746"
+                    strokeWidth={1.5}
+                    radius={[6, 6, 0, 0]}
+                  />
+                </BarChart>
+              </ResponsiveContainer>
+            )}
+          </div>
+        </PastelCard>
+
+        {/* Recent Workouts Card */}
+        <PastelCard tone="white" className="lg:col-span-7 p-5 space-y-4">
+          <div className="flex items-center justify-between border-b border-[#142746]/10 pb-3">
+            <div>
+              <h3 className="font-heading font-extrabold text-base text-[#142746]">
+                Recent Workouts
+              </h3>
+              <p className="text-xs text-[#8993A5]">Latest logged sessions and volume</p>
             </div>
-            <Link
-              href="/plans"
-              className="w-full py-2.5 px-4 rounded-lg bg-[#3155F5] hover:bg-[#2542C7] text-white text-xs font-heading font-black uppercase tracking-wider text-center block border-2 border-[#171717] shadow-neo transition-transform active:translate-x-0.5 active:translate-y-0.5"
-            >
-              {activePlan ? "Configure Routine Days" : "Create First Workout Plan"}
+            <Link href="/history" className="text-xs font-bold text-[#142746] hover:underline">
+              Open Spreadsheet →
             </Link>
           </div>
+
+          {recentWorkouts.length === 0 ? (
+            <div className="py-8 text-center rounded-xl bg-[#FAF9FD] border border-dashed border-[#142746]/25 text-xs font-semibold text-[#8993A5]">
+              {searchQuery
+                ? "No recent workouts match your search."
+                : "No recent workouts logged yet."}
+            </div>
+          ) : (
+            <div className="space-y-2.5">
+              {recentWorkouts.map((sess) => {
+                const dateLabel = new Date(
+                  sess.completedAt || sess.startedAt
+                ).toLocaleDateString("en-US", { month: "short", day: "numeric" });
+                return (
+                  <Link
+                    key={sess.id}
+                    href="/history"
+                    className="flex items-center justify-between gap-3 p-3 rounded-xl bg-[#FAF9FD] hover:bg-[#E9FF91]/45 border-[1.5px] border-[#142746]/25 hover:border-[#142746] transition-all"
+                  >
+                    <div className="min-w-0">
+                      <div className="font-heading font-bold text-sm text-[#142746] truncate">
+                        {sess.name}
+                      </div>
+                      <div className="text-xs text-[#8993A5] mt-0.5">
+                        {dateLabel} • {sess.exercises.length} exercises
+                        {sess.durationSeconds > 0 && ` • ${formatDuration(sess.durationSeconds)}`}
+                      </div>
+                    </div>
+                    <span className="px-2.5 py-1 rounded-lg bg-[#BDF7B6] border border-[#142746] text-xs font-bold text-[#142746] shrink-0">
+                      {sess.totalVolume.toLocaleString()} kg
+                    </span>
+                  </Link>
+                );
+              })}
+            </div>
+          )}
+        </PastelCard>
+
+        {/* Body Composition, Target Weight & BMI Overview */}
+        <div className="lg:col-span-5 space-y-4">
+          <PastelCard tone="yellow" className="p-5 space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold uppercase tracking-wider text-[#142746]/75 flex items-center gap-1.5">
+                <Target className="w-4 h-4" />
+                Body Weight &amp; Target
+              </span>
+              <Link href="/weight-tracker" className="text-xs font-bold text-[#142746] underline">
+                Manage
+              </Link>
+            </div>
+
+            {currentWeight == null && targetWeight == null ? (
+              <p className="text-xs text-[#142746]/75">
+                No weight logs or target weight set yet. Record your baseline to track progress.
+              </p>
+            ) : (
+              <>
+                <div className="flex items-baseline gap-2.5 font-heading font-extrabold text-2xl text-[#142746]">
+                  <span>{currentWeight != null ? `${currentWeight} kg` : "--"}</span>
+                  <span className="text-sm text-[#8993A5]">→</span>
+                  <span>{targetWeight != null ? `${targetWeight} kg` : "--"}</span>
+                  <span className="ml-auto text-xs font-bold">{targetProgressPct}%</span>
+                </div>
+                <div className="w-full h-2.5 rounded-full bg-white border border-[#142746] overflow-hidden">
+                  <div
+                    className="h-full bg-[#142746] transition-all duration-500"
+                    style={{ width: `${targetProgressPct}%` }}
+                  />
+                </div>
+              </>
+            )}
+          </PastelCard>
+
+          <PastelCard tone="white" className="p-5 flex flex-wrap sm:flex-nowrap items-center justify-between gap-4">
+            <div className="space-y-1 min-w-0">
+              <span className="text-xs font-bold text-[#8993A5] flex items-center gap-1.5">
+                <Activity className="w-4 h-4 text-[#142746]" />
+                BMI Overview
+              </span>
+              <div className="flex items-baseline gap-2 flex-wrap">
+                <span className="stat-fluid-lg stat-number text-[#142746]">
+                  {bmiData ? bmiData.bmi : "--"}
+                </span>
+                <PastelBadge tone="lavender">
+                  {bmiData ? bmiData.category : "Not configured"}
+                </PastelBadge>
+              </div>
+              <p className="text-xs text-[#8993A5]">
+                {heightCm ? `Height ${heightCm} cm` : "Add height in Body Metrics"}
+              </p>
+            </div>
+
+            <Link
+              href="/body-metrics"
+              className="neo-btn min-h-[44px] inline-flex items-center px-3.5 py-2 rounded-xl bg-[#BDF7B6] text-[#142746] text-xs font-heading font-bold shrink-0"
+            >
+              Metrics →
+            </Link>
+          </PastelCard>
         </div>
       </div>
     </div>

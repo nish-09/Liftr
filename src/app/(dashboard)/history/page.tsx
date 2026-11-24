@@ -15,6 +15,7 @@ import {
   formatSheetWeight,
 } from "@/lib/export/dataHandler";
 import { WorkoutSessionItem, SessionExerciseItem, SetLogItem } from "@/types";
+import { PageHeader, PastelCard, PastelBadge } from "@/components/ui/DesignSystem";
 import {
   Calendar,
   Clock,
@@ -79,7 +80,7 @@ function EditableCell({
           }
         }}
         className={cn(
-          "w-full h-full px-2 py-1.5 bg-[#E9F56A]/40 text-[#171717] font-mono text-xs font-bold focus:outline-none ring-2 ring-inset ring-[#3155F5]",
+          "w-full h-full px-2.5 py-1.5 bg-[#E9FF91]/60 text-[#142746] text-xs font-bold focus:outline-none ring-2 ring-inset ring-[#142746]",
           align === "center" ? "text-center" : "text-left",
           className
         )}
@@ -93,9 +94,9 @@ function EditableCell({
       onClick={startEditing}
       title="Click to edit cell"
       className={cn(
-        "w-full h-full min-h-[34px] px-2.5 py-1.5 font-mono text-xs transition-colors hover:bg-[#E9F56A]/25 cursor-text flex items-center",
+        "w-full h-full min-h-[36px] px-2.5 py-1.5 text-xs transition-colors hover:bg-[#E9FF91]/35 cursor-text flex items-center",
         align === "center" ? "justify-center text-center" : "justify-start text-left",
-        value ? "text-[#171717] font-semibold" : "text-[#171717]/30",
+        value ? "text-[#142746] font-semibold" : "text-[#8993A5]",
         className
       )}
     >
@@ -125,7 +126,6 @@ export default function HistoryPage() {
   const [importFeedback, setImportFeedback] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Edit Modal State
   const [editingSession, setEditingSession] = useState<WorkoutSessionItem | null>(null);
   const [editName, setEditName] = useState("");
   const [editNotes, setEditNotes] = useState("");
@@ -146,8 +146,6 @@ export default function HistoryPage() {
     });
   }, [sessions, searchQuery, selectedPlanFilter, exercises]);
 
-  // Match the Google Sheet's First / Second / Third Set Reps columns by default,
-  // expanding dynamically if any visible session has 4+ working sets.
   const maxSetColumns = useMemo(() => {
     let maxSets = 3;
     filteredSessions.forEach((sess) => {
@@ -253,8 +251,7 @@ export default function HistoryPage() {
     updateSessionExercise(sess, ex.id, (item) => {
       const workingSets = getWorkingSets(item);
       const warmups = item.sets.filter((s) => s.setType === "warmup");
-      const baseWeight =
-        workingSets.find((s) => (s.weight || 0) > 0)?.weight ?? 0;
+      const baseWeight = workingSets.find((s) => (s.weight || 0) > 0)?.weight ?? 0;
 
       const updatedWorking = [...workingSets];
       while (updatedWorking.length <= setIndex) {
@@ -279,9 +276,10 @@ export default function HistoryPage() {
         isCompleted: parsed !== null,
       };
 
-      const mergedSets: SetLogItem[] = [...warmups, ...updatedWorking].map(
-        (s, idx) => ({ ...s, setNumber: idx + 1 })
-      );
+      const mergedSets: SetLogItem[] = [...warmups, ...updatedWorking].map((s, idx) => ({
+        ...s,
+        setNumber: idx + 1,
+      }));
 
       return {
         ...item,
@@ -313,13 +311,10 @@ export default function HistoryPage() {
         return;
       }
 
-      // Build lookup map of existing exercises by lowercase name
       const exerciseByName = new Map(
         exercises.map((ex) => [ex.name.trim().toLowerCase(), ex])
       );
 
-      // Insert in reverse order because addCompletedSession prepends newest sessions first,
-      // keeping DAY 1..DAY N in natural spreadsheet top-to-bottom order.
       const baseTime = Date.now();
       [...blocks].reverse().forEach((block, revIdx) => {
         const sessionId = `sess-import-${crypto.randomUUID()}`;
@@ -399,75 +394,64 @@ export default function HistoryPage() {
 
   return (
     <div className="space-y-6">
-      {/* Top Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-3 flex-wrap">
-            <h1 className="font-heading font-black text-3xl md:text-4xl text-[#171717] tracking-tight uppercase">
-              WORKOUT HISTORY
-            </h1>
-            <span className="px-2.5 py-1 rounded-lg bg-[#3155F5] text-white border-2 border-[#171717] text-xs font-mono font-bold shadow-neo-sm">
-              {filteredSessions.length} Completed Logs
-            </span>
-          </div>
-          <p className="text-sm text-[#171717]/70 font-sans mt-1">
-            Spreadsheet logbook matching your Day-by-Day training sheet. Click any Weight, Reps, Rest, or Note cell to edit inline.
-          </p>
-        </div>
-
-        {/* Sheet Import / Export Controls */}
-        <div className="flex items-center gap-2.5 flex-wrap">
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept=".csv,text/csv"
-            onChange={handleImportSheetCSV}
-            className="hidden"
-          />
-          <button
-            type="button"
-            onClick={() => fileInputRef.current?.click()}
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-white hover:bg-[#E9F56A] text-[#171717] text-xs font-mono font-bold uppercase border-2 border-[#171717] shadow-neo-sm cursor-pointer transition-all active:translate-x-0.5 active:translate-y-0.5"
-          >
-            <Upload className="w-3.5 h-3.5 stroke-[2.5]" />
-            <span>Import Sheet CSV</span>
-          </button>
-          <button
-            type="button"
-            disabled={filteredSessions.length === 0}
-            onClick={() => downloadWorkoutSheetCSV(filteredSessions, exercises, plans)}
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-[#3155F5] hover:bg-[#2542C7] disabled:opacity-40 text-white text-xs font-mono font-bold uppercase border-2 border-[#171717] shadow-neo-sm cursor-pointer transition-all active:translate-x-0.5 active:translate-y-0.5"
-          >
-            <Download className="w-3.5 h-3.5 stroke-[2.5]" />
-            <span>Export Sheet CSV</span>
-          </button>
-        </div>
-      </div>
+      <PageHeader
+        title="Workout History"
+        subtitle="Spreadsheet logbook matching your Day-by-Day sheet. Click any cell to edit inline."
+        badge={<PastelBadge tone="lavender">{filteredSessions.length} Logs</PastelBadge>}
+        actions={
+          <>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".csv,text/csv"
+              onChange={handleImportSheetCSV}
+              className="hidden"
+            />
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              className="neo-btn min-h-[44px] px-3.5 py-2 rounded-xl bg-white text-[#142746] text-xs font-bold inline-flex items-center justify-center gap-1.5 cursor-pointer flex-1 sm:flex-initial"
+            >
+              <Upload className="w-3.5 h-3.5" />
+              <span>Import Sheet CSV</span>
+            </button>
+            <button
+              type="button"
+              disabled={filteredSessions.length === 0}
+              onClick={() => downloadWorkoutSheetCSV(filteredSessions, exercises, plans)}
+              className="neo-btn min-h-[44px] px-3.5 py-2 rounded-xl bg-[#142746] text-white text-xs font-bold inline-flex items-center justify-center gap-1.5 disabled:opacity-40 cursor-pointer flex-1 sm:flex-initial"
+            >
+              <Download className="w-3.5 h-3.5" />
+              <span>Export Sheet CSV</span>
+            </button>
+          </>
+        }
+      />
 
       {importFeedback && (
-        <div className="px-4 py-2.5 rounded-lg bg-[#E9F56A] border-2 border-[#171717] shadow-neo-sm text-xs font-mono font-bold text-[#171717] flex items-center gap-2">
-          <FileSpreadsheet className="w-4 h-4 stroke-[2.5]" />
+        <PastelCard tone="lime" className="px-4 py-2.5 text-xs font-bold flex items-center gap-2">
+          <FileSpreadsheet className="w-4 h-4" />
           <span>{importFeedback}</span>
-        </div>
+        </PastelCard>
       )}
 
-      {/* Filter and Search Bar */}
-      <div className="bg-white border-2 border-[#171717] rounded-xl shadow-neo p-4 flex flex-col sm:flex-row gap-3">
+      {/* Search & Filter */}
+      <PastelCard tone="white" className="p-4 flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1">
-          <Search className="w-4 h-4 text-[#171717]/50 absolute left-3.5 top-3" />
+          <Search className="w-4 h-4 text-[#8993A5] absolute left-3.5 top-3" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search workout name or exercise..."
-            className="w-full pl-9 pr-4 py-2 rounded-lg bg-[#F5F1E8] border-2 border-[#171717] text-sm text-[#171717] placeholder:text-[#171717]/40 focus:outline-none focus:ring-2 focus:ring-[#3155F5] font-sans"
+            className="w-full pl-9 pr-4 py-2 rounded-xl bg-[#FAF9FD] border-[1.5px] border-[#142746] text-sm text-[#142746] placeholder:text-[#8993A5] focus:outline-none"
           />
         </div>
 
         <select
           value={selectedPlanFilter}
           onChange={(e) => setSelectedPlanFilter(e.target.value)}
-          className="px-3 py-2 rounded-lg bg-[#F5F1E8] border-2 border-[#171717] text-xs font-mono font-bold text-[#171717] focus:outline-none focus:ring-2 focus:ring-[#3155F5] shadow-neo-sm cursor-pointer"
+          className="px-3 py-2 rounded-xl bg-[#FAF9FD] border-[1.5px] border-[#142746] text-xs font-bold text-[#142746] cursor-pointer focus:outline-none"
         >
           <option value="all">All Workout Plans</option>
           {plans.map((p) => (
@@ -476,43 +460,42 @@ export default function HistoryPage() {
             </option>
           ))}
         </select>
-      </div>
+      </PastelCard>
 
       {/* Spreadsheet View */}
       {filteredSessions.length === 0 ? (
-        <div className="bg-white border-2 border-[#171717] rounded-xl shadow-neo overflow-hidden">
-          {/* Show exact sheet header structure preview even when empty */}
-          <div className="overflow-x-auto border-b-2 border-[#171717]">
-            <table className="w-full border-collapse text-xs font-mono">
+        <PastelCard tone="white" className="overflow-hidden">
+          <div className="overflow-x-auto border-b-[1.5px] border-[#142746]">
+            <table className="w-full border-collapse text-xs">
               <thead>
-                <tr className="bg-[#3155F5] text-white border-b-2 border-[#171717]">
-                  <th className="px-3 py-2.5 bg-[#E9F56A] text-[#171717] font-heading font-black uppercase border-r border-[#171717] whitespace-nowrap">
+                <tr className="bg-[#BDF7B6] text-[#142746] border-b border-[#142746]">
+                  <th className="px-3 py-2.5 bg-[#E9FF91] font-heading font-extrabold border-r border-[#142746] whitespace-nowrap">
                     DAY 1
                   </th>
-                  <th className="px-3 py-2.5 text-left font-heading font-black uppercase border-r border-[#171717]/40 whitespace-nowrap">
+                  <th className="px-3 py-2.5 text-left font-heading font-extrabold border-r border-[#142746]/25 whitespace-nowrap">
                     Exercise
                   </th>
-                  <th className="px-3 py-2.5 text-center font-heading font-black uppercase border-r border-[#171717]/40 whitespace-nowrap">
+                  <th className="px-3 py-2.5 text-center font-heading font-extrabold border-r border-[#142746]/25 whitespace-nowrap">
                     Sets
                   </th>
-                  <th className="px-3 py-2.5 text-center font-heading font-black uppercase border-r border-[#171717]/40 whitespace-nowrap">
+                  <th className="px-3 py-2.5 text-center font-heading font-extrabold border-r border-[#142746]/25 whitespace-nowrap">
                     Reps
                   </th>
-                  <th className="px-3 py-2.5 text-center font-heading font-black uppercase border-r border-[#171717]/40 whitespace-nowrap">
+                  <th className="px-3 py-2.5 text-center font-heading font-extrabold border-r border-[#142746]/25 whitespace-nowrap">
                     Rest (Seconds)
                   </th>
-                  <th className="px-3 py-2.5 text-center font-heading font-black uppercase border-r border-[#171717]/40 whitespace-nowrap">
+                  <th className="px-3 py-2.5 text-center font-heading font-extrabold border-r border-[#142746]/25 whitespace-nowrap">
                     Weight
                   </th>
                   {setColumnHeaders.map((label) => (
                     <th
                       key={label}
-                      className="px-3 py-2.5 text-center font-heading font-black uppercase border-r border-[#171717]/40 whitespace-nowrap"
+                      className="px-3 py-2.5 text-center font-heading font-extrabold border-r border-[#142746]/25 whitespace-nowrap"
                     >
                       {label}
                     </th>
                   ))}
-                  <th className="px-3 py-2.5 text-left font-heading font-black uppercase whitespace-nowrap">
+                  <th className="px-3 py-2.5 text-left font-heading font-extrabold whitespace-nowrap">
                     Note
                   </th>
                 </tr>
@@ -521,19 +504,23 @@ export default function HistoryPage() {
           </div>
 
           <div className="p-12 text-center space-y-3">
-            <div className="w-12 h-12 mx-auto rounded-xl bg-[#3155F5]/10 border-2 border-[#171717] flex items-center justify-center text-[#171717]">
-              <Calendar className="w-6 h-6 stroke-[2.5]" />
+            <div className="w-12 h-12 mx-auto rounded-2xl bg-[#EBCBF7] border-[1.5px] border-[#142746] flex items-center justify-center text-[#142746]">
+              <Calendar className="w-6 h-6" />
             </div>
-            <h3 className="font-heading font-black text-lg text-[#171717] tracking-tight uppercase">
-              NO SESSIONS FOUND
+            <h3 className="font-heading font-extrabold text-lg text-[#142746]">
+              No Sessions Found
             </h3>
-            <p className="text-xs text-[#171717]/70 max-w-md mx-auto font-sans">
+            <p className="text-xs text-[#8993A5] max-w-md mx-auto">
               Complete a session in Live Workout or click <strong>Import Sheet CSV</strong> to populate your Day-by-Day training spreadsheet.
             </p>
           </div>
-        </div>
+        </PastelCard>
       ) : (
-        <div className="bg-white border-2 border-[#171717] rounded-xl shadow-neo overflow-hidden">
+        <PastelCard tone="white" className="overflow-hidden">
+          <div className="lg:hidden px-3 py-1.5 bg-[#E9FF91]/60 border-b border-[#142746] text-[11px] font-bold text-[#142746] flex items-center justify-between">
+            <span>Day-by-Day Training Sheet</span>
+            <span>Swipe table →</span>
+          </div>
           <div className="overflow-x-auto">
             <table className="w-full border-collapse text-xs">
               <tbody>
@@ -565,54 +552,53 @@ export default function HistoryPage() {
 
                   return (
                     <Fragment key={sess.id}>
-                      {/* Spacer row between Day blocks (matches blank separator rows in sheet) */}
                       {sessIdx > 0 && (
                         <tr>
                           <td
                             colSpan={totalColCount}
-                            className="h-5 bg-[#F5F1E8] border-y-2 border-[#171717]"
+                            className="h-4 bg-[#EBCBF7]/45 border-y-[1.5px] border-[#142746]"
                           />
                         </tr>
                       )}
 
-                      {/* Compact Session Meta & Action Bar */}
-                      <tr className="bg-[#F5F1E8] border-b border-[#171717]">
+                      {/* Session Meta Strip */}
+                      <tr className="bg-[#FAF9FD] border-b border-[#142746]">
                         <td colSpan={totalColCount} className="px-3 py-2">
                           <div className="flex flex-wrap items-center justify-between gap-3">
                             <div className="flex items-center gap-2 flex-wrap">
-                              <span className="text-[10px] font-mono uppercase px-2 py-0.5 rounded bg-white text-[#171717] border border-[#171717] font-bold">
+                              <span className="text-[10px] px-2 py-0.5 rounded-full bg-white text-[#142746] border border-[#142746] font-bold">
                                 {formattedDate}
                               </span>
-                              <span className="font-heading font-black text-xs text-[#171717] uppercase tracking-tight">
+                              <span className="font-heading font-extrabold text-xs text-[#142746]">
                                 {sess.name}
                               </span>
                               {sess.phaseId && (
-                                <span className="text-[10px] font-mono uppercase px-2 py-0.5 rounded bg-[#B9A5EF] text-[#171717] border border-[#171717] font-bold">
+                                <PastelBadge tone="lavender" className="text-[10px]">
                                   {sess.phaseId}
-                                </span>
+                                </PastelBadge>
                               )}
                               {sess.notes && (
-                                <span className="text-[11px] font-sans italic text-[#171717]/70">
+                                <span className="text-[11px] italic text-[#8993A5]">
                                   &ldquo;{sess.notes}&rdquo;
                                 </span>
                               )}
                             </div>
 
-                            <div className="flex items-center gap-2 font-mono text-[11px] font-bold text-[#171717]">
+                            <div className="flex items-center gap-2 text-[11px] font-bold text-[#142746]">
                               {sess.durationSeconds > 0 && (
-                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-white border border-[#171717]">
-                                  <Clock className="w-3 h-3 text-[#3155F5]" />
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-white border border-[#142746]">
+                                  <Clock className="w-3 h-3" />
                                   {formatDuration(sess.durationSeconds)}
                                 </span>
                               )}
-                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-white border border-[#171717]">
-                                <Dumbbell className="w-3 h-3 text-[#FF7043]" />
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-white border border-[#142746]">
+                                <Dumbbell className="w-3 h-3" />
                                 {sess.totalVolume.toLocaleString()} kg
                               </span>
                               <button
                                 type="button"
                                 onClick={() => openEditModal(sess)}
-                                className="p-1 rounded bg-white hover:bg-[#3155F5] hover:text-white border border-[#171717] transition-colors cursor-pointer"
+                                className="p-1.5 rounded-lg bg-white hover:bg-[#E9FF91] border border-[#142746] cursor-pointer"
                                 title="Edit Session Info"
                               >
                                 <Edit2 className="w-3 h-3" />
@@ -620,7 +606,7 @@ export default function HistoryPage() {
                               <button
                                 type="button"
                                 onClick={() => handleDelete(sess.id, sess.name)}
-                                className="p-1 rounded bg-[#FF7043] hover:bg-[#e85d30] text-white border border-[#171717] transition-colors cursor-pointer"
+                                className="p-1.5 rounded-lg bg-[#F8C3B5] text-[#142746] border border-[#142746] cursor-pointer"
                                 title="Delete Session"
                               >
                                 <Trash2 className="w-3 h-3" />
@@ -630,35 +616,35 @@ export default function HistoryPage() {
                         </td>
                       </tr>
 
-                      {/* Exact Google Sheet Column Header Row */}
-                      <tr className="bg-[#3155F5] text-white border-b-2 border-[#171717]">
-                        <th className="px-3 py-2.5 bg-[#E9F56A] text-[#171717] font-heading font-black text-xs uppercase text-center border-r-2 border-[#171717] min-w-[88px] whitespace-nowrap">
+                      {/* Exact Spreadsheet Column Header Row */}
+                      <tr className="bg-[#BDF7B6] text-[#142746] border-b-[1.5px] border-[#142746]">
+                        <th className="px-3 py-2.5 bg-[#E9FF91] text-[#142746] font-heading font-extrabold text-xs text-center border-r-[1.5px] border-[#142746] min-w-[88px] whitespace-nowrap">
                           {dayLabel}
                         </th>
-                        <th className="px-3 py-2.5 text-left font-heading font-black text-xs uppercase border-r border-white/25 min-w-[230px] whitespace-nowrap">
+                        <th className="px-3 py-2.5 text-left font-heading font-extrabold text-xs border-r border-[#142746]/25 min-w-[220px] whitespace-nowrap">
                           Exercise
                         </th>
-                        <th className="px-3 py-2.5 text-center font-heading font-black text-xs uppercase border-r border-white/25 w-16 whitespace-nowrap">
+                        <th className="px-3 py-2.5 text-center font-heading font-extrabold text-xs border-r border-[#142746]/25 w-16 whitespace-nowrap">
                           Sets
                         </th>
-                        <th className="px-3 py-2.5 text-center font-heading font-black text-xs uppercase border-r border-white/25 w-16 whitespace-nowrap">
+                        <th className="px-3 py-2.5 text-center font-heading font-extrabold text-xs border-r border-[#142746]/25 w-16 whitespace-nowrap">
                           Reps
                         </th>
-                        <th className="px-3 py-2.5 text-center font-heading font-black text-xs uppercase border-r border-white/25 w-32 whitespace-nowrap">
+                        <th className="px-3 py-2.5 text-center font-heading font-extrabold text-xs border-r border-[#142746]/25 w-32 whitespace-nowrap">
                           Rest (Seconds)
                         </th>
-                        <th className="px-3 py-2.5 text-center font-heading font-black text-xs uppercase border-r border-white/25 w-24 whitespace-nowrap">
+                        <th className="px-3 py-2.5 text-center font-heading font-extrabold text-xs border-r border-[#142746]/25 w-24 whitespace-nowrap">
                           Weight
                         </th>
                         {setColumnHeaders.map((colHeader) => (
                           <th
                             key={colHeader}
-                            className="px-3 py-2.5 text-center font-heading font-black text-xs uppercase border-r border-white/25 min-w-[118px] whitespace-nowrap"
+                            className="px-3 py-2.5 text-center font-heading font-extrabold text-xs border-r border-[#142746]/25 min-w-[118px] whitespace-nowrap"
                           >
                             {colHeader}
                           </th>
                         ))}
-                        <th className="px-3 py-2.5 text-left font-heading font-black text-xs uppercase min-w-[240px] whitespace-nowrap">
+                        <th className="px-3 py-2.5 text-left font-heading font-extrabold text-xs min-w-[230px] whitespace-nowrap">
                           Note
                         </th>
                       </tr>
@@ -688,57 +674,38 @@ export default function HistoryPage() {
                         return (
                           <tr
                             key={sessionEx.id}
-                            className="border-b border-[#171717]/20 hover:bg-[#F5F1E8]/50 transition-colors"
+                            className="border-b border-[#142746]/15 hover:bg-[#FAF9FD] transition-colors"
                           >
-                            {/* Blank Day gutter cell */}
-                            <td className="bg-[#F5F1E8]/50 border-r-2 border-[#171717] px-2 py-1.5" />
-
-                            {/* Exercise Name */}
-                            <td className="px-3 py-2 font-sans font-bold text-[#171717] border-r border-[#171717]/20">
+                            <td className="bg-[#FAF9FD] border-r-[1.5px] border-[#142746] px-2 py-1.5" />
+                            <td className="px-3 py-2 font-semibold text-[#142746] border-r border-[#142746]/15">
                               {exMeta?.name || "Exercise"}
                             </td>
-
-                            {/* Sets */}
-                            <td className="px-2 py-2 text-center font-mono font-bold text-[#171717] border-r border-[#171717]/20">
+                            <td className="px-2 py-2 text-center font-bold text-[#142746] border-r border-[#142746]/15">
                               {workingSets.length || "—"}
                             </td>
-
-                            {/* Target Reps */}
-                            <td className="p-0 border-r border-[#171717]/20">
+                            <td className="p-0 border-r border-[#142746]/15">
                               <EditableCell
                                 type="number"
                                 value={targetRepsVal !== null ? String(targetRepsVal) : ""}
                                 placeholder="—"
-                                onCommit={(val) =>
-                                  handleCommitTargetReps(sess, sessionEx, val)
-                                }
+                                onCommit={(val) => handleCommitTargetReps(sess, sessionEx, val)}
                               />
                             </td>
-
-                            {/* Rest (Seconds) */}
-                            <td className="p-0 border-r border-[#171717]/20">
+                            <td className="p-0 border-r border-[#142746]/15">
                               <EditableCell
                                 type="number"
                                 value={String(restVal)}
-                                onCommit={(val) =>
-                                  handleCommitRest(sess, sessionEx, val)
-                                }
+                                onCommit={(val) => handleCommitRest(sess, sessionEx, val)}
                               />
                             </td>
-
-                            {/* Weight */}
-                            <td className="p-0 border-r border-[#171717]/20">
+                            <td className="p-0 border-r border-[#142746]/15">
                               <EditableCell
                                 type="text"
                                 value={weightDisplay}
                                 placeholder=""
-                                onCommit={(val) =>
-                                  handleCommitWeight(sess, sessionEx, val)
-                                }
+                                onCommit={(val) => handleCommitWeight(sess, sessionEx, val)}
                               />
                             </td>
-
-                            {/* First Set Reps, Second Set Reps, Third Set Reps, ... */}
                             {setColumnHeaders.map((_, setIdx) => {
                               const setItem = workingSets[setIdx];
                               const displayVal =
@@ -749,7 +716,7 @@ export default function HistoryPage() {
                               return (
                                 <td
                                   key={setIdx}
-                                  className="p-0 border-r border-[#171717]/20"
+                                  className="p-0 border-r border-[#142746]/15"
                                 >
                                   <EditableCell
                                     type="number"
@@ -762,18 +729,13 @@ export default function HistoryPage() {
                                 </td>
                               );
                             })}
-
-                            {/* Note */}
                             <td className="p-0">
                               <EditableCell
                                 type="text"
                                 align="left"
                                 value={sessionEx.notes || ""}
                                 placeholder="Add note..."
-                                onCommit={(val) =>
-                                  handleCommitNote(sess, sessionEx, val)
-                                }
-                                className="font-sans"
+                                onCommit={(val) => handleCommitNote(sess, sessionEx, val)}
                               />
                             </td>
                           </tr>
@@ -785,28 +747,28 @@ export default function HistoryPage() {
               </tbody>
             </table>
           </div>
-        </div>
+        </PastelCard>
       )}
 
       {/* Edit Session Modal */}
       {editingSession && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-150">
-          <div className="bg-white border-2 border-[#171717] rounded-xl shadow-neo-lg p-6 w-full max-w-md relative font-sans space-y-4">
-            <div className="flex items-center justify-between border-b-2 border-[#171717]/15 pb-3">
-              <h3 className="font-heading font-black text-xl text-[#171717] tracking-tight uppercase">
-                EDIT WORKOUT DETAILS
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#142746]/50 backdrop-blur-sm overflow-y-auto">
+          <PastelCard tone="white" className="p-5 sm:p-6 w-full max-w-md max-h-[calc(100dvh-2rem)] overflow-y-auto my-auto space-y-4 shadow-neo-xl">
+            <div className="flex items-center justify-between border-b border-[#142746]/15 pb-3">
+              <h3 className="font-heading font-extrabold text-xl text-[#142746]">
+                Edit Workout Details
               </h3>
               <button
                 onClick={() => setEditingSession(null)}
-                className="p-1.5 rounded-lg border-2 border-[#171717] bg-[#F5F1E8] hover:bg-[#3155F5] hover:text-white text-[#171717] transition-all cursor-pointer shadow-neo-sm"
+                className="p-1.5 rounded-xl border-[1.5px] border-[#142746] bg-[#FAF9FD] hover:bg-[#EBCBF7] text-[#142746] cursor-pointer"
               >
-                <X className="w-4 h-4 stroke-[2.5]" />
+                <X className="w-4 h-4" />
               </button>
             </div>
 
             <form onSubmit={handleSaveEdit} className="space-y-4">
               <div>
-                <label className="block text-xs font-mono uppercase font-black text-[#171717] mb-1.5">
+                <label className="block text-xs font-bold text-[#142746] mb-1.5">
                   Workout Name
                 </label>
                 <input
@@ -814,39 +776,39 @@ export default function HistoryPage() {
                   required
                   value={editName}
                   onChange={(e) => setEditName(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-lg bg-[#F5F1E8] border-2 border-[#171717] text-[#171717] text-sm focus:outline-none focus:ring-2 focus:ring-[#3155F5] font-sans"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-white border-[1.5px] border-[#142746] text-[#142746] text-sm focus:outline-none"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-mono uppercase font-black text-[#171717] mb-1.5">
+                <label className="block text-xs font-bold text-[#142746] mb-1.5">
                   Workout Notes
                 </label>
                 <textarea
                   rows={3}
                   value={editNotes}
                   onChange={(e) => setEditNotes(e.target.value)}
-                  className="w-full px-3.5 py-2 rounded-lg bg-[#F5F1E8] border-2 border-[#171717] text-[#171717] text-sm focus:outline-none focus:ring-2 focus:ring-[#3155F5] resize-none font-sans"
+                  className="w-full px-3.5 py-2 rounded-xl bg-white border-[1.5px] border-[#142746] text-[#142746] text-sm resize-none focus:outline-none"
                 />
               </div>
 
-              <div className="flex justify-end gap-2 pt-3 border-t-2 border-[#171717]/15">
+              <div className="flex justify-end gap-2 pt-3 border-t border-[#142746]/15">
                 <button
                   type="button"
                   onClick={() => setEditingSession(null)}
-                  className="px-4 py-2.5 rounded-lg bg-[#F5F1E8] border-2 border-[#171717] hover:bg-white text-[#171717] text-xs font-mono font-bold uppercase transition-all shadow-neo-sm cursor-pointer"
+                  className="neo-btn px-4 py-2 rounded-xl bg-white text-[#142746] text-xs font-bold cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2.5 rounded-lg bg-[#3155F5] hover:bg-[#2542C7] text-white text-xs font-mono uppercase font-black tracking-wider border-2 border-[#171717] shadow-neo cursor-pointer transition-all active:translate-x-0.5 active:translate-y-0.5"
+                  className="neo-btn px-5 py-2 rounded-xl bg-[#142746] text-white text-xs font-bold cursor-pointer"
                 >
                   Save Changes
                 </button>
               </div>
             </form>
-          </div>
+          </PastelCard>
         </div>
       )}
     </div>

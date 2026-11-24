@@ -6,11 +6,11 @@ import confetti from "canvas-confetti";
 import { useWorkoutStore } from "@/stores/useWorkoutStore";
 import { useHistoryStore } from "@/stores/useHistoryStore";
 import { useExerciseStore } from "@/stores/useExerciseStore";
-import { usePlanStore } from "@/stores/usePlanStore";
 import { calculateProgression, ProgressionSuggestion } from "@/lib/progression/engine";
 import { calculateVolume } from "@/lib/calculations/strength";
 import { formatDuration, cn } from "@/lib/utils";
 import { SetType, PersonalRecordItem } from "@/types";
+import { PastelCard, PastelBadge, PageHeader } from "@/components/ui/DesignSystem";
 import {
   Play,
   Check,
@@ -18,11 +18,12 @@ import {
   Trash2,
   Timer,
   Award,
-  ChevronDown,
+  ChevronRight,
   X,
   RefreshCw,
   Dumbbell,
   Flame,
+  Pause,
 } from "lucide-react";
 
 interface CompletionSummary {
@@ -43,6 +44,10 @@ export default function WorkoutsPage() {
     discardWorkout,
     elapsedSeconds,
     tickElapsed,
+    restTimer,
+    pauseRestTimer,
+    resumeRestTimer,
+    addRestSeconds,
     addExerciseToWorkout,
     removeExerciseFromWorkout,
     addSetToExercise,
@@ -53,7 +58,6 @@ export default function WorkoutsPage() {
   } = useWorkoutStore();
 
   const { exercises } = useExerciseStore();
-  const { plans } = usePlanStore();
   const { addCompletedSession, getPreviousPerformance } = useHistoryStore();
 
   const [mounted, setMounted] = useState(false);
@@ -62,6 +66,7 @@ export default function WorkoutsPage() {
   const [showCompletionModal, setShowCompletionModal] = useState(false);
   const [completionSummary, setCompletionSummary] = useState<CompletionSummary | null>(null);
   const [sessionNotes, setSessionNotes] = useState("");
+  const [focusedExerciseId, setFocusedExerciseId] = useState<string | null>(null);
 
   useEffect(() => {
     setMounted(true);
@@ -89,10 +94,15 @@ export default function WorkoutsPage() {
     });
   }
 
+  // Highlight user-selected exercise, or automatically highlight first incomplete movement
+  const activeExerciseId =
+    focusedExerciseId ||
+    activeSession?.exercises.find((ex) => ex.sets.some((s) => !s.isCompleted))?.id ||
+    activeSession?.exercises[0]?.id ||
+    null;
+
   function handleStartEmptySession() {
-    startWorkout({
-      name: "Full Body Functional Session",
-    });
+    startWorkout({ name: "Full Body Functional Session" });
   }
 
   function handleAddExercise(e: React.FormEvent) {
@@ -129,120 +139,126 @@ export default function WorkoutsPage() {
         particleCount: 90,
         spread: 80,
         origin: { y: 0.6 },
-        colors: ["#3155F5", "#E9F56A", "#FF7043", "#B9A5EF"],
+        colors: ["#BDF7B6", "#E9FF91", "#EBCBF7", "#F8C3B5", "#142746"],
       });
     } catch {
       // Confetti fallback
     }
   }
 
-  // If no workout is active, show the Quick Start & Plan Day Launcher
+  // Empty / Launcher View
   if (!activeSession) {
     return (
       <div className="space-y-6">
-        <div>
-          <h1 className="font-heading text-3xl sm:text-4xl font-black text-[#171717] uppercase tracking-tight">
-            Live Workout Command
-          </h1>
-          <p className="text-sm text-[#171717]/80 font-mono mt-0.5">
-            Real-time double progression set logging with automated weight stepping and rest tracking.
-          </p>
-        </div>
+        <PageHeader
+          title="Live Workout Tracker"
+          subtitle="Real-time double progression set logging with automated weight stepping and rest tracking."
+        />
 
-        {/* Start Workout Bento Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Quick Start Card (Electric Blue) */}
-          <div className="bento-card-electric p-6 sm:p-7 flex flex-col justify-between space-y-6 rounded-xl border-2 border-[#171717] shadow-neo-lg">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <PastelCard tone="lime" className="p-6 flex flex-col justify-between space-y-6">
             <div className="space-y-3">
-              <div className="w-12 h-12 rounded-lg bg-[#E9F56A] border-2 border-[#171717] flex items-center justify-center text-[#171717] shadow-neo-sm">
-                <Play className="w-6 h-6 fill-[#171717] ml-0.5" />
+              <div className="w-12 h-12 rounded-2xl bg-white border-[1.5px] border-[#142746] flex items-center justify-center shadow-neo-sm">
+                <Play className="w-5 h-5 fill-[#142746] text-[#142746] ml-0.5" />
               </div>
               <div>
-                <h2 className="text-2xl font-heading font-black text-white uppercase tracking-tight">
+                <h2 className="text-xl font-heading font-extrabold text-[#142746]">
                   Start Empty Workout
                 </h2>
-                <p className="text-xs text-white/90 font-mono mt-1 leading-relaxed">
-                  Build your workout on the fly. Select movements from your library, log sets, and test PRs with transparent double progression suggestions.
+                <p className="text-xs sm:text-sm text-[#142746]/75 mt-1 leading-relaxed">
+                  Build your session on the fly. Select movements from your library, log sets, and track progressive overload automatically.
                 </p>
               </div>
             </div>
 
             <button
               onClick={handleStartEmptySession}
-              className="w-full py-3.5 px-6 rounded-lg bg-[#E9F56A] hover:bg-[#dae852] text-[#171717] font-heading font-black text-sm uppercase tracking-wider border-2 border-[#171717] shadow-neo flex items-center justify-center gap-2 transition-all active:translate-x-0.5 active:translate-y-0.5 cursor-pointer"
+              className="neo-btn w-full py-3.5 px-5 rounded-xl bg-[#142746] hover:bg-[#1e3863] text-white font-heading font-bold text-sm flex items-center justify-center gap-2 cursor-pointer"
             >
-              <Play className="w-4 h-4 fill-[#171717]" />
+              <Play className="w-4 h-4 fill-[#E9FF91] text-[#E9FF91]" />
               <span>Launch Live Workout</span>
             </button>
-          </div>
+          </PastelCard>
 
-          {/* Start From Plan Card (Pure White) */}
-          <div className="bento-card p-6 sm:p-7 flex flex-col justify-between space-y-6 rounded-xl border-2 border-[#171717] shadow-neo-lg">
+          <PastelCard tone="lavender" className="p-6 flex flex-col justify-between space-y-6">
             <div className="space-y-3">
-              <div className="w-12 h-12 rounded-lg bg-[#3155F5] border-2 border-[#171717] flex items-center justify-center text-[#E9F56A] shadow-neo-sm">
-                <Dumbbell className="w-6 h-6" />
+              <div className="w-12 h-12 rounded-2xl bg-white border-[1.5px] border-[#142746] flex items-center justify-center shadow-neo-sm">
+                <Dumbbell className="w-5 h-5 text-[#142746]" />
               </div>
               <div>
-                <h2 className="text-2xl font-heading font-black text-[#171717] uppercase tracking-tight">
+                <h2 className="text-xl font-heading font-extrabold text-[#142746]">
                   Start From Workout Plan
                 </h2>
-                <p className="text-xs text-[#171717]/75 font-mono mt-1 leading-relaxed">
-                  Choose a prescribed training day from your custom routines to auto-populate targets, rep ranges, and historical baseline weights.
+                <p className="text-xs sm:text-sm text-[#142746]/75 mt-1 leading-relaxed">
+                  Choose a prescribed training day from your routines to auto-populate rep ranges, rest durations, and baseline weights.
                 </p>
               </div>
             </div>
 
             <Link
               href="/plans"
-              className="w-full py-3.5 px-6 rounded-lg bg-[#3155F5] hover:bg-[#2542C7] text-white font-heading font-black text-xs uppercase tracking-wider text-center border-2 border-[#171717] shadow-neo flex items-center justify-center gap-2 transition-all active:translate-x-0.5 active:translate-y-0.5"
+              className="neo-btn w-full py-3.5 px-5 rounded-xl bg-white hover:bg-[#FAF9FD] text-[#142746] font-heading font-bold text-sm flex items-center justify-center gap-2"
             >
               <span>Browse Workout Plans</span>
-              <ChevronDown className="w-4 h-4 -rotate-90 text-[#E9F56A]" />
+              <ChevronRight className="w-4 h-4" />
             </Link>
-          </div>
+          </PastelCard>
         </div>
       </div>
     );
   }
 
+  const restMins = Math.floor(restTimer.remainingSeconds / 60);
+  const restSecs = restTimer.remainingSeconds % 60;
+  const formattedRest = `${restMins}:${restSecs < 10 ? "0" : ""}${restSecs}`;
+
   return (
-    <div className="space-y-6 pb-12">
-      {/* Sticky Active Session Header Bar (Electric Blue) */}
-      <div className="bento-card-electric p-4 sm:p-5 border-2 border-[#171717] shadow-neo-lg flex flex-col sm:flex-row sm:items-center justify-between gap-4 sticky top-16 z-20 rounded-xl">
-        <div>
-          <div className="flex items-center gap-2 mb-1">
-            <span className="w-2.5 h-2.5 rounded-full bg-[#E9F56A] border border-[#171717] animate-ping" />
-            <span className="text-[10px] font-mono uppercase tracking-widest text-[#E9F56A] font-black">
+    <div className="space-y-5 pb-10">
+      {/* Sticky Active Session Header on desktop */}
+      <PastelCard
+        tone="lime"
+        className="p-4 sm:p-5 lg:sticky lg:top-[73px] z-20 flex flex-col lg:flex-row lg:items-center justify-between gap-4"
+      >
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-2 mb-1 flex-wrap">
+            <span className="w-2.5 h-2.5 rounded-full bg-[#142746] animate-ping" />
+            <span className="text-[11px] font-bold uppercase tracking-wider text-[#142746]">
               Active Session
             </span>
-            <span className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-[#2542C7] text-white border border-[#171717] flex items-center gap-1 font-bold">
-              <RefreshCw className="w-2.5 h-2.5 text-[#E9F56A]" />
+            <PastelBadge tone="white" className="text-[10px]">
+              <RefreshCw className="w-2.5 h-2.5" />
               {syncStatus}
-            </span>
+            </PastelBadge>
           </div>
 
           <input
             type="text"
             value={activeSession.name}
             onChange={(e) => updateSessionMeta({ name: e.target.value })}
-            className="text-lg sm:text-xl font-heading font-black text-white bg-transparent border-b-2 border-transparent hover:border-[#E9F56A]/50 focus:border-[#E9F56A] focus:outline-none transition-colors uppercase tracking-tight"
+            className="w-full min-h-[40px] text-lg sm:text-xl font-heading font-extrabold text-[#142746] bg-transparent border-b border-transparent hover:border-[#142746]/40 focus:border-[#142746] focus:outline-none transition-colors"
           />
         </div>
 
-        {/* Live Metrics: Duration, Volume, Sets, Finish */}
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-4 px-3.5 py-1.5 rounded-lg bg-[#2542C7] border-2 border-[#171717] text-xs font-mono text-white shadow-neo-sm">
+        {/* Live Metrics & Controls */}
+        <div className="flex flex-wrap items-center gap-2 sm:gap-2.5 w-full lg:w-auto">
+          <div className="flex items-center justify-between sm:justify-start gap-2.5 sm:gap-3 px-3 sm:px-3.5 py-2 rounded-xl bg-white border-[1.5px] border-[#142746] text-xs shadow-neo-sm w-full sm:w-auto">
             <div>
-              <span className="text-[10px] text-white/70 block uppercase font-bold">Time</span>
-              <span className="font-bold text-white">{formatDuration(elapsedSeconds)}</span>
+              <span className="text-[10px] text-[#8993A5] block font-semibold">Time</span>
+              <span className="font-extrabold stat-number text-[#142746]">
+                {formatDuration(elapsedSeconds)}
+              </span>
             </div>
+            <div className="h-6 w-px bg-[#142746]/15" />
             <div>
-              <span className="text-[10px] text-white/70 block uppercase font-bold">Volume</span>
-              <span className="font-bold text-[#E9F56A]">{currentVolume.toLocaleString()} kg</span>
+              <span className="text-[10px] text-[#8993A5] block font-semibold">Volume</span>
+              <span className="font-extrabold stat-number text-[#142746]">
+                {currentVolume.toLocaleString()} kg
+              </span>
             </div>
+            <div className="h-6 w-px bg-[#142746]/15" />
             <div>
-              <span className="text-[10px] text-white/70 block uppercase font-bold">Sets</span>
-              <span className="font-bold text-[#E9F56A]">
+              <span className="text-[10px] text-[#8993A5] block font-semibold">Sets</span>
+              <span className="font-extrabold stat-number text-[#142746]">
                 {completedSetsCount}/{totalSetsCount}
               </span>
             </div>
@@ -250,10 +266,10 @@ export default function WorkoutsPage() {
 
           <button
             onClick={handleFinishSession}
-            className="px-4 py-2.5 rounded-lg bg-[#E9F56A] hover:bg-[#dae852] text-[#171717] font-heading text-xs uppercase font-black border-2 border-[#171717] shadow-neo cursor-pointer transition-all active:translate-x-0.5 active:translate-y-0.5 flex items-center gap-1.5"
+            className="neo-btn min-h-[44px] px-4 py-2.5 rounded-xl bg-[#142746] hover:bg-[#1e3863] text-white font-heading text-xs font-bold flex items-center justify-center gap-1.5 flex-1 sm:flex-initial cursor-pointer"
           >
-            <Check className="w-4 h-4 stroke-[3]" />
-            <span>Finish</span>
+            <Check className="w-4 h-4 text-[#BDF7B6] stroke-[2.5]" />
+            <span>Finish Workout</span>
           </button>
 
           <button
@@ -262,81 +278,165 @@ export default function WorkoutsPage() {
                 discardWorkout();
               }
             }}
-            className="p-2.5 rounded-lg bg-[#FF7043] hover:bg-[#e85d30] text-white border-2 border-[#171717] shadow-neo-sm transition-all cursor-pointer"
+            className="neo-btn min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl bg-[#F8C3B5] text-[#142746] cursor-pointer shrink-0"
             title="Discard Session"
+            aria-label="Discard Session"
           >
-            <Trash2 className="w-4 h-4 stroke-[2.5]" />
+            <Trash2 className="w-4 h-4" />
           </button>
         </div>
-      </div>
+      </PastelCard>
 
-      {/* Exercise Cards (Pure White) */}
+      {/* Prominent Inline Rest Timer Banner when active */}
+      {(restTimer.isRunning || restTimer.remainingSeconds > 0) && (
+        <PastelCard
+          tone="green"
+          className="px-4 py-3 flex flex-wrap items-center justify-between gap-3"
+        >
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-xl bg-white border-[1.5px] border-[#142746]">
+              <Timer className="w-4 h-4 text-[#142746]" />
+            </div>
+            <div>
+              <div className="text-[11px] font-bold text-[#142746]/70 uppercase">
+                Rest Timer {restTimer.setNumber ? `• Set ${restTimer.setNumber}` : ""}
+              </div>
+              <div className="text-xl font-extrabold stat-number text-[#142746]">
+                {formattedRest}
+              </div>
+            </div>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              onClick={() => addRestSeconds(15)}
+              className="neo-btn min-h-[42px] px-3 py-1.5 rounded-lg bg-white text-xs font-bold cursor-pointer"
+            >
+              +15s
+            </button>
+            <button
+              type="button"
+              onClick={() => addRestSeconds(30)}
+              className="neo-btn min-h-[42px] px-3 py-1.5 rounded-lg bg-white text-xs font-bold cursor-pointer"
+            >
+              +30s
+            </button>
+            {restTimer.isRunning ? (
+              <button
+                type="button"
+                onClick={pauseRestTimer}
+                className="neo-btn min-h-[42px] px-3.5 py-1.5 rounded-lg bg-[#142746] text-white text-xs font-bold inline-flex items-center gap-1 cursor-pointer"
+              >
+                <Pause className="w-3.5 h-3.5" />
+                Pause
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={resumeRestTimer}
+                className="neo-btn min-h-[42px] px-3.5 py-1.5 rounded-lg bg-[#E9FF91] text-[#142746] text-xs font-bold inline-flex items-center gap-1 cursor-pointer"
+              >
+                <Play className="w-3.5 h-3.5 fill-[#142746]" />
+                Resume
+              </button>
+            )}
+          </div>
+        </PastelCard>
+      )}
+
+      {/* Exercise Cards */}
       <div className="space-y-5">
         {activeSession.exercises.map((sessionEx, exIdx) => {
           const exMeta =
             exercises.find((ex) => ex.id === sessionEx.exerciseId) || sessionEx.exercise;
+          const isHighlighted = activeExerciseId === sessionEx.id;
+          const completedInEx = sessionEx.sets.filter((s) => s.isCompleted).length;
 
           return (
-            <div
+            <PastelCard
               key={sessionEx.id}
-              className="bento-card p-5 border-2 border-[#171717] shadow-neo rounded-xl space-y-4"
+              tone="white"
+              onClick={() => setFocusedExerciseId(sessionEx.id)}
+              className={cn(
+                "p-4 sm:p-5 space-y-4 transition-all",
+                isHighlighted && "ring-2 ring-[#142746] bg-[#FAF9FD]"
+              )}
             >
               {/* Exercise Header */}
-              <div className="flex items-start justify-between gap-3 border-b-2 border-[#171717]/15 pb-3">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-[#3155F5] text-[#E9F56A] border-2 border-[#171717] font-mono text-sm font-black flex items-center justify-center shadow-neo-sm">
+              <div className="flex items-start justify-between gap-3 border-b border-[#142746]/15 pb-3">
+                <div className="flex items-center gap-3 min-w-0">
+                  <div
+                    className={cn(
+                      "w-9 h-9 rounded-xl border-[1.5px] border-[#142746] font-extrabold text-sm flex items-center justify-center shrink-0 shadow-neo-sm",
+                      isHighlighted ? "bg-[#E9FF91]" : "bg-[#EBCBF7]"
+                    )}
+                  >
                     {exIdx + 1}
                   </div>
-                  <div>
-                    <h3 className="text-lg font-heading font-black text-[#171717] uppercase tracking-tight">
-                      {exMeta?.name || "Exercise"}
-                    </h3>
-                    <div className="flex items-center gap-2 text-xs font-mono text-[#171717]/80 mt-0.5">
-                      <span className="uppercase font-black text-[#171717] px-1.5 py-0.5 rounded bg-[#E9F56A] border border-[#171717]">
-                        {exMeta?.primaryMuscleGroup}
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <h3 className="text-base sm:text-lg font-heading font-extrabold text-[#142746] truncate">
+                        {exMeta?.name || "Exercise"}
+                      </h3>
+                      {isHighlighted && (
+                        <PastelBadge tone="lime" className="text-[10px]">
+                          Active
+                        </PastelBadge>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-2 text-xs text-[#8993A5] mt-0.5 flex-wrap">
+                      <span className="capitalize font-semibold text-[#142746]">
+                        {exMeta?.primaryMuscleGroup?.replace("_", " ")}
                       </span>
                       <span>•</span>
-                      <span className="capitalize font-semibold">{exMeta?.equipment}</span>
+                      <span className="capitalize">{exMeta?.equipment?.replace("_", " ")}</span>
                       <span>•</span>
-                      <span className="flex items-center gap-1 font-semibold">
-                        <Timer className="w-3.5 h-3.5 text-[#3155F5]" />
-                        {exMeta?.defaultRestDuration || 90}s rest
+                      <span className="inline-flex items-center gap-1">
+                        <Timer className="w-3.5 h-3.5 text-[#142746]" />
+                        {sessionEx.restDuration || exMeta?.defaultRestDuration || 90}s rest
+                      </span>
+                      <span>•</span>
+                      <span className="font-bold text-[#142746]">
+                        {completedInEx}/{sessionEx.sets.length} sets
                       </span>
                     </div>
                   </div>
                 </div>
 
                 <button
-                  onClick={() => removeExerciseFromWorkout(sessionEx.id)}
-                  className="p-1.5 rounded-md hover:bg-[#FF7043] hover:text-white border border-transparent hover:border-[#171717] text-[#171717]/60 transition-colors"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    removeExerciseFromWorkout(sessionEx.id);
+                  }}
+                  className="p-2 rounded-xl hover:bg-[#F8C3B5] border border-transparent hover:border-[#142746] text-[#8993A5] hover:text-[#142746] transition-colors cursor-pointer"
                   title="Remove Exercise"
                 >
                   <Trash2 className="w-4 h-4" />
                 </button>
               </div>
 
-              {/* Set Logging Table */}
-              <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs font-mono">
+              {/* Desktop Table Layout */}
+              <div className="hidden lg:block overflow-x-auto">
+                <table className="w-full text-left text-xs">
                   <thead>
-                    <tr className="border-b-2 border-[#171717] text-[#171717] text-[10px] uppercase font-black tracking-wider">
+                    <tr className="border-b-[1.5px] border-[#142746] text-[#8993A5] text-[11px] uppercase font-bold tracking-wider">
                       <th className="py-2 px-2 w-14 text-center">Set</th>
-                      <th className="py-2 px-2 min-w-[130px]">Previous Session</th>
-                      <th className="py-2 px-2 min-w-[160px]">Target Today</th>
-                      <th className="py-2 px-2 min-w-[120px]">Weight (kg)</th>
-                      <th className="py-2 px-2 min-w-[100px]">Reps</th>
+                      <th className="py-2 px-2 min-w-[120px]">Previous</th>
+                      <th className="py-2 px-2 min-w-[160px]">Today&apos;s Target</th>
+                      <th className="py-2 px-2 min-w-[130px]">Weight (kg)</th>
+                      <th className="py-2 px-2 min-w-[115px]">Reps</th>
                       <th className="py-2 px-2 w-16 text-center">Done</th>
                       <th className="py-2 px-1 w-8"></th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y-2 divide-[#171717]/15">
+                  <tbody className="divide-y divide-[#142746]/10">
                     {sessionEx.sets.map((setLog) => {
                       const prevPerformance = getPreviousPerformance(
                         sessionEx.exerciseId,
                         setLog.setNumber,
                         activeSession.planDayId
                       );
-
                       const progression: ProgressionSuggestion = calculateProgression({
                         exerciseId: sessionEx.exerciseId,
                         setNumber: setLog.setNumber,
@@ -347,7 +447,6 @@ export default function WorkoutsPage() {
                         previousReps: prevPerformance?.previousReps,
                         progressionEnabled: true,
                       });
-
                       const isCompleted = setLog.isCompleted;
 
                       return (
@@ -355,10 +454,9 @@ export default function WorkoutsPage() {
                           key={setLog.id}
                           className={cn(
                             "transition-colors",
-                            isCompleted ? "bg-[#E9F56A]/25 font-bold" : "hover:bg-[#F5F1E8]"
+                            isCompleted ? "bg-[#BDF7B6]/45" : "hover:bg-[#FAF9FD]"
                           )}
                         >
-                          {/* Set number badge & type selector */}
                           <td className="py-2.5 px-2 text-center">
                             <select
                               value={setLog.setType}
@@ -368,12 +466,12 @@ export default function WorkoutsPage() {
                                 })
                               }
                               className={cn(
-                                "text-xs font-mono font-bold rounded px-1.5 py-0.5 border-2 border-[#171717] cursor-pointer shadow-neo-sm",
+                                "text-xs font-bold rounded-lg px-2 py-1 border-[1.5px] border-[#142746] cursor-pointer",
                                 setLog.setType === "warmup"
-                                  ? "bg-[#B9A5EF] text-[#171717]"
+                                  ? "bg-[#EBCBF7]"
                                   : setLog.setType === "drop"
-                                  ? "bg-[#FF7043] text-white"
-                                  : "bg-white text-[#171717]"
+                                  ? "bg-[#F8C3B5]"
+                                  : "bg-white"
                               )}
                             >
                               <option value="normal">{setLog.setNumber}</option>
@@ -382,58 +480,52 @@ export default function WorkoutsPage() {
                             </select>
                           </td>
 
-                          {/* Previous performance */}
-                          <td className="py-2.5 px-2 text-[#171717]/80 font-bold">
+                          <td className="py-2.5 px-2 text-[#142746]/80 font-semibold">
                             {prevPerformance ? (
                               <span>
                                 {prevPerformance.previousWeight} kg × {prevPerformance.previousReps}
                               </span>
                             ) : (
-                              <span className="text-[#171717]/40 italic">—</span>
+                              <span className="text-[#8993A5]">—</span>
                             )}
                           </td>
 
-                          {/* Target Today with Progression Reason Badge */}
                           <td className="py-2.5 px-2">
-                            <div className="flex items-center gap-1.5">
-                              <span className="font-bold text-[#171717] font-mono text-xs">
+                            <div className="flex items-center gap-1.5 flex-wrap">
+                              <span className="font-bold text-[#142746]">
                                 {progression.targetWeight > 0
                                   ? `${progression.targetWeight} kg × ${progression.targetReps}`
                                   : `${progression.targetReps} reps`}
                               </span>
                               {progression.reasonType === "WEIGHT_INCREASE" && (
                                 <span
-                                  className="text-[9px] px-1.5 py-0.2 rounded bg-[#3155F5] text-[#E9F56A] border border-[#171717] font-bold"
+                                  className="text-[10px] px-2 py-0.5 rounded-full bg-[#E9FF91] border border-[#142746] font-bold"
                                   title={progression.explanation}
                                 >
-                                  +WEIGHT
+                                  +Weight
                                 </span>
                               )}
                               {progression.reasonType === "REP_PROGRESSION" && (
                                 <span
-                                  className="text-[9px] px-1.5 py-0.2 rounded bg-[#E9F56A] text-[#171717] border border-[#171717] font-bold"
+                                  className="text-[10px] px-2 py-0.5 rounded-full bg-[#BDF7B6] border border-[#142746] font-bold"
                                   title={progression.explanation}
                                 >
-                                  +1 REP
+                                  +1 Rep
                                 </span>
                               )}
                             </div>
                           </td>
 
-                          {/* Weight Input with Stepper */}
                           <td className="py-2.5 px-2">
-                            <div className="flex items-center gap-1 max-w-[130px]">
+                            <div className="flex items-center gap-1">
                               <button
                                 type="button"
                                 onClick={() =>
                                   updateSet(sessionEx.id, setLog.id, {
-                                    weight: Math.max(
-                                      0,
-                                      Number((setLog.weight - 2.5).toFixed(2))
-                                    ),
+                                    weight: Math.max(0, Number((setLog.weight - 2.5).toFixed(2))),
                                   })
                                 }
-                                className="w-6 h-7 rounded bg-[#F5F1E8] hover:bg-[#E9F56A] text-[#171717] font-bold flex items-center justify-center text-xs border-2 border-[#171717] shadow-neo-sm"
+                                className="w-7 h-8 rounded-lg bg-white hover:bg-[#E9FF91] text-[#142746] font-bold border border-[#142746] cursor-pointer"
                               >
                                 -
                               </button>
@@ -448,7 +540,7 @@ export default function WorkoutsPage() {
                                   })
                                 }
                                 placeholder="0"
-                                className="w-16 px-2 py-1 rounded bg-[#F5F1E8] border-2 border-[#171717] text-[#171717] text-center font-mono font-bold text-xs focus:outline-none focus:bg-white"
+                                className="w-16 px-2 py-1.5 rounded-lg bg-white border-[1.5px] border-[#142746] text-[#142746] text-center font-bold text-xs focus:outline-none"
                               />
                               <button
                                 type="button"
@@ -457,16 +549,15 @@ export default function WorkoutsPage() {
                                     weight: Number((setLog.weight + 2.5).toFixed(2)),
                                   })
                                 }
-                                className="w-6 h-7 rounded bg-[#F5F1E8] hover:bg-[#E9F56A] text-[#171717] font-bold flex items-center justify-center text-xs border-2 border-[#171717] shadow-neo-sm"
+                                className="w-7 h-8 rounded-lg bg-white hover:bg-[#E9FF91] text-[#142746] font-bold border border-[#142746] cursor-pointer"
                               >
                                 +
                               </button>
                             </div>
                           </td>
 
-                          {/* Reps Input with Stepper */}
                           <td className="py-2.5 px-2">
-                            <div className="flex items-center gap-1 max-w-[120px]">
+                            <div className="flex items-center gap-1">
                               <button
                                 type="button"
                                 onClick={() =>
@@ -474,7 +565,7 @@ export default function WorkoutsPage() {
                                     reps: Math.max(0, setLog.reps - 1),
                                   })
                                 }
-                                className="w-6 h-7 rounded bg-[#F5F1E8] hover:bg-[#E9F56A] text-[#171717] font-bold flex items-center justify-center text-xs border-2 border-[#171717] shadow-neo-sm"
+                                className="w-7 h-8 rounded-lg bg-white hover:bg-[#E9FF91] text-[#142746] font-bold border border-[#142746] cursor-pointer"
                               >
                                 -
                               </button>
@@ -488,46 +579,42 @@ export default function WorkoutsPage() {
                                   })
                                 }
                                 placeholder="0"
-                                className="w-14 px-2 py-1 rounded bg-[#F5F1E8] border-2 border-[#171717] text-[#171717] text-center font-mono font-bold text-xs focus:outline-none focus:bg-white"
+                                className="w-14 px-2 py-1.5 rounded-lg bg-white border-[1.5px] border-[#142746] text-[#142746] text-center font-bold text-xs focus:outline-none"
                               />
                               <button
                                 type="button"
                                 onClick={() =>
-                                  updateSet(sessionEx.id, setLog.id, {
-                                    reps: setLog.reps + 1,
-                                  })
+                                  updateSet(sessionEx.id, setLog.id, { reps: setLog.reps + 1 })
                                 }
-                                className="w-6 h-7 rounded bg-[#F5F1E8] hover:bg-[#E9F56A] text-[#171717] font-bold flex items-center justify-center text-xs border-2 border-[#171717] shadow-neo-sm"
+                                className="w-7 h-8 rounded-lg bg-white hover:bg-[#E9FF91] text-[#142746] font-bold border border-[#142746] cursor-pointer"
                               >
                                 +
                               </button>
                             </div>
                           </td>
 
-                          {/* Checkbox button */}
                           <td className="py-2.5 px-2 text-center">
                             <button
                               type="button"
                               onClick={() => toggleSetCompleted(sessionEx.id, setLog.id)}
                               className={cn(
-                                "w-7 h-7 rounded-md flex items-center justify-center transition-all cursor-pointer mx-auto border-2 border-[#171717]",
+                                "w-8 h-8 rounded-xl flex items-center justify-center transition-all cursor-pointer mx-auto border-[1.5px] border-[#142746]",
                                 isCompleted
-                                  ? "bg-[#E9F56A] text-[#171717] font-bold shadow-neo-sm"
-                                  : "bg-white text-transparent hover:border-[#3155F5]"
+                                  ? "bg-[#BDF7B6] text-[#142746] shadow-neo-sm"
+                                  : "bg-white text-transparent hover:bg-[#E9FF91]/40"
                               )}
                             >
                               <Check className="w-4 h-4 stroke-[3]" />
                             </button>
                           </td>
 
-                          {/* Delete Set */}
                           <td className="py-2.5 px-1 text-center">
                             <button
                               type="button"
                               onClick={() => deleteSetFromExercise(sessionEx.id, setLog.id)}
-                              className="p-1 rounded text-[#171717]/50 hover:text-[#FF7043]"
+                              className="p-1.5 rounded-lg text-[#8993A5] hover:text-[#142746] hover:bg-[#F8C3B5] cursor-pointer"
                             >
-                              <X className="w-3.5 h-3.5 stroke-[2.5]" />
+                              <X className="w-3.5 h-3.5" />
                             </button>
                           </td>
                         </tr>
@@ -537,78 +624,261 @@ export default function WorkoutsPage() {
                 </table>
               </div>
 
-              {/* Set Actions: + Set, + Warmup, + Drop */}
-              <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t-2 border-[#171717]/15">
-                <div className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={() => addSetToExercise(sessionEx.id, "normal")}
-                    className="px-3 py-1.5 rounded-lg bg-[#3155F5] hover:bg-[#2542C7] text-white text-xs font-heading font-black uppercase tracking-wider border-2 border-[#171717] shadow-neo-sm flex items-center gap-1 active:translate-x-0.5 active:translate-y-0.5"
-                  >
-                    <Plus className="w-3.5 h-3.5" />
-                    <span>Add Set</span>
-                  </button>
+              {/* Mobile & Tablet Card Set View (Touch-friendly) */}
+              <div className="lg:hidden space-y-3">
+                {sessionEx.sets.map((setLog) => {
+                  const prevPerformance = getPreviousPerformance(
+                    sessionEx.exerciseId,
+                    setLog.setNumber,
+                    activeSession.planDayId
+                  );
+                  const progression = calculateProgression({
+                    exerciseId: sessionEx.exerciseId,
+                    setNumber: setLog.setNumber,
+                    minReps: 8,
+                    maxReps: 12,
+                    increment: exMeta?.progressionIncrement || 2.5,
+                    previousWeight: prevPerformance?.previousWeight,
+                    previousReps: prevPerformance?.previousReps,
+                    progressionEnabled: true,
+                  });
+                  const isCompleted = setLog.isCompleted;
 
-                  <button
-                    type="button"
-                    onClick={() => addSetToExercise(sessionEx.id, "warmup")}
-                    className="px-2.5 py-1.5 rounded-lg bg-[#B9A5EF] hover:bg-[#a48fe0] text-[#171717] text-xs font-mono font-bold border-2 border-[#171717] shadow-neo-sm flex items-center gap-1"
-                  >
-                    <span>+ Warmup Set</span>
-                  </button>
+                  return (
+                    <div
+                      key={setLog.id}
+                      className={cn(
+                        "p-3.5 rounded-2xl border-[1.5px] border-[#142746] space-y-3 transition-colors",
+                        isCompleted ? "bg-[#BDF7B6]/60" : "bg-white"
+                      )}
+                    >
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <div className="flex flex-wrap items-center gap-2 min-w-0">
+                          <select
+                            value={setLog.setType}
+                            onChange={(e) =>
+                              updateSet(sessionEx.id, setLog.id, {
+                                setType: e.target.value as SetType,
+                              })
+                            }
+                            className="min-h-[40px] text-xs font-bold rounded-lg px-2.5 py-1.5 border-[1.5px] border-[#142746] bg-white"
+                          >
+                            <option value="normal">Set {setLog.setNumber}</option>
+                            <option value="warmup">Warmup</option>
+                            <option value="drop">Drop</option>
+                          </select>
+                          <div className="text-xs text-[#8993A5] font-medium flex flex-wrap items-center gap-x-2">
+                            {prevPerformance && (
+                              <span>
+                                Prev:{" "}
+                                <strong className="text-[#142746]">
+                                  {prevPerformance.previousWeight}kg × {prevPerformance.previousReps}
+                                </strong>
+                              </span>
+                            )}
+                            <span>
+                              Target:{" "}
+                              <strong className="text-[#142746]">
+                                {progression.targetWeight > 0
+                                  ? `${progression.targetWeight}kg × ${progression.targetReps}`
+                                  : `${progression.targetReps} reps`}
+                              </strong>
+                            </span>
+                          </div>
+                        </div>
 
-                  <button
-                    type="button"
-                    onClick={() => addSetToExercise(sessionEx.id, "drop")}
-                    className="px-2.5 py-1.5 rounded-lg bg-[#FF7043] hover:bg-[#e85d30] text-white text-xs font-mono font-bold border-2 border-[#171717] shadow-neo-sm flex items-center gap-1"
-                  >
-                    <span>+ Drop Set</span>
-                  </button>
-                </div>
+                        <div className="flex items-center gap-1.5 ml-auto">
+                          <button
+                            type="button"
+                            onClick={() => toggleSetCompleted(sessionEx.id, setLog.id)}
+                            className={cn(
+                              "min-h-[44px] px-3.5 py-2 rounded-xl border-[1.5px] border-[#142746] text-xs font-bold inline-flex items-center gap-1.5 cursor-pointer",
+                              isCompleted ? "bg-[#142746] text-[#BDF7B6]" : "bg-[#E9FF91] text-[#142746]"
+                            )}
+                          >
+                            <Check className="w-4 h-4 stroke-[3]" />
+                            {isCompleted ? "Done" : "Complete"}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => deleteSetFromExercise(sessionEx.id, setLog.id)}
+                            aria-label="Delete Set"
+                            className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl border border-[#142746]/25 text-[#8993A5] hover:bg-[#F8C3B5] hover:text-[#142746]"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 min-[380px]:grid-cols-2 gap-3">
+                        <div>
+                          <span className="text-[10px] font-bold uppercase text-[#8993A5] block mb-1">
+                            Weight (kg)
+                          </span>
+                          <div className="flex items-center gap-1.5">
+                            <button
+                              type="button"
+                              onClick={() =>
+                                updateSet(sessionEx.id, setLog.id, {
+                                  weight: Math.max(0, Number((setLog.weight - 2.5).toFixed(2))),
+                                })
+                              }
+                              className="w-11 h-11 shrink-0 rounded-xl bg-white border-[1.5px] border-[#142746] font-bold text-base cursor-pointer"
+                            >
+                              -
+                            </button>
+                            <input
+                              type="number"
+                              inputMode="decimal"
+                              step={0.5}
+                              min={0}
+                              value={setLog.weight === 0 ? "" : setLog.weight}
+                              onChange={(e) =>
+                                updateSet(sessionEx.id, setLog.id, {
+                                  weight: Number(e.target.value) || 0,
+                                })
+                              }
+                              placeholder="0"
+                              className="w-full min-w-0 h-11 rounded-xl bg-white border-[1.5px] border-[#142746] text-center font-bold text-sm"
+                            />
+                            <button
+                              type="button"
+                              onClick={() =>
+                                updateSet(sessionEx.id, setLog.id, {
+                                  weight: Number((setLog.weight + 2.5).toFixed(2)),
+                                })
+                              }
+                              className="w-11 h-11 shrink-0 rounded-xl bg-white border-[1.5px] border-[#142746] font-bold text-base cursor-pointer"
+                            >
+                              +
+                            </button>
+                          </div>
+                        </div>
+
+                        <div>
+                          <span className="text-[10px] font-bold uppercase text-[#8993A5] block mb-1">
+                            Reps
+                          </span>
+                          <div className="flex items-center gap-1.5">
+                            <button
+                              type="button"
+                              onClick={() =>
+                                updateSet(sessionEx.id, setLog.id, {
+                                  reps: Math.max(0, setLog.reps - 1),
+                                })
+                              }
+                              className="w-11 h-11 shrink-0 rounded-xl bg-white border-[1.5px] border-[#142746] font-bold text-base cursor-pointer"
+                            >
+                              -
+                            </button>
+                            <input
+                              type="number"
+                              inputMode="numeric"
+                              min={0}
+                              value={setLog.reps === 0 ? "" : setLog.reps}
+                              onChange={(e) =>
+                                updateSet(sessionEx.id, setLog.id, {
+                                  reps: parseInt(e.target.value, 10) || 0,
+                                })
+                              }
+                              placeholder="0"
+                              className="w-full min-w-0 h-11 rounded-xl bg-white border-[1.5px] border-[#142746] text-center font-bold text-sm"
+                            />
+                            <button
+                              type="button"
+                              onClick={() =>
+                                updateSet(sessionEx.id, setLog.id, { reps: setLog.reps + 1 })
+                              }
+                              className="w-11 h-11 shrink-0 rounded-xl bg-white border-[1.5px] border-[#142746] font-bold text-base cursor-pointer"
+                            >
+                              +
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
-            </div>
+
+              {/* Set Actions */}
+              <div className="flex flex-wrap items-center gap-2 pt-3 border-t border-[#142746]/15">
+                <button
+                  type="button"
+                  onClick={() => addSetToExercise(sessionEx.id, "normal")}
+                  className="neo-btn px-3.5 py-2 rounded-xl bg-[#142746] text-white text-xs font-heading font-bold flex items-center gap-1.5 cursor-pointer"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>Add Set</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => addSetToExercise(sessionEx.id, "warmup")}
+                  className="neo-btn px-3 py-2 rounded-xl bg-[#EBCBF7] text-[#142746] text-xs font-bold cursor-pointer"
+                >
+                  + Warmup Set
+                </button>
+                <button
+                  type="button"
+                  onClick={() => addSetToExercise(sessionEx.id, "drop")}
+                  className="neo-btn px-3 py-2 rounded-xl bg-[#F8C3B5] text-[#142746] text-xs font-bold cursor-pointer"
+                >
+                  + Drop Set
+                </button>
+              </div>
+            </PastelCard>
           );
         })}
 
-        {/* Add Exercise button */}
-        <button
-          onClick={() => setIsAddExerciseOpen(true)}
-          className="w-full py-4 rounded-xl border-2 border-dashed border-[#171717] bg-white hover:bg-[#E9F56A] text-[#171717] font-heading font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-neo transition-all cursor-pointer"
-        >
-          <Plus className="w-4 h-4 stroke-[2.5]" />
-          <span>Add Another Exercise to Session</span>
-        </button>
+        {/* Add Exercise & Finish Session Footer */}
+        <div className="flex flex-col sm:flex-row gap-3">
+          <button
+            onClick={() => setIsAddExerciseOpen(true)}
+            className="flex-1 min-h-[48px] py-3.5 px-4 rounded-2xl border-[1.5px] border-dashed border-[#142746] bg-[#FAF9FD] hover:bg-[#E9FF91] text-[#142746] font-heading font-bold text-sm flex items-center justify-center gap-2 transition-all cursor-pointer"
+          >
+            <Plus className="w-4 h-4" />
+            <span>Add Exercise</span>
+          </button>
+
+          <button
+            onClick={handleFinishSession}
+            className="neo-btn lg:hidden min-h-[48px] py-3.5 px-5 rounded-2xl bg-[#142746] text-white font-heading font-bold text-sm flex items-center justify-center gap-2 cursor-pointer"
+          >
+            <Check className="w-4 h-4 text-[#BDF7B6] stroke-[2.5]" />
+            <span>Finish &amp; Save Workout</span>
+          </button>
+        </div>
       </div>
 
-      {/* Add Movement Selector Modal */}
+      {/* Add Movement Modal */}
       {isAddExerciseOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <div className="bento-card p-6 w-full max-w-md border-2 border-[#171717] shadow-neo-xl">
-            <h3 className="text-lg font-heading font-black text-[#171717] uppercase tracking-tight mb-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#142746]/50 backdrop-blur-sm overflow-y-auto">
+          <PastelCard tone="white" className="p-5 sm:p-6 w-full max-w-md max-h-[calc(100dvh-2rem)] overflow-y-auto my-auto space-y-4 shadow-neo-xl">
+            <h3 className="text-lg font-heading font-extrabold text-[#142746]">
               Add Exercise to Live Session
             </h3>
             <form onSubmit={handleAddExercise} className="space-y-4">
               {exercises.length === 0 ? (
-                <div className="p-4 rounded-lg bg-[#F5F1E8] border-2 border-[#171717] text-center space-y-2">
-                  <p className="text-xs text-[#171717]/80 font-mono">
-                    No exercises found in your library. Add custom exercises in the Exercise Library first.
+                <div className="p-4 rounded-xl bg-[#FAF9FD] border-[1.5px] border-[#142746] text-center space-y-2">
+                  <p className="text-xs text-[#8993A5]">
+                    No exercises found in your library. Add custom exercises first.
                   </p>
                   <Link
                     href="/exercises"
-                    className="inline-block px-3 py-1.5 rounded-md bg-[#3155F5] text-white text-xs font-mono font-bold border border-[#171717]"
+                    className="neo-btn inline-block px-3 py-1.5 rounded-lg bg-[#E9FF91] text-[#142746] text-xs font-bold"
                   >
                     Go to Exercise Library →
                   </Link>
                 </div>
               ) : (
                 <div>
-                  <label className="block text-xs font-mono uppercase text-[#171717] font-black mb-1.5">
+                  <label className="block text-xs font-bold text-[#142746] mb-1.5">
                     Select Exercise
                   </label>
                   <select
                     value={selectedExerciseId}
                     onChange={(e) => setSelectedExerciseId(e.target.value)}
-                    className="w-full px-3.5 py-2.5 rounded-lg bg-[#F5F1E8] border-2 border-[#171717] text-[#171717] text-sm font-semibold focus:outline-none"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-white border-[1.5px] border-[#142746] text-[#142746] text-sm font-medium focus:outline-none"
                   >
                     <option value="">-- Choose Exercise --</option>
                     {exercises.map((ex) => (
@@ -624,90 +894,85 @@ export default function WorkoutsPage() {
                 <button
                   type="button"
                   onClick={() => setIsAddExerciseOpen(false)}
-                  className="px-4 py-2 rounded-lg bg-[#F5F1E8] border-2 border-[#171717] text-xs font-mono uppercase font-bold text-[#171717]"
+                  className="neo-btn px-4 py-2 rounded-xl bg-white text-xs font-bold text-[#142746] cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={!selectedExerciseId}
-                  className="px-5 py-2 rounded-lg bg-[#3155F5] text-[#E9F56A] text-xs font-heading uppercase font-black border-2 border-[#171717] shadow-neo disabled:opacity-50"
+                  className="neo-btn px-5 py-2 rounded-xl bg-[#142746] text-white text-xs font-bold disabled:opacity-40 cursor-pointer"
                 >
                   Add Exercise
                 </button>
               </div>
             </form>
-          </div>
+          </PastelCard>
         </div>
       )}
 
       {/* Workout Completion Summary Modal */}
       {showCompletionModal && completionSummary && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-md">
-          <div className="bento-card-electric p-6 sm:p-8 w-full max-w-lg border-2 border-[#171717] shadow-neo-xl relative space-y-6">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#142746]/55 backdrop-blur-sm overflow-y-auto">
+          <PastelCard tone="green" className="p-5 sm:p-8 w-full max-w-lg max-h-[calc(100dvh-2rem)] overflow-y-auto my-auto space-y-6 shadow-neo-xl">
             <div className="text-center space-y-2">
-              <div className="w-14 h-14 mx-auto rounded-xl bg-[#E9F56A] border-2 border-[#171717] flex items-center justify-center text-[#171717] shadow-neo">
-                <Award className="w-8 h-8 stroke-[2.5]" />
+              <div className="w-14 h-14 mx-auto rounded-2xl bg-[#E9FF91] border-[1.5px] border-[#142746] flex items-center justify-center text-[#142746] shadow-neo-sm">
+                <Award className="w-7 h-7 stroke-[2.2]" />
               </div>
-              <h2 className="font-heading text-3xl font-black text-white uppercase tracking-tight">
+              <h2 className="font-heading text-2xl sm:text-3xl font-extrabold text-[#142746]">
                 Workout Completed!
               </h2>
-              <p className="text-xs text-white/90 font-mono">
-                Performance recorded to persistent database and strength analytics.
+              <p className="text-xs text-[#142746]/75">
+                Performance saved to Workout History and Strength Analytics.
               </p>
             </div>
 
-            {/* Metrics Bento Grid */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
-              <div className="p-3 rounded-lg bg-[#2542C7] border-2 border-[#171717]">
-                <span className="text-[10px] font-mono uppercase text-white/80 font-bold block">
+              <div className="p-3 rounded-xl bg-white border-[1.5px] border-[#142746]">
+                <span className="text-[10px] font-bold uppercase text-[#8993A5] block">
                   Duration
                 </span>
-                <span className="font-mono text-base font-bold text-white">
+                <span className="text-base font-extrabold stat-number text-[#142746]">
                   {formatDuration(completionSummary.durationSeconds)}
                 </span>
               </div>
-              <div className="p-3 rounded-lg bg-[#2542C7] border-2 border-[#171717]">
-                <span className="text-[10px] font-mono uppercase text-white/80 font-bold block">
+              <div className="p-3 rounded-xl bg-white border-[1.5px] border-[#142746]">
+                <span className="text-[10px] font-bold uppercase text-[#8993A5] block">
                   Volume
                 </span>
-                <span className="font-mono text-base font-bold text-[#E9F56A]">
+                <span className="text-base font-extrabold stat-number text-[#142746]">
                   {completionSummary.totalVolume.toLocaleString()} kg
                 </span>
               </div>
-              <div className="p-3 rounded-lg bg-[#2542C7] border-2 border-[#171717]">
-                <span className="text-[10px] font-mono uppercase text-white/80 font-bold block">
+              <div className="p-3 rounded-xl bg-white border-[1.5px] border-[#142746]">
+                <span className="text-[10px] font-bold uppercase text-[#8993A5] block">
                   Sets Logged
                 </span>
-                <span className="font-mono text-base font-bold text-[#E9F56A]">
+                <span className="text-base font-extrabold stat-number text-[#142746]">
                   {completionSummary.completedSetsCount}
                 </span>
               </div>
-              <div className="p-3 rounded-lg bg-[#2542C7] border-2 border-[#171717]">
-                <span className="text-[10px] font-mono uppercase text-white/80 font-bold block">
+              <div className="p-3 rounded-xl bg-white border-[1.5px] border-[#142746]">
+                <span className="text-[10px] font-bold uppercase text-[#8993A5] block">
                   Movements
                 </span>
-                <span className="font-mono text-base font-bold text-[#FF7043]">
+                <span className="text-base font-extrabold stat-number text-[#142746]">
                   {completionSummary.exercisesCount}
                 </span>
               </div>
             </div>
 
-            {/* PRs Broken notification */}
-            {completionSummary.newPRs && completionSummary.newPRs.length > 0 && (
-              <div className="p-4 rounded-lg bg-[#FF7043] border-2 border-[#171717] text-white space-y-2 shadow-neo-sm">
-                <div className="flex items-center gap-2 text-xs font-mono font-bold uppercase">
-                  <Flame className="w-4 h-4 text-white fill-white" />
+            {completionSummary.newPRs.length > 0 && (
+              <div className="p-4 rounded-xl bg-[#F8C3B5] border-[1.5px] border-[#142746] text-[#142746] space-y-2">
+                <div className="flex items-center gap-2 text-xs font-bold uppercase">
+                  <Flame className="w-4 h-4" />
                   <span>Personal Records Broken!</span>
                 </div>
                 <div className="space-y-1">
                   {completionSummary.newPRs.map((pr) => (
-                    <div
-                      key={pr.id}
-                      className="text-xs font-mono flex items-center justify-between"
-                    >
-                      <span className="capitalize">{pr.prType.replace("_", " ")}</span>
-                      <span className="font-bold text-white">{pr.value} kg</span>
+                    <div key={pr.id} className="text-xs flex items-center justify-between">
+                      <span className="capitalize font-medium">{pr.prType.replace("_", " ")}</span>
+                      <span className="font-extrabold">{pr.value} kg</span>
                     </div>
                   ))}
                 </div>
@@ -717,12 +982,13 @@ export default function WorkoutsPage() {
             <button
               onClick={() => {
                 setShowCompletionModal(false);
+                setSessionNotes("");
               }}
-              className="w-full py-3.5 rounded-lg bg-[#E9F56A] hover:bg-[#dae852] text-[#171717] font-heading text-xs uppercase font-black border-2 border-[#171717] shadow-neo cursor-pointer transition-all active:translate-x-0.5 active:translate-y-0.5"
+              className="neo-btn w-full py-3.5 rounded-xl bg-[#142746] text-white font-heading text-sm font-bold cursor-pointer"
             >
               Continue to Dashboard
             </button>
-          </div>
+          </PastelCard>
         </div>
       )}
     </div>

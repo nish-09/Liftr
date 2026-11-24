@@ -27,7 +27,7 @@ interface LiftrMarkProps {
 /**
  * Standalone Liftr monogram icon mark.
  */
-export function LiftrMark({ className = "w-8 h-8", color = "#3155F5" }: LiftrMarkProps) {
+export function LiftrMark({ className = "w-8 h-8", color = "#142746" }: LiftrMarkProps) {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -53,8 +53,8 @@ interface LiftrLogoProps {
  */
 export function LiftrLogo({
   className = "h-9 w-auto",
-  symbolColor = "#3155F5",
-  textColor = "#171717",
+  symbolColor = "#142746",
+  textColor = "#142746",
 }: LiftrLogoProps) {
   return (
     <svg

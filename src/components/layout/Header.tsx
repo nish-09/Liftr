@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LogOut } from "lucide-react";
+import { Menu, PanelRightOpen, LogOut } from "lucide-react";
 import { signOut } from "@/lib/auth/actions";
 import ActiveWorkoutPill from "@/components/workout/ActiveWorkoutPill";
 import { LiftrMark } from "@/components/common/LiftrLogo";
@@ -10,62 +10,91 @@ import { LiftrMark } from "@/components/common/LiftrLogo";
 interface HeaderProps {
   userDisplayName?: string | null;
   userEmail?: string | null;
+  onOpenSidebar?: () => void;
+  onOpenContextPanel?: () => void;
 }
 
-export default function Header({ userDisplayName, userEmail }: HeaderProps) {
+export default function Header({
+  userDisplayName,
+  userEmail,
+  onOpenSidebar,
+  onOpenContextPanel,
+}: HeaderProps) {
   const pathname = usePathname();
 
   function getPageHeading() {
-    if (pathname.startsWith("/overview")) return { title: "Overview", subtitle: "Performance Command Center" };
-    if (pathname.startsWith("/workouts")) return { title: "Live Workout", subtitle: "Double Progression Session" };
-    if (pathname.startsWith("/plans")) return { title: "Workout Plans", subtitle: "Custom Routines & Splits" };
-    if (pathname.startsWith("/exercises")) return { title: "Exercise Library", subtitle: "Muscle Group Target System" };
-    if (pathname.startsWith("/progress")) return { title: "Strength Analytics", subtitle: "Volume, 1RM & PR Tracking" };
-    if (pathname.startsWith("/body-metrics")) return { title: "Body Metrics & BMI", subtitle: "Body Composition & Health" };
-    if (pathname.startsWith("/weight-tracker")) return { title: "Weight Tracker", subtitle: "Goal Trajectory & Trends" };
-    if (pathname.startsWith("/nutrition")) return { title: "Nutrition", subtitle: "Macro Architecture (Coming Soon)" };
-    if (pathname.startsWith("/history")) return { title: "Workout History", subtitle: "Past Sessions & Set Archives" };
-    if (pathname.startsWith("/settings")) return { title: "Settings", subtitle: "Preferences & Data Management" };
-    return { title: "Liftr", subtitle: "Strength Operating System" };
+    if (pathname.startsWith("/overview")) return { title: "Overview", subtitle: "Dashboard & daily momentum" };
+    if (pathname.startsWith("/workouts")) return { title: "Live Workout", subtitle: "Real-time double progression" };
+    if (pathname.startsWith("/plans")) return { title: "Workout Plans", subtitle: "Splits & progression rules" };
+    if (pathname.startsWith("/exercises")) return { title: "Exercise Library", subtitle: "Movements & targets" };
+    if (pathname.startsWith("/progress")) return { title: "Strength Analytics", subtitle: "1RM, volume & muscle heatmap" };
+    if (pathname.startsWith("/body-metrics")) return { title: "Body Metrics", subtitle: "BMI & circumference logs" };
+    if (pathname.startsWith("/weight-tracker")) return { title: "Weight Tracker", subtitle: "Weight trajectory & goal" };
+    if (pathname.startsWith("/nutrition")) return { title: "Nutrition", subtitle: "Coming soon" };
+    if (pathname.startsWith("/history")) return { title: "Workout History", subtitle: "Day-by-day spreadsheet archive" };
+    if (pathname.startsWith("/settings")) return { title: "Settings", subtitle: "Preferences & data export" };
+    return { title: "Liftr", subtitle: "Fitness Platform" };
   }
 
   const { title, subtitle } = getPageHeading();
+  const displayLabel = userDisplayName || userEmail?.split("@")[0] || "Athlete";
 
   return (
-    <header className="sticky top-0 z-20 bg-white border-b-2 border-[#171717] px-4 lg:px-8 py-3.5 flex items-center justify-between shadow-[0px_2px_0px_0px_#171717]">
-      {/* Mobile Brand / Page Title */}
-      <div className="flex items-center gap-3">
-        <Link href="/overview" className="lg:hidden flex items-center gap-2">
-          <div className="w-9 h-9 rounded-lg bg-[#F5F1E8] border-2 border-[#171717] flex items-center justify-center p-1.5 shadow-neo-sm">
-            <LiftrMark className="w-full h-full" />
+    <header className="sticky top-0 z-20 bg-[#EBCBF7]/95 backdrop-blur-sm border-b-[1.5px] border-[#142746]/20 px-3 sm:px-6 lg:px-8 py-2.5 sm:py-3.5 flex items-center justify-between gap-2 sm:gap-3 min-w-0">
+      {/* Left: Mobile Menu + Brand + Page Title */}
+      <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+        <button
+          type="button"
+          onClick={onOpenSidebar}
+          className="lg:hidden min-w-[42px] min-h-[42px] flex items-center justify-center rounded-xl bg-[#BDF7B6] border-[1.5px] border-[#142746] text-[#142746] shadow-neo-sm cursor-pointer shrink-0"
+          aria-label="Open navigation"
+        >
+          <Menu className="w-4 h-4 stroke-[2.5]" />
+        </button>
+
+        <Link href="/overview" className="hidden min-[380px]:flex lg:hidden items-center shrink-0">
+          <div className="w-10 h-10 rounded-xl bg-[#E9FF91] border-[1.5px] border-[#142746] flex items-center justify-center p-1.5 shadow-neo-sm">
+            <LiftrMark className="w-full h-full" color="#142746" />
           </div>
         </Link>
-        <div>
-          <h1 className="text-xl lg:text-2xl font-heading font-black text-[#171717] tracking-tight leading-tight uppercase">
+
+        <div className="min-w-0">
+          <h2 className="text-sm sm:text-lg font-heading font-extrabold text-[#142746] tracking-tight truncate">
             {title}
-          </h1>
-          <p className="hidden sm:block text-xs text-[#171717]/70 font-mono font-medium">
+          </h2>
+          <p className="hidden sm:block text-xs text-[#142746]/70 font-medium truncate">
             {subtitle}
           </p>
         </div>
       </div>
 
-      {/* Right controls: Active Workout Pill & User profile menu */}
-      <div className="flex items-center gap-3">
-        {/* Active workout indicator button */}
+      {/* Right controls */}
+      <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
         <ActiveWorkoutPill />
 
-        {/* User profile dropdown & Logout */}
-        <div className="flex items-center gap-2 pl-2 border-l-2 border-[#171717]/20">
+        {/* Collapsible Right Panel button on tablet/mobile */}
+        <button
+          type="button"
+          onClick={onOpenContextPanel}
+          className="xl:hidden min-w-[42px] min-h-[42px] px-2.5 flex items-center justify-center gap-1.5 rounded-xl bg-white hover:bg-[#BDF7B6] border-[1.5px] border-[#142746] text-[#142746] shadow-neo-sm cursor-pointer"
+          title="Open Insights Panel"
+          aria-label="Open Insights Panel"
+        >
+          <PanelRightOpen className="w-4 h-4 shrink-0" />
+          <span className="hidden md:inline text-xs font-heading font-bold">Insights</span>
+        </button>
+
+        {/* User profile pill & Logout */}
+        <div className="flex items-center gap-1.5 sm:gap-2 pl-1.5 sm:pl-2 border-l border-[#142746]/15">
           <Link
             href="/settings"
-            className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#E9F56A] hover:bg-[#dae852] border-2 border-[#171717] shadow-neo-sm transition-all text-xs text-[#171717] font-bold"
+            className="min-h-[42px] flex items-center gap-2 px-2 sm:px-2.5 py-1.5 rounded-xl bg-[#F2FA91] hover:bg-[#E9FF91] border-[1.5px] border-[#142746] shadow-neo-sm transition-all text-xs text-[#142746] font-bold"
           >
-            <div className="w-5 h-5 rounded-md bg-[#3155F5] text-white flex items-center justify-center font-bold font-mono text-[10px] border border-[#171717]">
-              {(userDisplayName || userEmail || "U")[0].toUpperCase()}
+            <div className="w-6 h-6 rounded-lg bg-[#142746] text-white flex items-center justify-center font-bold text-[11px] shrink-0">
+              {displayLabel[0].toUpperCase()}
             </div>
-            <span className="hidden md:inline font-mono font-bold">
-              {userDisplayName || userEmail?.split("@")[0] || "Athlete"}
+            <span className="hidden md:inline font-semibold max-w-[110px] truncate">
+              {displayLabel}
             </span>
           </Link>
 
@@ -73,9 +102,10 @@ export default function Header({ userDisplayName, userEmail }: HeaderProps) {
             <button
               type="submit"
               title="Sign Out"
-              className="p-1.5 rounded-lg bg-[#FF7043] hover:bg-[#e85d30] text-white border-2 border-[#171717] shadow-neo-sm transition-all cursor-pointer active:translate-x-0.5 active:translate-y-0.5"
+              aria-label="Sign Out"
+              className="min-w-[42px] min-h-[42px] flex items-center justify-center rounded-xl bg-[#F8C3B5] hover:bg-[#f4b3a2] text-[#142746] border-[1.5px] border-[#142746] shadow-neo-sm transition-all cursor-pointer"
             >
-              <LogOut className="w-4 h-4 stroke-[2.5]" />
+              <LogOut className="w-4 h-4 stroke-[2.2]" />
             </button>
           </form>
         </div>
