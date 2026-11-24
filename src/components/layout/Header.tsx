@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Menu, PanelRightOpen, LogOut } from "lucide-react";
 import { signOut } from "@/lib/auth/actions";
+import { clearAllUserBrowserData } from "@/lib/offline/sessionIsolation";
 import ActiveWorkoutPill from "@/components/workout/ActiveWorkoutPill";
 import { LiftrMark } from "@/components/common/LiftrLogo";
 
@@ -93,7 +94,7 @@ export default function Header({
             </span>
           </Link>
 
-          <form action={signOut}>
+          <form action={signOut} onSubmit={() => clearAllUserBrowserData()}>
             <button
               type="submit"
               title="Sign Out"

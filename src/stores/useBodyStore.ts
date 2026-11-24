@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
+import { getActiveClientUserId } from "@/lib/offline/db";
 import {
   WeightLogItem,
   BodyMeasurementItem,
@@ -10,7 +11,7 @@ import {
 
 const EMPTY_BODY_PROFILE: UserBodyProfile = {
   id: "profile-default",
-  userId: "local-user",
+  userId: "",
   height: null,
   heightUnit: "cm",
   startingWeight: null,
@@ -79,7 +80,7 @@ export const useBodyStore = create<BodyStore>()(
 
         const newLog: WeightLogItem = {
           id: `wl-${crypto.randomUUID()}`,
-          userId: "local-user",
+          userId: getActiveClientUserId(),
           weight: Number(weight.toFixed(2)),
           unit,
           recordedAt: dateStr,
@@ -110,7 +111,7 @@ export const useBodyStore = create<BodyStore>()(
         const dateStr = recordedAt || new Date().toISOString().split("T")[0];
         const newMeasurement: BodyMeasurementItem = {
           id: `bm-${crypto.randomUUID()}`,
-          userId: "local-user",
+          userId: getActiveClientUserId(),
           measurementType,
           value: Number(value.toFixed(2)),
           unit,

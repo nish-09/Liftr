@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
+import { getActiveClientUserId } from "@/lib/offline/db";
 import type { WorkoutSessionItem, SessionExerciseItem, SetLogItem, SetType } from "@/types";
 import { calculateVolume } from "@/lib/calculations/strength";
 
@@ -63,7 +64,7 @@ export const useWorkoutStore = create<WorkoutStore>()(
         const id = sessionData.id || crypto.randomUUID();
         const newSession: WorkoutSessionItem = {
           id,
-          userId: sessionData.userId || "local-user",
+          userId: sessionData.userId || getActiveClientUserId(),
           planId: sessionData.planId || null,
           planDayId: sessionData.planDayId || null,
           phaseId: sessionData.phaseId || null,

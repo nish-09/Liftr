@@ -9,18 +9,28 @@ export interface AuthResponse {
   success?: boolean;
 }
 
-export async function signUp(formData: FormData): Promise<AuthResponse> {
-  const email = (formData.get("email") as string)?.trim();
-  const password = formData.get("password") as string;
-  const displayName = (formData.get("displayName") as string)?.trim();
+function getSafeAppUrl(): string {
+  if (process.env.NEXT_PUBLIC_APP_URL) {
+    return process.env.NEXT_PUBLIC_APP_URL.replace(/\/+$/, "");
+  }
+  if (process.env.VERCEL_URL) {
+    return `https://${process.env.VERCEL_URL}`;
+  }
+  return "http://localhost:3000";
+}
 
-  if (!email || !password) {
-    return { error: "Email and password are required." };
+export async function signUp(formData: FormData): Promise<AuthResponse> {
+  const email = (formData.get("email") as string)?.trim().toLowerCase();
+  const password = formData.get("password") as string;
+  const displayName = (formData.get("displayName") as string)?.trim().slice(0, 80);
+
+  if (!email || !password || password.length < 6 || password.length > 128) {
+    return { error: "Valid email and a password between 6 and 128 characters are required." };
   }
 
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+  const appUrl = getSafeAppUrl();
   const supabase = await createClient();
-  const { data, error } = await supabase.auth.signUp({
+  const { error } = await supabase.auth.signUp({
     email,
     password,
     options: {
@@ -40,7 +50,7 @@ export async function signUp(formData: FormData): Promise<AuthResponse> {
 }
 
 export async function signIn(formData: FormData): Promise<AuthResponse> {
-  const email = (formData.get("email") as string)?.trim();
+  const email = (formData.get("email") as string)?.trim().toLowerCase();
   const password = formData.get("password") as string;
 
   if (!email || !password) {
@@ -54,7 +64,7 @@ export async function signIn(formData: FormData): Promise<AuthResponse> {
   });
 
   if (error) {
-    return { error: error.message };
+    return { error: "Invalid login credentials." };
   }
 
   revalidatePath("/", "layout");
@@ -63,37 +73,41 @@ export async function signIn(formData: FormData): Promise<AuthResponse> {
 
 export async function signOut() {
   const supabase = await createClient();
-  await supabase.auth.signOut();
+  await supabase.auth.signOut({ scope: "local" });
   revalidatePath("/", "layout");
   redirect("/login");
 }
 
 export async function forgotPassword(formData: FormData): Promise<AuthResponse> {
-  const email = (formData.get("email") as string)?.trim();
-  if (!email) {
-    return { error: "Email is required." };
+  const email = (formData.get("email") as string)?.trim().toLowerCase();
+  if (!email || !email.includes("@")) {
+    return { error: "Valid email is required." };
   }
 
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+  const appUrl = getSafeAppUrl();
   const supabase = await createClient();
-  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+  await supabase.auth.resetPasswordForEmail(email, {
     redirectTo: `${appUrl}/auth/callback?next=/reset-password`,
   });
 
-  if (error) {
-    return { error: error.message };
-  }
-
+  // Always return generic success to avoid email enumeration
   return { success: true };
 }
 
 export async function resetPassword(formData: FormData): Promise<AuthResponse> {
   const password = formData.get("password") as string;
-  if (!password || password.length < 6) {
-    return { error: "Password must be at least 6 characters." };
+  if (!password || password.length < 6 || password.length > 128) {
+    return { error: "Password must be between 6 and 128 characters." };
   }
 
   const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    return { error: "Active recovery session required." };
+  }
+
   const { error } = await supabase.auth.updateUser({
     password,
   });

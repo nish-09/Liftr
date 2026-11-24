@@ -4,6 +4,7 @@ import { useState, useMemo, useRef, Fragment } from "react";
 import { useHistoryStore } from "@/stores/useHistoryStore";
 import { useExerciseStore } from "@/stores/useExerciseStore";
 import { usePlanStore } from "@/stores/usePlanStore";
+import { useDashboardUser } from "@/components/common/UserContext";
 import { formatDuration, cn } from "@/lib/utils";
 import { calculateVolume } from "@/lib/calculations/strength";
 import {
@@ -112,6 +113,7 @@ function recalculateSessionVolume(exercisesList: SessionExerciseItem[]): number 
 }
 
 export default function HistoryPage() {
+  const { userId } = useDashboardUser();
   const {
     sessions,
     addCompletedSession,
@@ -300,6 +302,17 @@ export default function HistoryPage() {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    if (!file.name.toLowerCase().endsWith(".csv")) {
+      setImportFeedback("Only .csv files are supported.");
+      e.target.value = "";
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      setImportFeedback("CSV file exceeds the 5 MB limit.");
+      e.target.value = "";
+      return;
+    }
+
     const reader = new FileReader();
     reader.onload = (event) => {
       const text = event.target?.result;
@@ -373,7 +386,7 @@ export default function HistoryPage() {
 
         addCompletedSession({
           id: sessionId,
-          userId: "local-user",
+          userId,
           name: block.dayLabel,
           startedAt: timestamp,
           completedAt: timestamp,

@@ -10,20 +10,16 @@ export default async function DashboardLayout({
 }) {
   const user = await getUser();
 
-  // Defense-in-depth: Redirect unauthenticated users to login
-  if (
-    !user &&
-    process.env.NEXT_PUBLIC_SUPABASE_URL &&
-    !process.env.NEXT_PUBLIC_SUPABASE_URL.includes("placeholder")
-  ) {
+  // Defense-in-depth: Fail closed if user session is missing
+  if (!user) {
     redirect("/login");
   }
 
-  const userDisplayName = user?.user_metadata?.display_name || null;
-  const userEmail = user?.email || null;
+  const userDisplayName = user.user_metadata?.display_name || null;
+  const userEmail = user.email || null;
 
   return (
-    <UserProvider displayName={userDisplayName} email={userEmail}>
+    <UserProvider userId={user.id} displayName={userDisplayName} email={userEmail}>
       <DashboardShell userDisplayName={userDisplayName} userEmail={userEmail}>
         {children}
       </DashboardShell>

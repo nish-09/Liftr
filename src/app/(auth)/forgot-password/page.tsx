@@ -32,10 +32,11 @@ export default function ForgotPasswordPage() {
         redirectTo: `${origin}/auth/callback?next=/reset-password`,
       });
 
-      if (resetError) {
-        setError(resetError.message);
+      if (resetError && resetError.status === 429) {
+        setError("Too many reset requests. Please wait a moment and try again.");
         setLoading(false);
       } else {
+        // Avoid exposing whether an account exists for the entered email
         setSent(true);
         setLoading(false);
       }

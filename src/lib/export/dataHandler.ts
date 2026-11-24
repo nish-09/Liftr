@@ -60,18 +60,18 @@ export function downloadWorkoutsCSV(sessions: WorkoutSessionItem[], exercises: E
       const exMeta = exercises.find((e) => e.id === ex.exerciseId);
       ex.sets.forEach((s) => {
         const row = [
-          `"${dateStr.split("T")[0]}"`,
-          `"${sess.name.replace(/"/g, '""')}"`,
-          `"${(exMeta?.name || "Exercise").replace(/"/g, '""')}"`,
-          `"${exMeta?.primaryMuscleGroup || ""}"`,
-          `"${exMeta?.equipment || ""}"`,
-          s.setNumber,
-          s.setType,
-          s.weight,
-          s.reps,
-          (s.weight * s.reps).toFixed(1),
-          s.isCompleted ? "Yes" : "No",
-          `"${(s.notes || "").replace(/"/g, '""')}"`,
+          escapeCSVCell(dateStr.split("T")[0]),
+          escapeCSVCell(sess.name),
+          escapeCSVCell(exMeta?.name || "Exercise"),
+          escapeCSVCell(exMeta?.primaryMuscleGroup || ""),
+          escapeCSVCell(exMeta?.equipment || ""),
+          escapeCSVCell(s.setNumber),
+          escapeCSVCell(s.setType),
+          escapeCSVCell(s.weight),
+          escapeCSVCell(s.reps),
+          escapeCSVCell((s.weight * s.reps).toFixed(1)),
+          escapeCSVCell(s.isCompleted ? "Yes" : "No"),
+          escapeCSVCell(s.notes || ""),
         ];
         rows.push(row.join(","));
       });
@@ -194,8 +194,12 @@ export function formatSheetWeight(sets: SetLogItem[]): string {
 
 function escapeCSVCell(val: string | number | null | undefined): string {
   if (val === null || val === undefined) return "";
-  const str = String(val);
-  if (str.includes(",") || str.includes('"') || str.includes("\n")) {
+  let str = String(val);
+  // Neutralize spreadsheet formula injection (=, +, -, @, tab, CR)
+  if (/^[=+\-@\t\r]/.test(str)) {
+    str = `'${str}`;
+  }
+  if (str.includes(",") || str.includes('"') || str.includes("\n") || str.includes("\r")) {
     return `"${str.replace(/"/g, '""')}"`;
   }
   return str;

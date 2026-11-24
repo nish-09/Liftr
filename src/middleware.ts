@@ -6,10 +6,30 @@ export async function middleware(request: NextRequest) {
     request,
   });
 
-  const supabaseUrl =
-    process.env.NEXT_PUBLIC_SUPABASE_URL || "https://placeholder-liftr.supabase.co";
-  const supabaseAnonKey =
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "placeholder-anon-key";
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+  const pathname = request.nextUrl.pathname;
+  const isPublicAuthRoute =
+    pathname.startsWith("/login") ||
+    pathname.startsWith("/signup") ||
+    pathname.startsWith("/forgot-password");
+  const isResetPasswordRoute = pathname.startsWith("/reset-password");
+  const isAuthCallback = pathname.startsWith("/auth/callback");
+
+  // Fail closed if Supabase env configuration is missing or placeholder
+  if (
+    !supabaseUrl ||
+    !supabaseAnonKey ||
+    supabaseUrl.includes("placeholder")
+  ) {
+    if (!isPublicAuthRoute && !isAuthCallback) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/login";
+      return NextResponse.redirect(url);
+    }
+    return supabaseResponse;
+  }
 
   const supabase = createServerClient(supabaseUrl, supabaseAnonKey, {
     cookies: {
@@ -30,39 +50,25 @@ export async function middleware(request: NextRequest) {
     },
   });
 
-  // IMPORTANT: Avoid running logic between createServerClient and supabase.auth.getUser()
+  // Validate session against Supabase Auth server (not trusting unverified cookies alone)
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const pathname = request.nextUrl.pathname;
-
-  const isAuthPage =
-    pathname.startsWith("/login") ||
-    pathname.startsWith("/signup") ||
-    pathname.startsWith("/forgot-password") ||
-    pathname.startsWith("/reset-password");
-
-  const isAuthCallback = pathname.startsWith("/auth/callback");
-
-  // Prevent authenticated users from unnecessarily returning to login/signup pages
-  if (user && isAuthPage) {
+  // Redirect authenticated users away from login/signup/forgot-password, but allow /reset-password
+  if (user && isPublicAuthRoute) {
     const url = request.nextUrl.clone();
     url.pathname = "/overview";
     return NextResponse.redirect(url);
   }
 
-  // Prevent unauthenticated users from accessing protected dashboard routes
-  if (
-    !user &&
-    !isAuthPage &&
-    !isAuthCallback &&
-    pathname !== "/" &&
-    process.env.NEXT_PUBLIC_SUPABASE_URL &&
-    !process.env.NEXT_PUBLIC_SUPABASE_URL.includes("placeholder")
-  ) {
+  // Require valid authenticated user for all protected dashboard routes and /reset-password
+  if (!user && !isPublicAuthRoute && !isAuthCallback) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
+    if (!isResetPasswordRoute && pathname !== "/") {
+      url.searchParams.set("redirectedFrom", pathname);
+    }
     return NextResponse.redirect(url);
   }
 

@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
+import { getActiveClientUserId } from "@/lib/offline/db";
 import { WorkoutPlanItem, PlanDayItem, PlanExerciseItem } from "@/types";
 
 export type TrainingPhase = "Bulking" | "Recomp" | "Cutting" | "Strength" | "Custom";
@@ -40,7 +41,7 @@ export const usePlanStore = create<PlanStore>()(
       createPlan: (name, description, phase = "Bulking") => {
         const newPlan: WorkoutPlanItem = {
           id: `plan-${crypto.randomUUID()}`,
-          userId: "local-user",
+          userId: getActiveClientUserId(),
           name,
           description: description || "",
           phaseId: phase,

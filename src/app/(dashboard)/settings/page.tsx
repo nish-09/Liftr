@@ -27,7 +27,7 @@ import {
 } from "lucide-react";
 
 export default function SettingsPage() {
-  const { displayName: authName } = useDashboardUser();
+  const { userId, displayName: authName } = useDashboardUser();
   const { sessions, deleteHistoricalSession, addCompletedSession } = useHistoryStore();
   const { exercises, addExercise } = useExerciseStore();
   const { plans } = usePlanStore();
@@ -76,6 +76,15 @@ export default function SettingsPage() {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    if (!file.name.toLowerCase().endsWith(".csv")) {
+      setImportStatus("Only .csv files are supported.");
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      setImportStatus("CSV file exceeds the 5 MB limit.");
+      return;
+    }
+
     const reader = new FileReader();
     reader.onload = (event) => {
       const text = event.target?.result;
@@ -107,7 +116,7 @@ export default function SettingsPage() {
       if (!workoutGroups[key]) {
         workoutGroups[key] = {
           id: `imported-${crypto.randomUUID()}`,
-          userId: "local-user",
+          userId,
           name: workoutName,
           startedAt: `${date}T10:00:00.000Z`,
           completedAt: `${date}T11:00:00.000Z`,
