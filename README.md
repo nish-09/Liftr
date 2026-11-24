@@ -42,8 +42,13 @@ WORKOUT PERFORMANCE  +  BODY COMPOSITION  +  NUTRITION
    - 7 equipment categories: Barbell, Dumbbell, Cable, Machine, Bodyweight, Smith Machine, Other.
    - Search, muscle chips, favorites, and custom movement creation.
 
-4. **Strength Analytics & Personal Records:**
-   - Epley formula 1RM calculations: `1RM = Weight * (1 + Reps / 30)`.
+4. **Strength Analytics, 2D Muscle Heatmap & Personal Records:**
+   - **Interactive 2D Human Body Muscle Heatmap:** Realistic SVG visualization of anterior (front) and posterior (back) views dividing the human body into 15 distinct muscle groups.
+   - **Hypertrophic Training Coverage Formula:**
+     $$\text{Coverage (\%)} = \left(\frac{\text{Completed Working Sets}}{\text{Target Working Sets}}\right) \times 100$$
+   - **Color Spectrum:** Grey (0%), Muted Red (1–24%), Orange (25–49%), Yellow (50–74%), Light Green (75–99%), Bright Green (100%+).
+   - **Interactive Diagnostics:** Hover tooltips, detailed drill-down drawer, configurable target sets per muscle, and multi-window time filtering (7d, 30d, 3mo, 6mo).
+   - **Strength Analytics:** Epley formula 1RM calculations: `1RM = Weight * (1 + Reps / 30)`.
    - Training volume trajectory charts (`Recharts`).
    - Muscle group working set distribution.
    - Automated Personal Record (PR) hall of fame.

@@ -1,5 +1,11 @@
 import { calculateProgression } from "../src/lib/progression/engine";
 import { calculate1RM, calculateBMI, calculateVolume } from "../src/lib/calculations/strength";
+import {
+  getCoverageColor,
+  calculateMuscleHeatmap,
+  getExerciseMuscleContributions,
+} from "../src/lib/calculations/muscleHeatmap";
+import { Exercise, WorkoutSessionItem } from "../src/types";
 
 function runTests() {
   console.log("=== RUNNING LIFTR VERIFICATION TESTS ===\n");
@@ -142,6 +148,134 @@ function runTests() {
   assert(
     bmiOver.bmi === 27.8 && bmiOver.category === "Overweight",
     "BMI: 90kg at 180cm equals Overweight"
+  );
+
+  // --- Muscle Heatmap Calculation Tests ---
+
+  // Color Coding Scale checks
+  const colGrey = getCoverageColor(0);
+  assert(colGrey.color === "#2A2A2A", "Heatmap Color: 0% maps to Grey (#2A2A2A)");
+
+  const colMutedRed = getCoverageColor(15);
+  assert(colMutedRed.color === "#A8382B", "Heatmap Color: 15% maps to Muted Red (#A8382B)");
+
+  const colOrange = getCoverageColor(35);
+  assert(colOrange.color === "#E97860", "Heatmap Color: 35% maps to Orange (#E97860)");
+
+  const colYellow = getCoverageColor(60);
+  assert(colYellow.color === "#E9D65B", "Heatmap Color: 60% maps to Yellow (#E9D65B)");
+
+  const colLightGreen = getCoverageColor(85);
+  assert(colLightGreen.color === "#83D19B", "Heatmap Color: 85% maps to Light Green (#83D19B)");
+
+  const colBrightGreen = getCoverageColor(115);
+  assert(colBrightGreen.color === "#60C27D", "Heatmap Color: 115% maps to Bright Green (#60C27D)");
+
+  // Primary & Secondary Exercise Mapping Test
+  const mockBenchPress: Exercise = {
+    id: "ex-bench-test",
+    name: "Barbell Bench Press",
+    primaryMuscleGroup: "chest",
+    secondaryMuscleGroups: ["triceps", "shoulders"],
+    equipment: "barbell",
+    weightUnit: "kg",
+    defaultRestDuration: 120,
+    progressionIncrement: 2.5,
+    isSystem: true,
+    isFavorite: true,
+    isArchived: false,
+  };
+
+  const benchContrib = getExerciseMuscleContributions(mockBenchPress);
+  const chestFactor = benchContrib.find((c) => c.muscleId === "chest")?.factor;
+  const tricepFactor = benchContrib.find((c) => c.muscleId === "triceps")?.factor;
+  const frontDeltFactor = benchContrib.find((c) => c.muscleId === "front_delts")?.factor;
+
+  assert(chestFactor === 1.0, "Muscle Mapping: Primary chest gets 1.0 full contribution");
+  assert(tricepFactor === 0.5, "Muscle Mapping: Secondary tricep gets 0.5 fractional contribution");
+  assert(frontDeltFactor === 0.5, "Muscle Mapping: Secondary front deltoid gets 0.5 fractional contribution");
+
+  // Full Session Heatmap Calculation with Warmup Exclusion Test
+  const mockSession: WorkoutSessionItem = {
+    id: "test-sess-heatmap",
+    userId: "test-user",
+    name: "Chest & Arms Session",
+    startedAt: new Date().toISOString(),
+    completedAt: new Date().toISOString(),
+    durationSeconds: 3600,
+    status: "completed",
+    totalVolume: 5000,
+    exercises: [
+      {
+        id: "sex-test-1",
+        sessionId: "test-sess-heatmap",
+        exerciseId: "ex-bench-test",
+        orderInSession: 1,
+        isCompleted: true,
+        sets: [
+          {
+            id: "s-warmup",
+            sessionExerciseId: "sex-test-1",
+            sessionId: "test-sess-heatmap",
+            exerciseId: "ex-bench-test",
+            setNumber: 1,
+            setType: "warmup", // MUST BE EXCLUDED
+            weight: 40,
+            reps: 10,
+            isCompleted: true,
+          },
+          {
+            id: "s-work-1",
+            sessionExerciseId: "sex-test-1",
+            sessionId: "test-sess-heatmap",
+            exerciseId: "ex-bench-test",
+            setNumber: 2,
+            setType: "normal", // 1.0 chest set
+            weight: 80,
+            reps: 8,
+            isCompleted: true,
+          },
+          {
+            id: "s-work-2",
+            sessionExerciseId: "sex-test-1",
+            sessionId: "test-sess-heatmap",
+            exerciseId: "ex-bench-test",
+            setNumber: 3,
+            setType: "normal", // 1.0 chest set
+            weight: 80,
+            reps: 8,
+            isCompleted: true,
+          },
+        ],
+      },
+    ],
+  };
+
+  // Run 7-day period calculation with weekly target of 12 sets for chest
+  const heatmapResult = calculateMuscleHeatmap(
+    [mockSession],
+    [mockBenchPress],
+    7,
+    { chest: 12 }
+  );
+
+  // 2 completed working sets on chest out of target 12 = (2 / 12) * 100 = 16.7% (capped display 17%, Muted Red)
+  const chestCoverage = heatmapResult.chest;
+  assert(
+    chestCoverage.completedWorkingSets === 2,
+    "Heatmap: Accurately counts 2 completed working sets, excluding warmup"
+  );
+  assert(
+    chestCoverage.targetWorkingSets === 12,
+    "Heatmap: Target working sets equals 12"
+  );
+  assert(
+    chestCoverage.coveragePercentage === 17,
+    "Heatmap: Coverage percentage rounded to 17%"
+  );
+  assert(
+    chestCoverage.color === "#A8382B",
+    "Heatmap: 17% coverage assigned Muted Red color (#A8382B)"
   );
 
   console.log(`\nTests Summary: ${passed} passed, ${failed} failed.\n`);

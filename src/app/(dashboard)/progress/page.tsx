@@ -4,6 +4,7 @@ import { useState, useMemo } from "react";
 import { useHistoryStore } from "@/stores/useHistoryStore";
 import { useExerciseStore } from "@/stores/useExerciseStore";
 import { calculate1RM } from "@/lib/calculations/strength";
+import MuscleHeatmap from "@/components/analytics/MuscleHeatmap";
 import {
   TrendingUp,
   Dumbbell,
@@ -222,6 +223,13 @@ export default function ProgressPage() {
           </span>
         </div>
       </div>
+
+      {/* Interactive 2D Human Body Muscle Heatmap */}
+      <MuscleHeatmap
+        sessions={sessions}
+        exercises={exercises}
+        defaultTimeFilter={selectedTimeFilter}
+      />
 
       {/* Volume Chart & Strength Progression Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
