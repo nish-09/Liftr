@@ -28,13 +28,13 @@ CREATE POLICY "Users can update own profile" ON profiles
   FOR UPDATE USING (auth.uid() = id);
 
 -- 2. User Preferences Policies
-CREATE POLICY "Users can read own preferences" ON userPreferences
+CREATE POLICY "Users can read own preferences" ON user_preferences
   FOR SELECT USING (auth.uid() = user_id);
 
-CREATE POLICY "Users can insert own preferences" ON userPreferences
+CREATE POLICY "Users can insert own preferences" ON user_preferences
   FOR INSERT WITH CHECK (auth.uid() = user_id);
 
-CREATE POLICY "Users can update own preferences" ON userPreferences
+CREATE POLICY "Users can update own preferences" ON user_preferences
   FOR UPDATE USING (auth.uid() = user_id);
 
 -- 3. User Body Profiles Policies
