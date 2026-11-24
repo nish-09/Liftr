@@ -1,9 +1,8 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
-  <rect width="512" height="512" rx="128" fill="#171717" />
-  <rect x="32" y="32" width="448" height="448" rx="96" fill="#3155F5" stroke="#171717" stroke-width="8" />
-  <path d="M160 216h192v80H160z" fill="#FFFFFF" stroke="#171717" stroke-width="6" />
-  <rect x="120" y="180" width="40" height="152" rx="12" fill="#FFFFFF" stroke="#171717" stroke-width="6" />
-  <rect x="352" y="180" width="40" height="152" rx="12" fill="#FFFFFF" stroke="#171717" stroke-width="6" />
-  <rect x="80" y="200" width="32" height="112" rx="8" fill="#E9F56A" stroke="#171717" stroke-width="6" />
-  <rect x="400" y="200" width="32" height="112" rx="8" fill="#E9F56A" stroke="#171717" stroke-width="6" />
+  <rect width="512" height="512" rx="112" fill="#F5F1E8" />
+  <rect x="16" y="16" width="480" height="480" rx="96" fill="#F5F1E8" stroke="#171717" stroke-width="18" />
+  <g transform="translate(88, 114) scale(1.835)">
+    <path d="M 62.5 156 L 169 156 L 182.5 121 L 121 121 L 94 130.5 L 114 109 L 157 0 L 102 0 L 88.5 34 L 109.5 34 Z" fill="#3155F5" />
+    <path d="M 0 156 L 48.5 156 L 90.5 48 L 54.5 48 L 41.5 83 L 59.5 83 L 45.5 120 L 43.5 120 L 43.5 95.5 L 23 95.5 Z" fill="#3155F5" />
+  </g>
 </svg>

@@ -29,6 +29,14 @@ export const metadata: Metadata = {
   description:
     "Neo-Brutalist athletic performance platform connecting workout tracking, progressive overload, and body composition.",
   manifest: "/manifest.json",
+  icons: {
+    icon: [
+      { url: "/favicon.svg", type: "image/svg+xml" },
+      { url: "/icon.svg", type: "image/svg+xml" },
+    ],
+    shortcut: "/favicon.svg",
+    apple: "/icon.svg",
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",

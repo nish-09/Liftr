@@ -4,7 +4,8 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { Dumbbell, ArrowRight, CheckCircle2 } from "lucide-react";
+import { ArrowRight, CheckCircle2 } from "lucide-react";
+import { LiftrLogo } from "@/components/common/LiftrLogo";
 
 export default function SignUpPage() {
   const router = useRouter();
@@ -85,13 +86,8 @@ export default function SignUpPage() {
     <div className="min-h-screen bg-[#F5F1E8] flex flex-col justify-center items-center px-4 py-12 relative overflow-hidden">
       <div className="w-full max-w-md relative z-10">
         <div className="text-center mb-8">
-          <Link href="/" className="inline-flex items-center gap-3 mb-4 group">
-            <div className="w-12 h-12 rounded-xl bg-[#3155F5] border-2 border-[#171717] flex items-center justify-center text-[#E9F56A] shadow-neo group-hover:translate-x-0.5 group-hover:translate-y-0.5 transition-transform">
-              <Dumbbell className="w-6 h-6 stroke-[2.5]" />
-            </div>
-            <span className="font-heading font-black text-4xl tracking-tight text-[#171717] uppercase">
-              Liftr
-            </span>
+          <Link href="/" className="inline-flex items-center justify-center mb-4 group">
+            <LiftrLogo className="h-11 w-auto group-hover:scale-[1.02] transition-transform" />
           </Link>
           <h1 className="font-heading font-black text-2xl tracking-tight text-[#171717] uppercase mt-1">
             Build Your Strength

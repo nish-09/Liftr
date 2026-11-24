@@ -16,6 +16,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { LiftrLogo } from "@/components/common/LiftrLogo";
 
 const NAV_ITEMS = [
   { name: "Overview", href: "/overview", icon: LayoutDashboard },
@@ -39,19 +40,12 @@ export default function Sidebar() {
         {/* Brand Logo Header */}
         <Link
           href="/overview"
-          className="flex items-center gap-3 px-3 py-3.5 mb-5 rounded-xl bg-white border-2 border-[#171717] shadow-neo group hover:translate-x-0.5 hover:translate-y-0.5 transition-all"
+          className="flex flex-col justify-center px-3.5 py-3.5 mb-5 rounded-xl bg-[#F5F1E8] border-2 border-[#171717] shadow-neo group hover:translate-x-0.5 hover:translate-y-0.5 transition-all"
         >
-          <div className="w-10 h-10 rounded-lg bg-[#E9F56A] flex items-center justify-center text-[#171717] border-2 border-[#171717] shadow-neo-sm group-hover:scale-105 transition-all">
-            <Dumbbell className="w-5 h-5 stroke-[2.5]" />
-          </div>
-          <div>
-            <div className="font-heading text-2xl font-black tracking-tight text-[#171717] leading-none uppercase">
-              LIFTR
-            </div>
-            <span className="text-[10px] font-mono tracking-widest uppercase text-[#3155F5] font-black">
-              Performance OS
-            </span>
-          </div>
+          <LiftrLogo className="w-full h-auto max-h-9" />
+          <span className="text-[9px] font-mono tracking-widest uppercase text-[#3155F5] font-black mt-1.5 pl-0.5">
+            Performance OS
+          </span>
         </Link>
 
         {/* Navigation list */}

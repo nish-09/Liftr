@@ -2,9 +2,10 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Dumbbell, LogOut } from "lucide-react";
+import { LogOut } from "lucide-react";
 import { signOut } from "@/lib/auth/actions";
 import ActiveWorkoutPill from "@/components/workout/ActiveWorkoutPill";
+import { LiftrMark } from "@/components/common/LiftrLogo";
 
 interface HeaderProps {
   userDisplayName?: string | null;
@@ -35,8 +36,8 @@ export default function Header({ userDisplayName, userEmail }: HeaderProps) {
       {/* Mobile Brand / Page Title */}
       <div className="flex items-center gap-3">
         <Link href="/overview" className="lg:hidden flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-[#3155F5] border-2 border-[#171717] flex items-center justify-center text-[#E9F56A] shadow-neo-sm">
-            <Dumbbell className="w-4 h-4 stroke-[2.5]" />
+          <div className="w-9 h-9 rounded-lg bg-[#F5F1E8] border-2 border-[#171717] flex items-center justify-center p-1.5 shadow-neo-sm">
+            <LiftrMark className="w-full h-full" />
           </div>
         </Link>
         <div>
