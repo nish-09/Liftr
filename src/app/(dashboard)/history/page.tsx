@@ -13,11 +13,7 @@ import {
   Trash2,
   ChevronDown,
   ChevronUp,
-  Filter,
-  CheckCircle2,
   Search,
-  Layers,
-  Award,
   Edit2,
   X,
 } from "lucide-react";
@@ -84,35 +80,37 @@ export default function HistoryPage() {
       {/* Top Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2">
-            <h1 className="font-serif italic text-3xl text-white">Workout History</h1>
-            <span className="px-2 py-0.5 rounded bg-[#1C1C1C] border border-[#2B2B2B] text-xs font-mono text-liftr-purple">
+          <div className="flex items-center gap-3">
+            <h1 className="font-heading font-black text-3xl md:text-4xl text-dark tracking-tight">
+              WORKOUT HISTORY
+            </h1>
+            <span className="px-2.5 py-1 rounded bg-forest text-cream border-2 border-dark text-xs font-mono font-bold shadow-neo-sm">
               {filteredSessions.length} Completed Logs
             </span>
           </div>
-          <p className="text-sm text-liftr-grey mt-0.5">
+          <p className="text-sm text-dark/70 font-sans mt-1">
             Archival record of past sessions, individual set weights, rep thresholds, and training volume.
           </p>
         </div>
       </div>
 
       {/* Filter and Search Bar */}
-      <div className="bento-card p-4 flex flex-col sm:flex-row gap-3">
+      <div className="bg-cream border-2 border-dark rounded-xl shadow-neo p-4 flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1">
-          <Search className="w-4 h-4 text-zinc-500 absolute left-3.5 top-3" />
+          <Search className="w-4 h-4 text-dark/50 absolute left-3.5 top-3" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search workout name or exercise..."
-            className="w-full pl-9 pr-4 py-2 rounded-lg bg-[#181818] border border-[#2c2c2c] text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-liftr-purple font-sans"
+            className="w-full pl-9 pr-4 py-2 rounded-lg bg-white border-2 border-dark text-sm text-dark placeholder:text-dark/40 focus:outline-none focus:ring-2 focus:ring-forest font-sans"
           />
         </div>
 
         <select
           value={selectedPlanFilter}
           onChange={(e) => setSelectedPlanFilter(e.target.value)}
-          className="px-3 py-2 rounded-lg bg-[#181818] border border-[#2c2c2c] text-xs font-mono text-white focus:outline-none focus:border-liftr-purple cursor-pointer"
+          className="px-3 py-2 rounded-lg bg-white border-2 border-dark text-xs font-mono font-bold text-dark focus:outline-none focus:ring-2 focus:ring-forest shadow-neo-sm cursor-pointer"
         >
           <option value="all">All Workout Plans</option>
           {plans.map((p) => (
@@ -125,12 +123,12 @@ export default function HistoryPage() {
 
       {/* Session List */}
       {filteredSessions.length === 0 ? (
-        <div className="bento-card p-12 text-center space-y-3">
-          <div className="w-12 h-12 mx-auto rounded-xl bg-[#1C1C1C] flex items-center justify-center text-zinc-500">
-            <Calendar className="w-6 h-6" />
+        <div className="bg-cream border-2 border-dark rounded-xl shadow-neo p-12 text-center space-y-3">
+          <div className="w-12 h-12 mx-auto rounded-xl bg-forest/10 border-2 border-dark flex items-center justify-center text-dark">
+            <Calendar className="w-6 h-6 stroke-[2.5]" />
           </div>
-          <h3 className="text-base font-bold text-white">No Sessions Found</h3>
-          <p className="text-xs text-liftr-grey max-w-sm mx-auto">
+          <h3 className="font-heading font-black text-lg text-dark tracking-tight">NO SESSIONS FOUND</h3>
+          <p className="text-xs text-dark/70 max-w-sm mx-auto font-sans">
             No completed workouts match your current filter. Complete a session in the Live Workout Tracker to build your archive.
           </p>
         </div>
@@ -157,29 +155,29 @@ export default function HistoryPage() {
             return (
               <div
                 key={sess.id}
-                className="bento-card border-[#232323] hover:border-[#333333] transition-all overflow-hidden"
+                className="bg-cream border-2 border-dark rounded-xl shadow-neo hover:shadow-neo-lg transition-all overflow-hidden"
               >
                 {/* Session Summary Header */}
                 <div
                   onClick={() =>
                     setExpandedSessionId(isExpanded ? null : sess.id)
                   }
-                  className="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 cursor-pointer select-none bg-[#121212]"
+                  className="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 cursor-pointer select-none bg-white border-b-2 border-dark/10"
                 >
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">
-                      <span className="text-[10px] font-mono uppercase px-2 py-0.5 rounded bg-liftr-purple/15 text-liftr-purple-light border border-liftr-purple/30 font-semibold">
+                      <span className="text-[10px] font-mono uppercase px-2 py-0.5 rounded bg-forest text-cream border-2 border-dark font-black shadow-neo-sm">
                         {formattedDate}
                       </span>
                       {sess.phaseId && (
-                        <span className="text-[10px] font-mono uppercase px-2 py-0.5 rounded bg-[#1C1C1C] text-zinc-400 border border-[#2B2B2B]">
+                        <span className="text-[10px] font-mono uppercase px-2 py-0.5 rounded bg-lavender text-dark border-2 border-dark font-black shadow-neo-sm">
                           {sess.phaseId}
                         </span>
                       )}
                     </div>
-                    <h3 className="text-base font-bold text-white">{sess.name}</h3>
+                    <h3 className="font-heading font-black text-lg text-dark tracking-tight">{sess.name}</h3>
                     {sess.notes && (
-                      <p className="text-xs text-liftr-grey line-clamp-1 italic">
+                      <p className="text-xs text-dark/70 line-clamp-1 italic font-sans">
                         &ldquo;{sess.notes}&rdquo;
                       </p>
                     )}
@@ -187,16 +185,18 @@ export default function HistoryPage() {
 
                   {/* Right Metrics Pills */}
                   <div className="flex items-center gap-4 text-xs font-mono">
-                    <div className="flex items-center gap-3 text-zinc-400">
-                      <span className="flex items-center gap-1">
-                        <Clock className="w-3.5 h-3.5 text-zinc-500" />
+                    <div className="flex items-center gap-2 text-dark font-bold">
+                      <span className="flex items-center gap-1 bg-cream px-2.5 py-1 rounded-md border-2 border-dark shadow-neo-sm">
+                        <Clock className="w-3.5 h-3.5 text-forest" />
                         {formatDuration(sess.durationSeconds)}
                       </span>
-                      <span className="flex items-center gap-1">
-                        <Dumbbell className="w-3.5 h-3.5 text-liftr-purple" />
+                      <span className="flex items-center gap-1 bg-cream px-2.5 py-1 rounded-md border-2 border-dark shadow-neo-sm">
+                        <Dumbbell className="w-3.5 h-3.5 text-orange" />
                         {sess.totalVolume.toLocaleString()} kg
                       </span>
-                      <span>{totalSets} sets</span>
+                      <span className="bg-cream px-2.5 py-1 rounded-md border-2 border-dark shadow-neo-sm">
+                        {totalSets} sets
+                      </span>
                     </div>
 
                     <div className="flex items-center gap-1">
@@ -205,7 +205,7 @@ export default function HistoryPage() {
                           e.stopPropagation();
                           openEditModal(sess);
                         }}
-                        className="p-1.5 rounded hover:bg-[#202020] text-zinc-400 hover:text-white"
+                        className="p-1.5 rounded-md border-2 border-dark bg-white hover:bg-forest hover:text-cream text-dark transition-all shadow-neo-sm cursor-pointer"
                         title="Edit Session"
                       >
                         <Edit2 className="w-3.5 h-3.5" />
@@ -215,16 +215,16 @@ export default function HistoryPage() {
                           e.stopPropagation();
                           handleDelete(sess.id, sess.name);
                         }}
-                        className="p-1.5 rounded hover:bg-liftr-coral/20 text-zinc-400 hover:text-liftr-coral"
+                        className="p-1.5 rounded-md border-2 border-dark bg-orange text-cream hover:bg-orange/90 transition-all shadow-neo-sm cursor-pointer"
                         title="Delete Session"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>
-                      <div className="p-1 rounded text-zinc-500">
+                      <div className="p-1 rounded text-dark font-black">
                         {isExpanded ? (
-                          <ChevronUp className="w-4 h-4" />
+                          <ChevronUp className="w-4 h-4 stroke-[2.5]" />
                         ) : (
-                          <ChevronDown className="w-4 h-4" />
+                          <ChevronDown className="w-4 h-4 stroke-[2.5]" />
                         )}
                       </div>
                     </div>
@@ -233,9 +233,9 @@ export default function HistoryPage() {
 
                 {/* Expanded Details: Exercise & Set Breakdown */}
                 {isExpanded && (
-                  <div className="p-4 sm:p-5 pt-0 border-t border-[#1C1C1C] bg-[#0E0E0E] space-y-4">
-                    <div className="text-xs font-mono uppercase tracking-wider text-liftr-grey pt-3">
-                      Recorded Exercises &amp; Sets
+                  <div className="p-4 sm:p-5 pt-0 bg-cream space-y-4">
+                    <div className="text-xs font-mono uppercase font-black tracking-wider text-dark/70 pt-4">
+                      Recorded Movements &amp; Sets
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -247,13 +247,13 @@ export default function HistoryPage() {
                         return (
                           <div
                             key={sessionEx.id}
-                            className="p-3.5 rounded-lg bg-[#141414] border border-[#232323] space-y-2.5"
+                            className="p-3.5 rounded-xl bg-white border-2 border-dark shadow-neo-sm space-y-2.5"
                           >
                             <div className="flex items-center justify-between">
-                              <h4 className="text-sm font-bold text-white">
+                              <h4 className="font-heading font-black text-sm text-dark">
                                 {idx + 1}. {exMeta?.name || "Exercise"}
                               </h4>
-                              <span className="text-[10px] font-mono uppercase px-1.5 py-0.5 rounded bg-liftr-purple/10 text-liftr-purple-light">
+                              <span className="text-[10px] font-mono uppercase px-2 py-0.5 rounded bg-forest text-cream border-2 border-dark font-black shadow-neo-sm">
                                 {exMeta?.primaryMuscleGroup}
                               </span>
                             </div>
@@ -263,21 +263,21 @@ export default function HistoryPage() {
                                 <div
                                   key={s.id}
                                   className={cn(
-                                    "flex items-center justify-between px-2.5 py-1.5 rounded text-xs font-mono",
+                                    "flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs font-mono border-2 border-dark/15",
                                     s.isCompleted
-                                      ? "bg-[#181818] text-white"
-                                      : "bg-[#121212] text-zinc-500"
+                                      ? "bg-cream text-dark font-bold"
+                                      : "bg-white text-dark/40"
                                   )}
                                 >
                                   <div className="flex items-center gap-2">
-                                    <span className="w-4 text-center text-zinc-500">
+                                    <span className="w-4 text-center font-black text-forest">
                                       {s.setType === "warmup" ? "W" : s.setNumber}
                                     </span>
                                     <span>
                                       {s.weight} kg × {s.reps} reps
                                     </span>
                                   </div>
-                                  <span className="text-zinc-500 text-[11px]">
+                                  <span className="text-dark/60 text-[11px] font-bold">
                                     {(s.weight * s.reps).toLocaleString()} kg vol
                                   </span>
                                 </div>
@@ -297,12 +297,21 @@ export default function HistoryPage() {
 
       {/* Edit Session Modal */}
       {editingSession && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-          <div className="bento-card p-6 w-full max-w-md border-2 border-border shadow-neo-purple">
-            <h3 className="text-base font-bold text-white mb-4">Edit Workout Details</h3>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-dark/70 backdrop-blur-sm animate-in fade-in duration-150">
+          <div className="bg-cream border-3 border-dark rounded-xl shadow-neo-lg p-6 w-full max-w-md relative font-sans space-y-4">
+            <div className="flex items-center justify-between border-b-2 border-dark/15 pb-3">
+              <h3 className="font-heading font-black text-xl text-dark tracking-tight">EDIT WORKOUT DETAILS</h3>
+              <button
+                onClick={() => setEditingSession(null)}
+                className="p-1.5 rounded-lg border-2 border-dark bg-white hover:bg-forest hover:text-cream text-dark transition-all cursor-pointer shadow-neo-sm"
+              >
+                <X className="w-4 h-4 stroke-[2.5]" />
+              </button>
+            </div>
+
             <form onSubmit={handleSaveEdit} className="space-y-4">
               <div>
-                <label className="block text-xs font-mono uppercase text-liftr-grey mb-1.5">
+                <label className="block text-xs font-mono uppercase font-bold text-dark mb-1.5">
                   Workout Name
                 </label>
                 <input
@@ -310,33 +319,33 @@ export default function HistoryPage() {
                   required
                   value={editName}
                   onChange={(e) => setEditName(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-lg bg-[#181818] border border-[#2c2c2c] text-white text-sm focus:outline-none focus:border-liftr-purple"
+                  className="w-full px-3.5 py-2.5 rounded-lg bg-white border-2 border-dark text-dark text-sm focus:outline-none focus:ring-2 focus:ring-forest font-sans"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-mono uppercase text-liftr-grey mb-1.5">
+                <label className="block text-xs font-mono uppercase font-bold text-dark mb-1.5">
                   Workout Notes
                 </label>
                 <textarea
                   rows={3}
                   value={editNotes}
                   onChange={(e) => setEditNotes(e.target.value)}
-                  className="w-full px-3.5 py-2 rounded-lg bg-[#181818] border border-[#2c2c2c] text-white text-sm focus:outline-none focus:border-liftr-purple resize-none"
+                  className="w-full px-3.5 py-2 rounded-lg bg-white border-2 border-dark text-dark text-sm focus:outline-none focus:ring-2 focus:ring-forest resize-none font-sans"
                 />
               </div>
 
-              <div className="flex justify-end gap-2 pt-2">
+              <div className="flex justify-end gap-2 pt-3 border-t-2 border-dark/15">
                 <button
                   type="button"
                   onClick={() => setEditingSession(null)}
-                  className="px-4 py-2 rounded bg-[#1C1C1C] text-xs font-mono uppercase text-zinc-300"
+                  className="px-4 py-2.5 rounded-lg bg-white border-2 border-dark hover:bg-cream text-dark text-xs font-mono font-bold uppercase transition-all shadow-neo-sm cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 rounded bg-liftr-purple hover:bg-liftr-purple-dark text-white text-xs font-mono uppercase font-bold shadow-neo"
+                  className="px-5 py-2.5 rounded-lg bg-lime hover:bg-lime/90 text-dark text-xs font-mono uppercase font-black tracking-wider border-2 border-dark shadow-neo cursor-pointer transition-all active:translate-x-0.5 active:translate-y-0.5"
                 >
                   Save Changes
                 </button>

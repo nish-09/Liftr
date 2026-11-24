@@ -8,7 +8,7 @@ import { useHistoryStore } from "@/stores/useHistoryStore";
 import { useExerciseStore } from "@/stores/useExerciseStore";
 import { usePlanStore } from "@/stores/usePlanStore";
 import { calculateProgression, ProgressionSuggestion } from "@/lib/progression/engine";
-import { formatDuration, formatWeight, cn } from "@/lib/utils";
+import { formatDuration, cn } from "@/lib/utils";
 import { SetType, Exercise, SetLogItem } from "@/types";
 import {
   Play,
@@ -17,18 +17,12 @@ import {
   Trash2,
   Timer,
   Zap,
-  TrendingUp,
-  AlertCircle,
-  Dumbbell,
-  Clock,
-  Flame,
   Award,
-  Layers,
-  Sparkles,
   ChevronDown,
-  Info,
   X,
   RefreshCw,
+  Dumbbell,
+  Flame,
 } from "lucide-react";
 
 export default function WorkoutsPage() {
@@ -64,7 +58,6 @@ export default function WorkoutsPage() {
     setMounted(true);
   }, []);
 
-  // Timer interval for active session
   useEffect(() => {
     if (!activeSession) return;
     const interval = setInterval(() => {
@@ -75,7 +68,6 @@ export default function WorkoutsPage() {
 
   if (!mounted) return null;
 
-  // Calculate live session statistics
   let completedSetsCount = 0;
   let totalSetsCount = 0;
   let currentVolume = 0;
@@ -113,7 +105,6 @@ export default function WorkoutsPage() {
     const finished = finishWorkout();
     if (!finished) return;
 
-    // Save to history & detect personal records
     const { newPRs } = addCompletedSession({
       ...finished,
       notes: sessionNotes || finished.notes,
@@ -132,10 +123,10 @@ export default function WorkoutsPage() {
 
     try {
       confetti({
-        particleCount: 80,
-        spread: 70,
+        particleCount: 90,
+        spread: 80,
         origin: { y: 0.6 },
-        colors: ["#8957DC", "#60C27D", "#E9D65B", "#E97860"],
+        colors: ["#D5F36A", "#183D2A", "#F07845", "#B9A4E8"],
       });
     } catch {
       // Confetti fallback
@@ -147,23 +138,27 @@ export default function WorkoutsPage() {
     return (
       <div className="space-y-6">
         <div>
-          <h1 className="font-serif italic text-3xl text-white">Live Workout Command</h1>
-          <p className="text-sm text-liftr-grey mt-0.5">
+          <h1 className="font-heading text-3xl sm:text-4xl font-bold text-[#171B16]">
+            Live Workout Command
+          </h1>
+          <p className="text-sm text-[#171B16]/80 font-mono mt-0.5">
             Real-time double progression set logging with automated weight stepping and rest tracking.
           </p>
         </div>
 
         {/* Start Workout Bento Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Quick Start Card */}
-          <div className="bento-card bento-card-purple p-6 flex flex-col justify-between space-y-6">
+          {/* Quick Start Card (Deep Forest Green) */}
+          <div className="bento-card-forest p-6 sm:p-7 flex flex-col justify-between space-y-6 rounded-xl border-2 border-[#171B16] shadow-neo-lg">
             <div className="space-y-3">
-              <div className="w-12 h-12 rounded-xl bg-liftr-purple flex items-center justify-center text-white shadow-neo">
-                <Play className="w-6 h-6 fill-white ml-0.5" />
+              <div className="w-12 h-12 rounded-lg bg-[#D5F36A] border-2 border-[#171B16] flex items-center justify-center text-[#171B16] shadow-neo-sm">
+                <Play className="w-6 h-6 fill-[#171B16] ml-0.5" />
               </div>
               <div>
-                <h2 className="text-xl font-bold text-white">Start Empty Workout</h2>
-                <p className="text-xs text-zinc-300 mt-1">
+                <h2 className="text-2xl font-heading font-bold text-[#F5F0DF]">
+                  Start Empty Workout
+                </h2>
+                <p className="text-xs text-[#B8D99A] font-mono mt-1 leading-relaxed">
                   Build your workout on the fly. Select movements from your library, log sets, and test PRs with transparent double progression suggestions.
                 </p>
               </div>
@@ -171,22 +166,24 @@ export default function WorkoutsPage() {
 
             <button
               onClick={handleStartEmptySession}
-              className="w-full py-3.5 px-6 rounded-lg bg-liftr-purple hover:bg-liftr-purple-dark text-white font-bold text-sm shadow-neo flex items-center justify-center gap-2 transition-all cursor-pointer"
+              className="w-full py-3.5 px-6 rounded-lg bg-[#D5F36A] hover:bg-[#c4e458] text-[#171B16] font-heading font-bold text-sm uppercase tracking-wider border-2 border-[#171B16] shadow-neo flex items-center justify-center gap-2 transition-all active:translate-x-0.5 active:translate-y-0.5 cursor-pointer"
             >
-              <Play className="w-4 h-4 fill-white" />
+              <Play className="w-4 h-4 fill-[#171B16]" />
               <span>Launch Live Workout</span>
             </button>
           </div>
 
-          {/* Start From Active Plan Card */}
-          <div className="bento-card p-6 flex flex-col justify-between space-y-6">
+          {/* Start From Plan Card (Warm Cream) */}
+          <div className="bento-card p-6 sm:p-7 flex flex-col justify-between space-y-6 rounded-xl border-2 border-[#171B16] shadow-neo-lg">
             <div className="space-y-3">
-              <div className="w-12 h-12 rounded-xl bg-[#1C1C1C] border border-[#2B2B2B] flex items-center justify-center text-liftr-green">
+              <div className="w-12 h-12 rounded-lg bg-[#183D2A] border-2 border-[#171B16] flex items-center justify-center text-[#D5F36A] shadow-neo-sm">
                 <Dumbbell className="w-6 h-6" />
               </div>
               <div>
-                <h2 className="text-xl font-bold text-white">Start From Workout Plan</h2>
-                <p className="text-xs text-liftr-grey mt-1">
+                <h2 className="text-2xl font-heading font-bold text-[#171B16]">
+                  Start From Workout Plan
+                </h2>
+                <p className="text-xs text-[#171B16]/75 font-mono mt-1 leading-relaxed">
                   Choose a prescribed training day from your custom routines to auto-populate targets, rep ranges, and historical baseline weights.
                 </p>
               </div>
@@ -194,10 +191,10 @@ export default function WorkoutsPage() {
 
             <Link
               href="/plans"
-              className="w-full py-3.5 px-6 rounded-lg bg-[#1C1C1C] hover:bg-[#252525] border border-[#2B2B2B] text-white font-mono text-xs uppercase tracking-wider text-center transition-all flex items-center justify-center gap-2"
+              className="w-full py-3.5 px-6 rounded-lg bg-[#183D2A] hover:bg-[#143323] text-[#F5F0DF] font-heading font-bold text-xs uppercase tracking-wider text-center border-2 border-[#171B16] shadow-neo flex items-center justify-center gap-2 transition-all active:translate-x-0.5 active:translate-y-0.5"
             >
               <span>Browse Workout Plans</span>
-              <ChevronDown className="w-4 h-4 -rotate-90 text-liftr-purple" />
+              <ChevronDown className="w-4 h-4 -rotate-90 text-[#D5F36A]" />
             </Link>
           </div>
         </div>
@@ -207,16 +204,16 @@ export default function WorkoutsPage() {
 
   return (
     <div className="space-y-6 pb-12">
-      {/* Sticky Active Session Header Bar */}
-      <div className="bento-card p-4 sm:p-5 border-liftr-purple/40 shadow-neo flex flex-col sm:flex-row sm:items-center justify-between gap-4 sticky top-16 z-20 bg-[#0E0E0E]/95 backdrop-blur-md">
+      {/* Sticky Active Session Header Bar (Deep Forest Green) */}
+      <div className="bento-card-forest p-4 sm:p-5 border-2 border-[#171B16] shadow-neo-lg flex flex-col sm:flex-row sm:items-center justify-between gap-4 sticky top-16 z-20 rounded-xl">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <span className="w-2.5 h-2.5 rounded-full bg-liftr-purple animate-ping" />
-            <span className="text-[10px] font-mono uppercase tracking-widest text-liftr-purple font-bold">
+            <span className="w-2.5 h-2.5 rounded-full bg-[#D5F36A] border border-[#171B16] animate-ping" />
+            <span className="text-[10px] font-mono uppercase tracking-widest text-[#D5F36A] font-bold">
               Active Session
             </span>
-            <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-[#1C1C1C] text-zinc-400 border border-[#2B2B2B] flex items-center gap-1">
-              <RefreshCw className="w-2.5 h-2.5 text-liftr-green" />
+            <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-[#143323] text-[#F5F0DF] border border-[#171B16] flex items-center gap-1 font-semibold">
+              <RefreshCw className="w-2.5 h-2.5 text-[#D5F36A]" />
               {syncStatus}
             </span>
           </div>
@@ -225,24 +222,24 @@ export default function WorkoutsPage() {
             type="text"
             value={activeSession.name}
             onChange={(e) => updateSessionMeta({ name: e.target.value })}
-            className="text-lg sm:text-xl font-bold text-white bg-transparent border-b border-transparent hover:border-[#383838] focus:border-liftr-purple focus:outline-none"
+            className="text-lg sm:text-xl font-heading font-bold text-[#F5F0DF] bg-transparent border-b-2 border-transparent hover:border-[#D5F36A]/50 focus:border-[#D5F36A] focus:outline-none transition-colors"
           />
         </div>
 
         {/* Live Metrics: Duration, Volume, Sets, Finish */}
         <div className="flex items-center gap-3">
-          <div className="flex items-center gap-4 px-3 py-1.5 rounded-lg bg-[#141414] border border-[#232323] text-xs font-mono">
+          <div className="flex items-center gap-4 px-3 py-1.5 rounded-md bg-[#143323] border-2 border-[#171B16] text-xs font-mono text-white">
             <div>
-              <span className="text-[10px] text-zinc-500 block">Time</span>
-              <span className="font-bold text-white">{formatDuration(elapsedSeconds)}</span>
+              <span className="text-[10px] text-[#B8D99A] block uppercase font-bold">Time</span>
+              <span className="font-bold text-[#F5F0DF]">{formatDuration(elapsedSeconds)}</span>
             </div>
             <div>
-              <span className="text-[10px] text-zinc-500 block">Volume</span>
-              <span className="font-bold text-liftr-purple-light">{currentVolume.toLocaleString()} kg</span>
+              <span className="text-[10px] text-[#B8D99A] block uppercase font-bold">Volume</span>
+              <span className="font-bold text-[#D5F36A]">{currentVolume.toLocaleString()} kg</span>
             </div>
             <div>
-              <span className="text-[10px] text-zinc-500 block">Sets</span>
-              <span className="font-bold text-liftr-green">
+              <span className="text-[10px] text-[#B8D99A] block uppercase font-bold">Sets</span>
+              <span className="font-bold text-[#D5F36A]">
                 {completedSetsCount}/{totalSetsCount}
               </span>
             </div>
@@ -250,7 +247,7 @@ export default function WorkoutsPage() {
 
           <button
             onClick={handleFinishSession}
-            className="px-4 py-2.5 rounded-lg bg-liftr-green hover:bg-liftr-green-light text-black font-mono text-xs uppercase font-bold shadow-neo cursor-pointer transition-all active:translate-x-0.5 active:translate-y-0.5 flex items-center gap-1.5"
+            className="px-4 py-2.5 rounded-md bg-[#D5F36A] hover:bg-[#c3e357] text-[#171B16] font-heading text-xs uppercase font-bold border-2 border-[#171B16] shadow-neo cursor-pointer transition-all active:translate-x-0.5 active:translate-y-0.5 flex items-center gap-1.5"
           >
             <Check className="w-4 h-4 stroke-[3]" />
             <span>Finish</span>
@@ -262,15 +259,15 @@ export default function WorkoutsPage() {
                 discardWorkout();
               }
             }}
-            className="p-2.5 rounded-lg hover:bg-liftr-coral/20 text-zinc-500 hover:text-liftr-coral transition-colors"
+            className="p-2.5 rounded-md bg-[#F07845] hover:bg-[#d96636] text-white border-2 border-[#171B16] shadow-neo-sm transition-all cursor-pointer"
             title="Discard Session"
           >
-            <Trash2 className="w-4 h-4" />
+            <Trash2 className="w-4 h-4 stroke-[2.5]" />
           </button>
         </div>
       </div>
 
-      {/* Exercise Cards */}
+      {/* Exercise Cards (Warm Cream) */}
       <div className="space-y-5">
         {activeSession.exercises.map((sessionEx, exIdx) => {
           const exMeta =
@@ -279,27 +276,27 @@ export default function WorkoutsPage() {
           return (
             <div
               key={sessionEx.id}
-              className="bento-card p-4 sm:p-5 border-[#262626] space-y-4"
+              className="bento-card p-5 border-2 border-[#171B16] shadow-neo rounded-xl space-y-4"
             >
               {/* Exercise Header */}
-              <div className="flex items-start justify-between gap-3">
-                <div className="flex items-center gap-2.5">
-                  <div className="w-7 h-7 rounded-lg bg-liftr-purple/20 text-liftr-purple-light font-mono text-xs font-bold flex items-center justify-center">
+              <div className="flex items-start justify-between gap-3 border-b-2 border-[#171B16]/20 pb-3">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-md bg-[#183D2A] text-[#D5F36A] border-2 border-[#171B16] font-mono text-sm font-bold flex items-center justify-center shadow-neo-sm">
                     {exIdx + 1}
                   </div>
                   <div>
-                    <h3 className="text-base font-bold text-white">
+                    <h3 className="text-lg font-heading font-bold text-[#171B16]">
                       {exMeta?.name || "Exercise"}
                     </h3>
-                    <div className="flex items-center gap-2 text-[11px] font-mono text-liftr-grey mt-0.5">
-                      <span className="uppercase text-liftr-purple-light">
+                    <div className="flex items-center gap-2 text-xs font-mono text-[#171B16]/80 mt-0.5">
+                      <span className="uppercase font-bold text-[#183D2A] px-1.5 py-0.5 rounded bg-[#D5F36A] border border-[#171B16]">
                         {exMeta?.primaryMuscleGroup}
                       </span>
                       <span>•</span>
-                      <span className="capitalize">{exMeta?.equipment}</span>
+                      <span className="capitalize font-semibold">{exMeta?.equipment}</span>
                       <span>•</span>
-                      <span className="flex items-center gap-1 text-zinc-400">
-                        <Timer className="w-3 h-3 text-zinc-500" />
+                      <span className="flex items-center gap-1 font-semibold">
+                        <Timer className="w-3.5 h-3.5 text-[#183D2A]" />
                         {exMeta?.defaultRestDuration || 90}s rest
                       </span>
                     </div>
@@ -308,7 +305,7 @@ export default function WorkoutsPage() {
 
                 <button
                   onClick={() => removeExerciseFromWorkout(sessionEx.id)}
-                  className="p-1 rounded hover:bg-liftr-coral/20 text-zinc-500 hover:text-liftr-coral transition-colors"
+                  className="p-1.5 rounded-md hover:bg-[#F07845] hover:text-white border border-transparent hover:border-[#171B16] text-[#171B16]/60 transition-colors"
                   title="Remove Exercise"
                 >
                   <Trash2 className="w-4 h-4" />
@@ -319,26 +316,24 @@ export default function WorkoutsPage() {
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-xs font-mono">
                   <thead>
-                    <tr className="border-b border-[#232323] text-zinc-500 text-[10px] uppercase tracking-wider">
-                      <th className="py-2 px-2 w-12 text-center">Set</th>
+                    <tr className="border-b-2 border-[#171B16] text-[#171B16] text-[10px] uppercase font-bold tracking-wider">
+                      <th className="py-2 px-2 w-14 text-center">Set</th>
                       <th className="py-2 px-2 min-w-[130px]">Previous Session</th>
                       <th className="py-2 px-2 min-w-[160px]">Target Today</th>
-                      <th className="py-2 px-2 min-w-[100px]">Weight (kg)</th>
-                      <th className="py-2 px-2 min-w-[90px]">Reps</th>
+                      <th className="py-2 px-2 min-w-[120px]">Weight (kg)</th>
+                      <th className="py-2 px-2 min-w-[100px]">Reps</th>
                       <th className="py-2 px-2 w-16 text-center">Done</th>
                       <th className="py-2 px-1 w-8"></th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-[#1C1C1C]">
+                  <tbody className="divide-y-2 divide-[#171B16]/20">
                     {sessionEx.sets.map((setLog) => {
-                      // Lookup historical performance for this exercise & set
                       const prevPerformance = getPreviousPerformance(
                         sessionEx.exerciseId,
                         setLog.setNumber,
                         activeSession.planDayId
                       );
 
-                      // Calculate double progression
                       const progression: ProgressionSuggestion = calculateProgression({
                         exerciseId: sessionEx.exerciseId,
                         setNumber: setLog.setNumber,
@@ -357,7 +352,7 @@ export default function WorkoutsPage() {
                           key={setLog.id}
                           className={cn(
                             "transition-colors",
-                            isCompleted ? "bg-[#101912]" : "hover:bg-[#161616]"
+                            isCompleted ? "bg-[#D5F36A]/40 font-bold" : "hover:bg-[#EAE3CE]"
                           )}
                         >
                           {/* Set number badge & type selector */}
@@ -370,12 +365,12 @@ export default function WorkoutsPage() {
                                 })
                               }
                               className={cn(
-                                "text-[11px] font-mono font-bold rounded px-1.5 py-0.5 border cursor-pointer",
+                                "text-xs font-mono font-bold rounded px-1.5 py-0.5 border-2 border-[#171B16] cursor-pointer shadow-neo-sm",
                                 setLog.setType === "warmup"
-                                  ? "bg-liftr-yellow/20 text-liftr-yellow border-liftr-yellow/40"
+                                  ? "bg-[#D5F36A] text-[#171B16]"
                                   : setLog.setType === "drop"
-                                  ? "bg-liftr-coral/20 text-liftr-coral border-liftr-coral/40"
-                                  : "bg-[#1C1C1C] text-zinc-300 border-[#2C2C2C]"
+                                  ? "bg-[#F07845] text-white"
+                                  : "bg-[#F5F0DF] text-[#171B16]"
                               )}
                             >
                               <option value="normal">{setLog.setNumber}</option>
@@ -384,28 +379,28 @@ export default function WorkoutsPage() {
                             </select>
                           </td>
 
-                          {/* Previous performance column */}
-                          <td className="py-2.5 px-2 text-zinc-400">
+                          {/* Previous performance */}
+                          <td className="py-2.5 px-2 text-[#171B16]/80 font-bold">
                             {prevPerformance ? (
-                              <span className="font-mono text-xs">
+                              <span>
                                 {prevPerformance.previousWeight} kg × {prevPerformance.previousReps}
                               </span>
                             ) : (
-                              <span className="text-zinc-600 italic text-[11px]">—</span>
+                              <span className="text-[#171B16]/40 italic">—</span>
                             )}
                           </td>
 
                           {/* Target Today with Progression Reason Badge */}
                           <td className="py-2.5 px-2">
                             <div className="flex items-center gap-1.5">
-                              <span className="font-bold text-white font-mono text-xs">
+                              <span className="font-bold text-[#171B16] font-mono text-xs">
                                 {progression.targetWeight > 0
                                   ? `${progression.targetWeight} kg × ${progression.targetReps}`
                                   : `${progression.targetReps} reps`}
                               </span>
                               {progression.reasonType === "WEIGHT_INCREASE" && (
                                 <span
-                                  className="text-[9px] px-1 py-0.2 rounded bg-liftr-purple/20 text-liftr-purple-light border border-liftr-purple/40 font-bold"
+                                  className="text-[9px] px-1.5 py-0.2 rounded bg-[#183D2A] text-[#D5F36A] border border-[#171B16] font-bold"
                                   title={progression.explanation}
                                 >
                                   +WEIGHT
@@ -413,7 +408,7 @@ export default function WorkoutsPage() {
                               )}
                               {progression.reasonType === "REP_PROGRESSION" && (
                                 <span
-                                  className="text-[9px] px-1 py-0.2 rounded bg-liftr-green/20 text-liftr-green border border-liftr-green/40 font-bold"
+                                  className="text-[9px] px-1.5 py-0.2 rounded bg-[#D5F36A] text-[#171B16] border border-[#171B16] font-bold"
                                   title={progression.explanation}
                                 >
                                   +1 REP
@@ -424,7 +419,7 @@ export default function WorkoutsPage() {
 
                           {/* Weight Input with Stepper */}
                           <td className="py-2.5 px-2">
-                            <div className="flex items-center gap-1 max-w-[120px]">
+                            <div className="flex items-center gap-1 max-w-[130px]">
                               <button
                                 type="button"
                                 onClick={() =>
@@ -435,7 +430,7 @@ export default function WorkoutsPage() {
                                     ),
                                   })
                                 }
-                                className="w-5 h-7 rounded bg-[#1C1C1C] hover:bg-[#282828] text-zinc-400 font-bold flex items-center justify-center text-xs"
+                                className="w-6 h-7 rounded bg-[#F5F0DF] hover:bg-[#D5F36A] text-[#171B16] font-bold flex items-center justify-center text-xs border-2 border-[#171B16] shadow-neo-sm"
                               >
                                 -
                               </button>
@@ -450,7 +445,7 @@ export default function WorkoutsPage() {
                                   })
                                 }
                                 placeholder="0"
-                                className="w-14 px-2 py-1 rounded bg-[#181818] border border-[#2B2B2B] text-white text-center font-mono font-bold text-xs focus:outline-none focus:border-liftr-purple"
+                                className="w-16 px-2 py-1 rounded bg-[#F5F0DF] border-2 border-[#171B16] text-[#171B16] text-center font-mono font-bold text-xs focus:outline-none focus:bg-[#D5F36A]/20"
                               />
                               <button
                                 type="button"
@@ -459,7 +454,7 @@ export default function WorkoutsPage() {
                                     weight: Number((setLog.weight + 2.5).toFixed(2)),
                                   })
                                 }
-                                className="w-5 h-7 rounded bg-[#1C1C1C] hover:bg-[#282828] text-zinc-400 font-bold flex items-center justify-center text-xs"
+                                className="w-6 h-7 rounded bg-[#F5F0DF] hover:bg-[#D5F36A] text-[#171B16] font-bold flex items-center justify-center text-xs border-2 border-[#171B16] shadow-neo-sm"
                               >
                                 +
                               </button>
@@ -468,7 +463,7 @@ export default function WorkoutsPage() {
 
                           {/* Reps Input with Stepper */}
                           <td className="py-2.5 px-2">
-                            <div className="flex items-center gap-1 max-w-[110px]">
+                            <div className="flex items-center gap-1 max-w-[120px]">
                               <button
                                 type="button"
                                 onClick={() =>
@@ -476,7 +471,7 @@ export default function WorkoutsPage() {
                                     reps: Math.max(0, setLog.reps - 1),
                                   })
                                 }
-                                className="w-5 h-7 rounded bg-[#1C1C1C] hover:bg-[#282828] text-zinc-400 font-bold flex items-center justify-center text-xs"
+                                className="w-6 h-7 rounded bg-[#F5F0DF] hover:bg-[#D5F36A] text-[#171B16] font-bold flex items-center justify-center text-xs border-2 border-[#171B16] shadow-neo-sm"
                               >
                                 -
                               </button>
@@ -490,7 +485,7 @@ export default function WorkoutsPage() {
                                   })
                                 }
                                 placeholder="0"
-                                className="w-12 px-2 py-1 rounded bg-[#181818] border border-[#2B2B2B] text-white text-center font-mono font-bold text-xs focus:outline-none focus:border-liftr-purple"
+                                className="w-14 px-2 py-1 rounded bg-[#F5F0DF] border-2 border-[#171B16] text-[#171B16] text-center font-mono font-bold text-xs focus:outline-none focus:bg-[#D5F36A]/20"
                               />
                               <button
                                 type="button"
@@ -499,7 +494,7 @@ export default function WorkoutsPage() {
                                     reps: setLog.reps + 1,
                                   })
                                 }
-                                className="w-5 h-7 rounded bg-[#1C1C1C] hover:bg-[#282828] text-zinc-400 font-bold flex items-center justify-center text-xs"
+                                className="w-6 h-7 rounded bg-[#F5F0DF] hover:bg-[#D5F36A] text-[#171B16] font-bold flex items-center justify-center text-xs border-2 border-[#171B16] shadow-neo-sm"
                               >
                                 +
                               </button>
@@ -512,10 +507,10 @@ export default function WorkoutsPage() {
                               type="button"
                               onClick={() => toggleSetCompleted(sessionEx.id, setLog.id)}
                               className={cn(
-                                "w-7 h-7 rounded-md flex items-center justify-center transition-all cursor-pointer mx-auto",
+                                "w-7 h-7 rounded-md flex items-center justify-center transition-all cursor-pointer mx-auto border-2 border-[#171B16]",
                                 isCompleted
-                                  ? "bg-liftr-green text-black font-bold shadow-neo-sm"
-                                  : "bg-[#1C1C1C] border border-[#2C2C2C] text-transparent hover:border-liftr-green/50"
+                                  ? "bg-[#D5F36A] text-[#171B16] font-bold shadow-neo-sm"
+                                  : "bg-[#F5F0DF] text-transparent hover:border-[#183D2A]"
                               )}
                             >
                               <Check className="w-4 h-4 stroke-[3]" />
@@ -527,9 +522,9 @@ export default function WorkoutsPage() {
                             <button
                               type="button"
                               onClick={() => deleteSetFromExercise(sessionEx.id, setLog.id)}
-                              className="p-1 rounded text-zinc-600 hover:text-liftr-coral"
+                              className="p-1 rounded text-[#171B16]/50 hover:text-[#F07845]"
                             >
-                              <X className="w-3.5 h-3.5" />
+                              <X className="w-3.5 h-3.5 stroke-[2.5]" />
                             </button>
                           </td>
                         </tr>
@@ -539,13 +534,13 @@ export default function WorkoutsPage() {
                 </table>
               </div>
 
-              {/* Set Actions: + Set, + Warmup, Notes */}
-              <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-[#1C1C1C]">
+              {/* Set Actions: + Set, + Warmup, + Drop */}
+              <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t-2 border-[#171B16]/20">
                 <div className="flex items-center gap-2">
                   <button
                     type="button"
                     onClick={() => addSetToExercise(sessionEx.id, "normal")}
-                    className="px-3 py-1.5 rounded bg-[#1A1A1A] hover:bg-[#222222] border border-[#2B2B2B] text-xs font-mono text-zinc-300 flex items-center gap-1"
+                    className="px-3 py-1.5 rounded-md bg-[#183D2A] hover:bg-[#143323] text-[#F5F0DF] text-xs font-heading font-bold uppercase tracking-wider border-2 border-[#171B16] shadow-neo-sm flex items-center gap-1 active:translate-x-0.5 active:translate-y-0.5"
                   >
                     <Plus className="w-3.5 h-3.5" />
                     <span>Add Set</span>
@@ -554,7 +549,7 @@ export default function WorkoutsPage() {
                   <button
                     type="button"
                     onClick={() => addSetToExercise(sessionEx.id, "warmup")}
-                    className="px-2.5 py-1.5 rounded bg-[#1A1A1A] hover:bg-[#222222] border border-[#2B2B2B] text-xs font-mono text-liftr-yellow flex items-center gap-1"
+                    className="px-2.5 py-1.5 rounded-md bg-[#D5F36A] hover:bg-[#c2e255] text-[#171B16] text-xs font-mono font-bold border-2 border-[#171B16] shadow-neo-sm flex items-center gap-1"
                   >
                     <span>+ Warmup Set</span>
                   </button>
@@ -562,7 +557,7 @@ export default function WorkoutsPage() {
                   <button
                     type="button"
                     onClick={() => addSetToExercise(sessionEx.id, "drop")}
-                    className="px-2.5 py-1.5 rounded bg-[#1A1A1A] hover:bg-[#222222] border border-[#2B2B2B] text-xs font-mono text-liftr-coral flex items-center gap-1"
+                    className="px-2.5 py-1.5 rounded-md bg-[#F07845] hover:bg-[#dc6938] text-white text-xs font-mono font-bold border-2 border-[#171B16] shadow-neo-sm flex items-center gap-1"
                   >
                     <span>+ Drop Set</span>
                   </button>
@@ -575,29 +570,29 @@ export default function WorkoutsPage() {
         {/* Add Exercise button */}
         <button
           onClick={() => setIsAddExerciseOpen(true)}
-          className="w-full py-4 rounded-xl border-2 border-dashed border-[#282828] hover:border-liftr-purple/50 bg-[#101010] text-zinc-300 hover:text-white font-mono text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all cursor-pointer"
+          className="w-full py-4 rounded-xl border-2 border-dashed border-[#171B16] bg-[#F5F0DF] hover:bg-[#D5F36A] text-[#171B16] font-heading font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-neo transition-all cursor-pointer"
         >
-          <Plus className="w-4 h-4 text-liftr-purple" />
+          <Plus className="w-4 h-4 stroke-[2.5]" />
           <span>Add Another Exercise to Session</span>
         </button>
       </div>
 
       {/* Add Movement Selector Modal */}
       {isAddExerciseOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-          <div className="bento-card p-6 w-full max-w-md border-2 border-border shadow-neo-purple">
-            <h3 className="text-base font-bold text-white mb-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <div className="bento-card p-6 w-full max-w-md border-2 border-[#171B16] shadow-neo-xl">
+            <h3 className="text-lg font-heading font-bold text-[#171B16] mb-4">
               Add Exercise to Live Session
             </h3>
             <form onSubmit={handleAddExercise} className="space-y-4">
               <div>
-                <label className="block text-xs font-mono uppercase text-liftr-grey mb-1.5">
+                <label className="block text-xs font-mono uppercase text-[#171B16] font-bold mb-1.5">
                   Select Exercise
                 </label>
                 <select
                   value={selectedExerciseId}
                   onChange={(e) => setSelectedExerciseId(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-lg bg-[#181818] border border-[#2c2c2c] text-white text-sm focus:outline-none focus:border-liftr-purple"
+                  className="w-full px-3.5 py-2.5 rounded-lg bg-[#F5F0DF] border-2 border-[#171B16] text-[#171B16] text-sm font-semibold focus:outline-none"
                 >
                   <option value="">-- Choose Exercise --</option>
                   {exercises.map((ex) => (
@@ -612,14 +607,14 @@ export default function WorkoutsPage() {
                 <button
                   type="button"
                   onClick={() => setIsAddExerciseOpen(false)}
-                  className="px-4 py-2 rounded bg-[#1C1C1C] text-xs font-mono uppercase text-zinc-300"
+                  className="px-4 py-2 rounded-lg bg-[#F5F0DF] border-2 border-[#171B16] text-xs font-mono uppercase font-bold text-[#171B16]"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={!selectedExerciseId}
-                  className="px-5 py-2 rounded bg-liftr-purple hover:bg-liftr-purple-dark text-white text-xs font-mono uppercase font-bold shadow-neo disabled:opacity-50"
+                  className="px-5 py-2 rounded-lg bg-[#183D2A] text-[#D5F36A] text-xs font-heading uppercase font-bold border-2 border-[#171B16] shadow-neo disabled:opacity-50"
                 >
                   Add Exercise
                 </button>
@@ -631,41 +626,51 @@ export default function WorkoutsPage() {
 
       {/* Workout Completion Summary Modal */}
       {showCompletionModal && completionSummary && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
-          <div className="bento-card p-6 sm:p-8 w-full max-w-lg border-2 border-liftr-green shadow-neo-green relative space-y-6">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-md">
+          <div className="bento-card-forest p-6 sm:p-8 w-full max-w-lg border-2 border-[#171B16] shadow-neo-xl relative space-y-6">
             <div className="text-center space-y-2">
-              <div className="w-14 h-14 mx-auto rounded-2xl bg-liftr-green flex items-center justify-center text-black shadow-neo">
-                <Award className="w-8 h-8" />
+              <div className="w-14 h-14 mx-auto rounded-xl bg-[#D5F36A] border-2 border-[#171B16] flex items-center justify-center text-[#171B16] shadow-neo">
+                <Award className="w-8 h-8 stroke-[2.5]" />
               </div>
-              <h2 className="font-serif italic text-3xl text-white">Workout Completed!</h2>
-              <p className="text-xs text-liftr-grey font-mono">
+              <h2 className="font-heading text-3xl font-bold text-[#F5F0DF]">
+                Workout Completed!
+              </h2>
+              <p className="text-xs text-[#B8D99A] font-mono">
                 Performance recorded to persistent database and strength analytics.
               </p>
             </div>
 
             {/* Metrics Bento Grid */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
-              <div className="p-3 rounded-lg bg-[#181818] border border-[#282828]">
-                <span className="text-[10px] font-mono uppercase text-zinc-500 block">Duration</span>
+              <div className="p-3 rounded-lg bg-[#143323] border-2 border-[#171B16]">
+                <span className="text-[10px] font-mono uppercase text-[#B8D99A] font-bold block">
+                  Duration
+                </span>
                 <span className="font-mono text-base font-bold text-white">
                   {formatDuration(completionSummary.durationSeconds)}
                 </span>
               </div>
-              <div className="p-3 rounded-lg bg-[#181818] border border-[#282828]">
-                <span className="text-[10px] font-mono uppercase text-zinc-500 block">Volume</span>
-                <span className="font-mono text-base font-bold text-liftr-purple-light">
+              <div className="p-3 rounded-lg bg-[#143323] border-2 border-[#171B16]">
+                <span className="text-[10px] font-mono uppercase text-[#B8D99A] font-bold block">
+                  Volume
+                </span>
+                <span className="font-mono text-base font-bold text-[#D5F36A]">
                   {completionSummary.totalVolume.toLocaleString()} kg
                 </span>
               </div>
-              <div className="p-3 rounded-lg bg-[#181818] border border-[#282828]">
-                <span className="text-[10px] font-mono uppercase text-zinc-500 block">Sets Logged</span>
-                <span className="font-mono text-base font-bold text-liftr-green">
+              <div className="p-3 rounded-lg bg-[#143323] border-2 border-[#171B16]">
+                <span className="text-[10px] font-mono uppercase text-[#B8D99A] font-bold block">
+                  Sets Logged
+                </span>
+                <span className="font-mono text-base font-bold text-[#D5F36A]">
                   {completionSummary.completedSetsCount}
                 </span>
               </div>
-              <div className="p-3 rounded-lg bg-[#181818] border border-[#282828]">
-                <span className="text-[10px] font-mono uppercase text-zinc-500 block">Movements</span>
-                <span className="font-mono text-base font-bold text-liftr-yellow">
+              <div className="p-3 rounded-lg bg-[#143323] border-2 border-[#171B16]">
+                <span className="text-[10px] font-mono uppercase text-[#B8D99A] font-bold block">
+                  Movements
+                </span>
+                <span className="font-mono text-base font-bold text-[#F07845]">
                   {completionSummary.exercisesCount}
                 </span>
               </div>
@@ -673,16 +678,16 @@ export default function WorkoutsPage() {
 
             {/* PRs Broken notification */}
             {completionSummary.newPRs && completionSummary.newPRs.length > 0 && (
-              <div className="p-4 rounded-lg bg-liftr-purple/15 border border-liftr-purple/40 space-y-2">
-                <div className="flex items-center gap-2 text-xs font-mono font-bold text-liftr-purple-light uppercase">
-                  <Flame className="w-4 h-4 text-liftr-coral fill-liftr-coral" />
+              <div className="p-4 rounded-lg bg-[#F07845] border-2 border-[#171B16] text-white space-y-2 shadow-neo-sm">
+                <div className="flex items-center gap-2 text-xs font-mono font-bold uppercase">
+                  <Flame className="w-4 h-4 text-white fill-white" />
                   <span>Personal Records Broken!</span>
                 </div>
                 <div className="space-y-1">
                   {completionSummary.newPRs.map((pr: any) => (
                     <div
                       key={pr.id}
-                      className="text-xs font-mono text-zinc-300 flex items-center justify-between"
+                      className="text-xs font-mono flex items-center justify-between"
                     >
                       <span className="capitalize">{pr.prType.replace("_", " ")}</span>
                       <span className="font-bold text-white">{pr.value} kg</span>
@@ -696,7 +701,7 @@ export default function WorkoutsPage() {
               onClick={() => {
                 setShowCompletionModal(false);
               }}
-              className="w-full py-3.5 rounded-lg bg-liftr-purple hover:bg-liftr-purple-dark text-white font-mono text-xs uppercase font-bold shadow-neo cursor-pointer transition-all"
+              className="w-full py-3.5 rounded-lg bg-[#D5F36A] hover:bg-[#c2e255] text-[#171B16] font-heading text-xs uppercase font-bold border-2 border-[#171B16] shadow-neo cursor-pointer transition-all active:translate-x-0.5 active:translate-y-0.5"
             >
               Continue to Dashboard
             </button>

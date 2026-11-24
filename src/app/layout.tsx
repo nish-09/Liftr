@@ -1,30 +1,32 @@
 import type { Metadata, Viewport } from "next";
-import { Instrument_Serif, DM_Sans, JetBrains_Mono } from "next/font/google";
+import { Space_Grotesk, DM_Sans, IBM_Plex_Mono } from "next/font/google";
 import "@/styles/globals.css";
 
-const instrumentSerif = Instrument_Serif({
-  weight: "400",
+const spaceGrotesk = Space_Grotesk({
   subsets: ["latin"],
-  variable: "--font-instrument-serif",
+  variable: "--font-space-grotesk",
   display: "swap",
+  weight: ["500", "600", "700"],
 });
 
 const dmSans = DM_Sans({
   subsets: ["latin"],
   variable: "--font-dm-sans",
   display: "swap",
+  weight: ["400", "500", "600", "700"],
 });
 
-const jetbrainsMono = JetBrains_Mono({
+const ibmPlexMono = IBM_Plex_Mono({
   subsets: ["latin"],
-  variable: "--font-jetbrains-mono",
+  variable: "--font-ibm-plex-mono",
   display: "swap",
+  weight: ["400", "500", "600", "700"],
 });
 
 export const metadata: Metadata = {
-  title: "Liftr — Progressive Overload & Fitness Platform",
+  title: "Liftr — Progressive Overload & Athletic Performance",
   description:
-    "Neo-Brutalist editorial fitness tracking platform connecting workout performance, progressive overload, and body composition.",
+    "Green Neo-Brutalist athletic performance platform connecting workout tracking, progressive overload, and body composition.",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
@@ -34,7 +36,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#090909",
+  themeColor: "#B8D99A",
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
@@ -48,9 +50,9 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${instrumentSerif.variable} ${dmSans.variable} ${jetbrainsMono.variable} dark`}
+      className={`${spaceGrotesk.variable} ${dmSans.variable} ${ibmPlexMono.variable}`}
     >
-      <body className="min-h-screen bg-background text-foreground antialiased selection:bg-liftr-purple selection:text-white">
+      <body className="min-h-screen bg-[#B8D99A] text-[#171B16] antialiased selection:bg-[#D5F36A] selection:text-[#171B16]">
         {children}
       </body>
     </html>

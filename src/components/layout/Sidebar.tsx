@@ -14,6 +14,7 @@ import {
   History,
   Settings,
   ChevronRight,
+  Zap,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -34,27 +35,32 @@ export default function Sidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="hidden lg:flex w-64 flex-col justify-between border-r border-border bg-[#0C0C0C] p-4 h-screen sticky top-0 z-30 select-none">
+    <aside className="hidden lg:flex w-64 flex-col justify-between border-r-2 border-[#171B16] bg-[#183D2A] p-4 h-screen sticky top-0 z-30 select-none shadow-[2px_0px_0px_0px_#171B16]">
       <div>
-        {/* Brand Logo */}
-        <Link href="/overview" className="flex items-center gap-3 px-3 py-4 mb-4 group">
-          <div className="w-10 h-10 rounded-xl bg-liftr-purple flex items-center justify-center text-white shadow-neo group-hover:scale-105 transition-all">
-            <Dumbbell className="w-5 h-5" />
+        {/* Brand Logo Header */}
+        <Link
+          href="/overview"
+          className="flex items-center gap-3 px-3 py-4 mb-4 rounded-lg bg-[#143323] border-2 border-[#171B16] shadow-neo group hover:translate-x-0.5 hover:translate-y-0.5 transition-all"
+        >
+          <div className="w-10 h-10 rounded-md bg-[#D5F36A] flex items-center justify-center text-[#171B16] border-2 border-[#171B16] shadow-neo-sm group-hover:scale-105 transition-all">
+            <Dumbbell className="w-5 h-5 stroke-[2.5]" />
           </div>
           <div>
-            <div className="font-serif italic text-2xl tracking-tight text-white leading-none">
-              Liftr
+            <div className="font-heading text-2xl font-bold tracking-tight text-[#F5F0DF] leading-none">
+              LIFTR
             </div>
-            <span className="text-[10px] font-mono tracking-widest uppercase text-liftr-grey">
-              Progressive Engine
+            <span className="text-[10px] font-mono tracking-widest uppercase text-[#D5F36A] font-semibold">
+              Performance OS
             </span>
           </div>
         </Link>
 
         {/* Navigation list */}
-        <nav className="space-y-1">
+        <nav className="space-y-1.5">
           {NAV_ITEMS.map((item) => {
-            const isActive = pathname === item.href || (item.href !== "/overview" && pathname.startsWith(item.href));
+            const isActive =
+              pathname === item.href ||
+              (item.href !== "/overview" && pathname.startsWith(item.href));
             const Icon = item.icon;
 
             return (
@@ -62,34 +68,39 @@ export default function Sidebar() {
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  "flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium transition-all group",
+                  "flex items-center justify-between px-3 py-2.5 rounded-lg text-xs font-heading font-semibold uppercase tracking-wider transition-all group",
                   isActive
-                    ? "bg-[#1B1B1B] text-white border border-[#2E2E2E] shadow-neo-sm"
-                    : "text-liftr-grey hover:text-white hover:bg-[#151515]"
+                    ? "bg-[#D5F36A] text-[#171B16] border-2 border-[#171B16] shadow-neo translate-x-1"
+                    : "text-[#F5F0DF] hover:bg-[#1E4C34] hover:text-[#D5F36A] border-2 border-transparent"
                 )}
               >
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2.5">
                   <Icon
                     className={cn(
                       "w-4 h-4 transition-colors",
-                      isActive
-                        ? "text-liftr-purple"
-                        : "text-liftr-grey group-hover:text-white"
+                      isActive ? "text-[#171B16] stroke-[2.5]" : "text-[#B8D99A] group-hover:text-[#D5F36A]"
                     )}
                   />
                   <span>{item.name}</span>
                 </div>
 
                 {item.comingSoon ? (
-                  <span className="text-[10px] font-mono tracking-wider uppercase px-2 py-0.5 rounded bg-liftr-yellow/15 text-liftr-yellow border border-liftr-yellow/30 font-semibold">
+                  <span className="text-[9px] font-mono tracking-wider uppercase px-2 py-0.5 rounded bg-[#F07845] text-white border border-[#171B16] font-bold">
                     Soon
                   </span>
                 ) : item.badge ? (
-                  <span className="text-[10px] font-mono tracking-wider uppercase px-2 py-0.5 rounded bg-liftr-purple/20 text-liftr-purple-light border border-liftr-purple/30 font-bold">
+                  <span
+                    className={cn(
+                      "text-[9px] font-mono tracking-wider uppercase px-1.5 py-0.5 rounded font-bold border",
+                      isActive
+                        ? "bg-[#183D2A] text-[#D5F36A] border-[#171B16]"
+                        : "bg-[#D5F36A] text-[#171B16] border-[#171B16]"
+                    )}
+                  >
                     {item.badge}
                   </span>
                 ) : isActive ? (
-                  <ChevronRight className="w-3.5 h-3.5 text-liftr-purple" />
+                  <ChevronRight className="w-4 h-4 text-[#171B16] stroke-[3]" />
                 ) : null}
               </Link>
             );
@@ -98,14 +109,14 @@ export default function Sidebar() {
       </div>
 
       {/* Footer / Status Box */}
-      <div className="pt-4 border-t border-[#1C1C1C]">
-        <div className="p-3 rounded-lg bg-[#141414] border border-[#232323] flex items-center justify-between">
+      <div className="pt-3 border-t-2 border-[#171B16]/60">
+        <div className="p-3 rounded-lg bg-[#143323] border-2 border-[#171B16] shadow-neo-sm flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-liftr-green animate-pulse" />
-            <span className="text-xs font-mono text-zinc-400">Offline Ready</span>
+            <span className="w-2.5 h-2.5 rounded-full bg-[#D5F36A] border border-[#171B16] animate-pulse" />
+            <span className="text-xs font-mono font-bold text-[#F5F0DF]">Offline Ready</span>
           </div>
-          <span className="text-[10px] font-mono text-liftr-purple uppercase px-1.5 py-0.5 rounded bg-liftr-purple/10">
-            v1.0.0
+          <span className="text-[10px] font-mono text-[#171B16] font-bold uppercase px-1.5 py-0.5 rounded bg-[#D5F36A] border border-[#171B16]">
+            v2.0
           </span>
         </div>
       </div>

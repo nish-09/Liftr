@@ -3,15 +3,9 @@
 import Link from "next/link";
 import {
   UtensilsCrossed,
-  Sparkles,
   Flame,
   Apple,
   Droplets,
-  TrendingUp,
-  Layers,
-  ArrowRight,
-  ShieldCheck,
-  CheckCircle2,
 } from "lucide-react";
 
 export default function NutritionPage() {
@@ -20,110 +14,112 @@ export default function NutritionPage() {
       {/* Top Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2">
-            <h1 className="font-serif italic text-3xl text-white">Macro Architecture</h1>
-            <span className="px-2 py-0.5 rounded bg-liftr-yellow/15 border border-liftr-yellow/30 text-xs font-mono text-liftr-yellow font-bold uppercase">
+          <div className="flex items-center gap-3">
+            <h1 className="font-heading font-black text-3xl md:text-4xl text-dark tracking-tight">
+              MACRO ARCHITECTURE
+            </h1>
+            <span className="px-2.5 py-1 rounded bg-lime text-dark border-2 border-dark text-xs font-mono font-black uppercase shadow-neo-sm">
               Coming Soon
             </span>
           </div>
-          <p className="text-sm text-liftr-grey mt-0.5">
+          <p className="text-sm text-dark/70 font-sans mt-1">
             The third dimension of Liftr: connecting workout performance, body composition, and precision nutrition.
           </p>
         </div>
 
         <Link
           href="/overview"
-          className="px-3.5 py-2 rounded-lg bg-[#181818] hover:bg-[#202020] border border-[#2B2B2B] text-xs font-mono uppercase text-zinc-300 transition-colors self-start md:self-auto"
+          className="px-4 py-2 rounded-lg bg-white hover:bg-cream border-2 border-dark text-xs font-mono uppercase font-bold text-dark shadow-neo-sm transition-all self-start md:self-auto cursor-pointer"
         >
           Return to Overview
         </Link>
       </div>
 
       {/* Editorial Vision Hero Banner */}
-      <div className="bento-card p-6 sm:p-8 bg-gradient-to-br from-[#1A1810] via-[#121212] to-[#0A0A0A] border-liftr-yellow/30 shadow-neo space-y-6">
-        <div className="flex items-center gap-2">
-          <div className="w-10 h-10 rounded-xl bg-liftr-yellow text-black flex items-center justify-center font-bold shadow-neo-sm">
-            <UtensilsCrossed className="w-5 h-5" />
+      <div className="bg-forest text-cream border-2 border-dark rounded-xl shadow-neo p-6 sm:p-8 space-y-6">
+        <div className="flex items-center gap-3">
+          <div className="w-12 h-12 rounded-xl bg-lime text-dark border-2 border-dark flex items-center justify-center font-bold shadow-neo-sm">
+            <UtensilsCrossed className="w-6 h-6 stroke-[2.5]" />
           </div>
           <div>
-            <span className="text-[10px] font-mono uppercase tracking-widest text-liftr-yellow font-bold">
+            <span className="text-[10px] font-mono uppercase tracking-widest text-lime font-black">
               Architectural Roadmap
             </span>
-            <h2 className="text-xl sm:text-2xl font-bold text-white font-sans">
-              Performance Nutrition &amp; Energy Balance
+            <h2 className="font-heading font-black text-xl sm:text-2xl text-cream tracking-tight">
+              PERFORMANCE NUTRITION &amp; ENERGY BALANCE
             </h2>
           </div>
         </div>
 
-        <p className="text-sm text-zinc-300 leading-relaxed max-w-2xl">
+        <p className="text-sm text-cream/90 leading-relaxed max-w-2xl font-sans">
           In strict accordance with Liftr&apos;s product philosophy, we do not deploy artificial or fake food logging. The nutrition subsystem is architecturally pre-engineered to connect with your body metrics and workout volume without cluttering your existing strength logs.
         </p>
 
         {/* The Triad Vision Diagram */}
-        <div className="p-4 rounded-xl bg-[#141414] border border-[#262626] flex flex-col sm:flex-row items-center justify-around gap-4 text-center">
+        <div className="p-5 rounded-xl bg-cream border-2 border-dark shadow-neo-sm flex flex-col sm:flex-row items-center justify-around gap-4 text-center">
           <div className="space-y-1">
-            <span className="text-[10px] font-mono text-liftr-purple uppercase font-bold">
+            <span className="text-[10px] font-mono text-dark/60 uppercase font-black">
               Dimension 1
             </span>
-            <div className="text-sm font-bold text-white">Workout Tracking</div>
-            <span className="text-[11px] font-mono text-liftr-green">● Live &amp; Active</span>
+            <div className="font-heading font-black text-base text-dark">Workout Tracking</div>
+            <span className="text-[11px] font-mono font-bold text-forest">● Live &amp; Active</span>
           </div>
 
-          <div className="hidden sm:block text-zinc-600 font-mono text-xl">+</div>
+          <div className="hidden sm:block text-dark font-mono text-2xl font-black">+</div>
 
           <div className="space-y-1">
-            <span className="text-[10px] font-mono text-liftr-green uppercase font-bold">
+            <span className="text-[10px] font-mono text-dark/60 uppercase font-black">
               Dimension 2
             </span>
-            <div className="text-sm font-bold text-white">Body Composition</div>
-            <span className="text-[11px] font-mono text-liftr-green">● Live &amp; Active</span>
+            <div className="font-heading font-black text-base text-dark">Body Composition</div>
+            <span className="text-[11px] font-mono font-bold text-forest">● Live &amp; Active</span>
           </div>
 
-          <div className="hidden sm:block text-zinc-600 font-mono text-xl">+</div>
+          <div className="hidden sm:block text-dark font-mono text-2xl font-black">+</div>
 
           <div className="space-y-1">
-            <span className="text-[10px] font-mono text-liftr-yellow uppercase font-bold">
+            <span className="text-[10px] font-mono text-dark/60 uppercase font-black">
               Dimension 3
             </span>
-            <div className="text-sm font-bold text-white">Precision Nutrition</div>
-            <span className="text-[11px] font-mono text-liftr-yellow">● In Development</span>
+            <div className="font-heading font-black text-base text-dark">Precision Nutrition</div>
+            <span className="text-[11px] font-mono font-black text-orange">● In Development</span>
           </div>
         </div>
       </div>
 
       {/* Forthcoming Subsystem Capabilities */}
       <div className="space-y-3">
-        <div className="text-xs font-mono uppercase tracking-wider text-liftr-grey px-1">
+        <div className="text-xs font-mono uppercase font-black tracking-wider text-dark/70 px-1">
           Planned Architectural Modules
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="bento-card p-5 space-y-3">
-            <div className="w-8 h-8 rounded-lg bg-liftr-coral/20 text-liftr-coral flex items-center justify-center">
-              <Flame className="w-4 h-4" />
+          <div className="bg-cream border-2 border-dark rounded-xl shadow-neo p-5 space-y-3">
+            <div className="w-10 h-10 rounded-lg bg-orange text-cream border-2 border-dark flex items-center justify-center shadow-neo-sm">
+              <Flame className="w-5 h-5 stroke-[2.5]" />
             </div>
-            <h3 className="text-base font-bold text-white">Energy Balance Engine</h3>
-            <p className="text-xs text-liftr-grey leading-relaxed">
+            <h3 className="font-heading font-black text-base text-dark tracking-tight">ENERGY BALANCE ENGINE</h3>
+            <p className="text-xs text-dark/75 leading-relaxed font-sans">
               Automated caloric surplus (+300 kcal for lean bulking) or deficit targets dynamically synchronized with your current weight rate-of-change.
             </p>
           </div>
 
-          <div className="bento-card p-5 space-y-3">
-            <div className="w-8 h-8 rounded-lg bg-liftr-purple/20 text-liftr-purple-light flex items-center justify-center">
-              <Apple className="w-4 h-4" />
+          <div className="bg-cream border-2 border-dark rounded-xl shadow-neo p-5 space-y-3">
+            <div className="w-10 h-10 rounded-lg bg-lavender text-dark border-2 border-dark flex items-center justify-center shadow-neo-sm">
+              <Apple className="w-5 h-5 stroke-[2.5]" />
             </div>
-            <h3 className="text-base font-bold text-white">Macronutrient Targets</h3>
-            <p className="text-xs text-liftr-grey leading-relaxed">
+            <h3 className="font-heading font-black text-base text-dark tracking-tight">MACRONUTRIENT TARGETS</h3>
+            <p className="text-xs text-dark/75 leading-relaxed font-sans">
               Target protein benchmarks (e.g., 2.0g per kg of bodyweight), carbohydrate periodization for training days, and essential dietary fats.
             </p>
           </div>
 
-          <div className="bento-card p-5 space-y-3">
-            <div className="w-8 h-8 rounded-lg bg-liftr-green/20 text-liftr-green flex items-center justify-center">
-              <Droplets className="w-4 h-4" />
+          <div className="bg-cream border-2 border-dark rounded-xl shadow-neo p-5 space-y-3">
+            <div className="w-10 h-10 rounded-lg bg-lime text-dark border-2 border-dark flex items-center justify-center shadow-neo-sm">
+              <Droplets className="w-5 h-5 stroke-[2.5]" />
             </div>
-            <h3 className="text-base font-bold text-white">Hydration &amp; Meal History</h3>
-            <p className="text-xs text-liftr-grey leading-relaxed">
+            <h3 className="font-heading font-black text-base text-dark tracking-tight">HYDRATION &amp; MEAL HISTORY</h3>
+            <p className="text-xs text-dark/75 leading-relaxed font-sans">
               Frictionless meal logging across breakfast, lunch, dinner, and intra-workout fueling, with verified database caching.
             </p>
           </div>

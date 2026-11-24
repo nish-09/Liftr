@@ -3,24 +3,14 @@
 import { useState, useMemo } from "react";
 import Link from "next/link";
 import { useBodyStore } from "@/stores/useBodyStore";
-import { useHistoryStore } from "@/stores/useHistoryStore";
 import { calculateBMI } from "@/lib/calculations/strength";
 import { BodyMeasurementItem, MeasurementUnit } from "@/types";
 import {
-  Activity,
-  Scale,
-  Ruler,
-  AlertTriangle,
   Info,
-  TrendingUp,
-  CheckCircle2,
-  Calendar,
-  Layers,
-  Edit2,
-  Trash2,
   Plus,
   X,
-  ArrowRight,
+  Edit2,
+  Trash2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -74,7 +64,7 @@ export default function BodyMetricsPage() {
   const currentHeightCm = userBodyProfile.height || 180;
 
   // Calculate dynamic BMI
-  const { bmi, category, color } = useMemo(() => {
+  const { bmi, category } = useMemo(() => {
     return calculateBMI(latestWeight, currentHeightCm);
   }, [latestWeight, currentHeightCm]);
 
@@ -135,26 +125,28 @@ export default function BodyMetricsPage() {
       {/* Top Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2">
-            <h1 className="font-serif italic text-3xl text-white">Body Metrics &amp; Measurements</h1>
-            <span className="px-2 py-0.5 rounded bg-[#1C1C1C] border border-[#2B2B2B] text-xs font-mono text-liftr-purple">
+          <div className="flex items-center gap-3">
+            <h1 className="font-heading font-black text-3xl md:text-4xl text-dark tracking-tight">
+              BODY METRICS &amp; MEASUREMENTS
+            </h1>
+            <span className="px-2.5 py-1 rounded bg-forest text-cream border-2 border-dark text-xs font-mono font-bold shadow-neo-sm">
               Biometric Engine
             </span>
           </div>
-          <p className="text-sm text-liftr-grey mt-0.5">
+          <p className="text-sm text-dark/70 font-sans mt-1">
             Dynamic BMI calculations, category classification, and circumference measurements.
           </p>
         </div>
 
         {/* Tab switch buttons */}
-        <div className="flex items-center gap-1.5 p-1 rounded-lg bg-[#141414] border border-[#232323]">
+        <div className="flex items-center gap-1.5 p-1 rounded-xl bg-white border-2 border-dark shadow-neo-sm">
           <button
             onClick={() => setActiveTab("bmi")}
             className={cn(
-              "px-3 py-1.5 rounded-md text-xs font-mono transition-all cursor-pointer",
+              "px-3.5 py-1.5 rounded-lg text-xs font-mono transition-all cursor-pointer border-2",
               activeTab === "bmi"
-                ? "bg-white text-black font-bold shadow-neo-sm"
-                : "text-zinc-400 hover:text-white"
+                ? "bg-forest text-lime border-dark font-black shadow-neo-sm"
+                : "border-transparent text-dark/70 hover:text-dark font-bold"
             )}
           >
             BMI Analysis
@@ -162,10 +154,10 @@ export default function BodyMetricsPage() {
           <button
             onClick={() => setActiveTab("measurements")}
             className={cn(
-              "px-3 py-1.5 rounded-md text-xs font-mono transition-all cursor-pointer",
+              "px-3.5 py-1.5 rounded-lg text-xs font-mono transition-all cursor-pointer border-2",
               activeTab === "measurements"
-                ? "bg-white text-black font-bold shadow-neo-sm"
-                : "text-zinc-400 hover:text-white"
+                ? "bg-forest text-lime border-dark font-black shadow-neo-sm"
+                : "border-transparent text-dark/70 hover:text-dark font-bold"
             )}
           >
             Body Circumference ({bodyMeasurements.length})
@@ -176,10 +168,10 @@ export default function BodyMetricsPage() {
       {activeTab === "bmi" ? (
         <>
           {/* Advisory Banner: BMI Screening Disclaimer */}
-          <div className="p-4 rounded-xl bg-[#141414] border border-[#262626] flex items-start gap-3">
-            <Info className="w-5 h-5 text-liftr-yellow shrink-0 mt-0.5" />
-            <div className="text-xs text-zinc-300 leading-relaxed">
-              <span className="font-bold text-white uppercase font-mono mr-1">
+          <div className="p-4 rounded-xl bg-white border-2 border-dark shadow-neo-sm flex items-start gap-3">
+            <Info className="w-5 h-5 text-forest shrink-0 mt-0.5 stroke-[2.5]" />
+            <div className="text-xs text-dark/80 leading-relaxed font-sans">
+              <span className="font-black text-dark uppercase font-mono mr-1">
                 Clinical Note:
               </span>
               BMI is a screening tool based on total body mass and height. It does not measure body fat percentage or differentiate between skeletal muscle and adipose tissue. For athletes engaged in progressive resistance training, use BMI alongside body measurements, strength trajectory, and target weight management.
@@ -189,48 +181,53 @@ export default function BodyMetricsPage() {
           {/* Hero Bento Cards: Current BMI + Visual Scale */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
             {/* Left: Dynamic BMI Display Card */}
-            <div className="lg:col-span-5 bento-card p-6 flex flex-col justify-between space-y-6 border-border">
+            <div className="lg:col-span-5 bg-cream border-2 border-dark rounded-xl shadow-neo p-6 flex flex-col justify-between space-y-6">
               <div>
-                <div className="flex items-center justify-between text-zinc-400 mb-2">
-                  <span className="text-xs font-mono uppercase tracking-wider text-liftr-grey">
+                <div className="flex items-center justify-between text-dark/70 mb-2">
+                  <span className="text-xs font-mono uppercase font-black tracking-wider text-dark/80">
                     Current BMI Status
                   </span>
-                  <span
-                    className="text-xs font-mono font-bold uppercase px-2.5 py-1 rounded"
-                    style={{
-                      backgroundColor: `${color}20`,
-                      color: color,
-                      border: `1px solid ${color}40`,
-                    }}
-                  >
+                  <span className="text-xs font-mono font-black uppercase px-2.5 py-1 rounded bg-lime text-dark border-2 border-dark shadow-neo-sm">
                     {category}
                   </span>
                 </div>
 
                 <div className="my-4">
-                  <div className="text-5xl font-bold stat-number text-white">
+                  <div className="text-6xl font-heading font-black text-forest tracking-tight">
                     {bmi}
                   </div>
-                  <span className="text-xs font-mono text-zinc-400 mt-1 block">
-                    Derived from {latestWeight} kg and {currentHeightCm} cm
-                  </span>
+                  <div className="flex items-center justify-between mt-2">
+                    <span className="text-xs font-mono font-bold text-dark/70">
+                      Derived from {latestWeight} kg and {currentHeightCm} cm
+                    </span>
+                    <button
+                      onClick={() => {
+                        setFormHeight(currentHeightCm);
+                        setIsHeightModalOpen(true);
+                      }}
+                      className="text-xs font-mono font-black text-forest hover:text-dark flex items-center gap-1 cursor-pointer"
+                    >
+                      <Edit2 className="w-3 h-3" />
+                      <span>Edit Height</span>
+                    </button>
+                  </div>
                 </div>
               </div>
 
               {/* Visual BMI Scale Bar */}
               <div className="space-y-2">
-                <div className="flex items-center justify-between text-[10px] font-mono text-zinc-500">
-                  <span>Underweight (&lt;18.5)</span>
+                <div className="flex items-center justify-between text-[10px] font-mono font-bold text-dark/70">
+                  <span>Under (&lt;18.5)</span>
                   <span>Normal (18.5-24.9)</span>
-                  <span>Overweight (25-29.9)</span>
-                  <span>Obesity (30+)</span>
+                  <span>Over (25-29.9)</span>
+                  <span>Obese (30+)</span>
                 </div>
 
-                <div className="relative w-full h-3 rounded-full bg-[#1C1C1C] overflow-hidden flex">
-                  <div className="w-[17.5%] h-full bg-[#E9D65B]/60" title="Underweight" />
-                  <div className="w-[32%] h-full bg-[#60C27D]/80" title="Normal" />
-                  <div className="w-[25%] h-full bg-[#E97860]/70" title="Overweight" />
-                  <div className="w-[25.5%] h-full bg-[#E97860]" title="Obesity" />
+                <div className="relative w-full h-3.5 rounded-full bg-white border-2 border-dark overflow-hidden flex shadow-neo-sm">
+                  <div className="w-[17.5%] h-full bg-lavender border-r border-dark/20" title="Underweight" />
+                  <div className="w-[32%] h-full bg-lime border-r border-dark/20" title="Normal" />
+                  <div className="w-[25%] h-full bg-orange/60 border-r border-dark/20" title="Overweight" />
+                  <div className="w-[25.5%] h-full bg-orange" title="Obesity" />
                 </div>
 
                 <div className="relative w-full h-4">
@@ -238,29 +235,29 @@ export default function BodyMetricsPage() {
                     className="absolute top-0 -ml-2 text-center transition-all duration-500 ease-out"
                     style={{ left: `${scalePercent}%` }}
                   >
-                    <div className="w-4 h-4 rounded-full bg-white border-2 border-liftr-purple shadow-neo-sm mx-auto" />
+                    <div className="w-4 h-4 rounded-full bg-forest border-2 border-dark shadow-neo-sm mx-auto" />
                   </div>
                 </div>
               </div>
 
-              <div className="pt-4 border-t border-[#1C1C1C] flex items-center justify-between text-xs font-mono text-zinc-400">
+              <div className="pt-4 border-t-2 border-dark/15 flex items-center justify-between text-xs font-mono font-bold text-dark/70">
                 <span>Healthy Target Range</span>
-                <span className="text-white font-bold">18.5 — 24.9</span>
+                <span className="text-forest font-black">18.5 — 24.9</span>
               </div>
             </div>
 
             {/* Right: Historical BMI Trajectory Chart */}
-            <div className="lg:col-span-7 bento-card p-6 space-y-4">
+            <div className="lg:col-span-7 bg-cream border-2 border-dark rounded-xl shadow-neo p-6 space-y-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-base font-bold text-white">BMI Trend Over Time</h3>
-                  <p className="text-xs text-liftr-grey font-mono mt-0.5">
+                  <h3 className="font-heading font-black text-lg text-dark tracking-tight">BMI TREND OVER TIME</h3>
+                  <p className="text-xs text-dark/70 font-mono font-bold mt-0.5">
                     Dynamic history calculated per recorded weight log
                   </p>
                 </div>
                 <Link
                   href="/weight-tracker"
-                  className="text-xs font-mono text-liftr-purple hover:underline"
+                  className="px-3 py-1.5 rounded-lg bg-lime hover:bg-lime/90 text-dark border-2 border-dark text-xs font-mono font-black uppercase shadow-neo-sm cursor-pointer"
                 >
                   Log Weight
                 </Link>
@@ -268,7 +265,7 @@ export default function BodyMetricsPage() {
 
               <div className="h-64 w-full">
                 {historicalBMIData.length === 0 ? (
-                  <div className="h-full flex items-center justify-center text-xs text-zinc-500 font-mono">
+                  <div className="h-full flex items-center justify-center text-xs text-dark/60 font-mono font-bold">
                     Log weights to visualize your BMI trajectory.
                   </div>
                 ) : (
@@ -276,28 +273,31 @@ export default function BodyMetricsPage() {
                     <AreaChart data={historicalBMIData}>
                       <defs>
                         <linearGradient id="bmiGrad" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#60C27D" stopOpacity={0.4} />
-                          <stop offset="95%" stopColor="#60C27D" stopOpacity={0.0} />
+                          <stop offset="5%" stopColor="#D5F36A" stopOpacity={0.8} />
+                          <stop offset="95%" stopColor="#D5F36A" stopOpacity={0.1} />
                         </linearGradient>
                       </defs>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#222" />
-                      <XAxis dataKey="date" stroke="#666" fontSize={11} />
-                      <YAxis domain={["dataMin - 1", "dataMax + 1"]} stroke="#666" fontSize={11} />
+                      <CartesianGrid strokeDasharray="3 3" stroke="#171B16" opacity={0.15} />
+                      <XAxis dataKey="date" stroke="#171B16" fontSize={11} tick={{ fill: "#171B16", fontWeight: "bold" }} />
+                      <YAxis domain={["dataMin - 1", "dataMax + 1"]} stroke="#171B16" fontSize={11} tick={{ fill: "#171B16", fontWeight: "bold" }} />
                       <Tooltip
                         contentStyle={{
-                          backgroundColor: "#181818",
-                          border: "1px solid #333",
+                          backgroundColor: "#F5F0DF",
+                          border: "2px solid #171B16",
                           borderRadius: "8px",
+                          boxShadow: "3px 3px 0px #171B16",
                           fontSize: "12px",
                           fontFamily: "monospace",
+                          fontWeight: "bold",
+                          color: "#171B16",
                         }}
                       />
                       <Area
                         type="monotone"
                         dataKey="bmi"
                         name="BMI"
-                        stroke="#60C27D"
-                        strokeWidth={2}
+                        stroke="#183D2A"
+                        strokeWidth={3}
                         fillOpacity={1}
                         fill="url(#bmiGrad)"
                       />
@@ -313,17 +313,17 @@ export default function BodyMetricsPage() {
         <div className="space-y-6">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-lg font-bold text-white">Circumference Tracker</h2>
-              <p className="text-xs text-liftr-grey font-mono">
+              <h2 className="font-heading font-black text-xl text-dark tracking-tight">CIRCUMFERENCE TRACKER</h2>
+              <p className="text-xs text-dark/70 font-sans mt-0.5">
                 Track muscle growth across arms, chest, thighs, waist, and custom zones.
               </p>
             </div>
 
             <button
               onClick={() => setIsMeasureModalOpen(true)}
-              className="px-4 py-2.5 rounded-lg bg-liftr-purple hover:bg-liftr-purple-dark text-white text-xs font-mono uppercase font-bold shadow-neo flex items-center gap-1.5 cursor-pointer"
+              className="px-4 py-2.5 rounded-lg bg-forest hover:bg-forest/90 text-cream text-xs font-mono uppercase font-bold tracking-wider shadow-neo border-2 border-dark flex items-center gap-1.5 cursor-pointer transition-all active:translate-x-0.5 active:translate-y-0.5"
             >
-              <Plus className="w-4 h-4" />
+              <Plus className="w-4 h-4 stroke-[2.5]" />
               <span>Log Measurement</span>
             </button>
           </div>
@@ -344,21 +344,21 @@ export default function BodyMetricsPage() {
               return (
                 <div
                   key={mType.value}
-                  className="bento-card p-4 flex flex-col justify-between space-y-3"
+                  className="bg-cream border-2 border-dark rounded-xl shadow-neo p-4 flex flex-col justify-between space-y-3"
                 >
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-mono uppercase text-liftr-grey font-bold">
+                    <span className="text-xs font-mono uppercase text-dark font-black tracking-wider">
                       {mType.label}
                     </span>
                     {delta !== null && (
                       <span
                         className={cn(
-                          "text-[10px] font-mono px-1.5 py-0.5 rounded",
+                          "text-[10px] font-mono px-2 py-0.5 rounded border-2 border-dark font-black shadow-neo-sm",
                           delta > 0
-                            ? "bg-liftr-green/15 text-liftr-green"
+                            ? "bg-lime text-dark"
                             : delta < 0
-                            ? "bg-liftr-coral/15 text-liftr-coral"
-                            : "bg-[#202020] text-zinc-400"
+                            ? "bg-orange text-cream"
+                            : "bg-white text-dark/70"
                         )}
                       >
                         {delta > 0 ? `+${delta}` : delta} cm
@@ -368,28 +368,28 @@ export default function BodyMetricsPage() {
 
                   {latest ? (
                     <div>
-                      <div className="text-3xl font-bold stat-number text-white">
+                      <div className="text-3xl font-heading font-black text-dark tracking-tight">
                         {latest.value}{" "}
-                        <span className="text-sm font-normal text-zinc-400">
+                        <span className="text-sm font-mono font-bold text-dark/60">
                           {latest.unit}
                         </span>
                       </div>
-                      <span className="text-[10px] font-mono text-zinc-500 mt-1 block">
+                      <span className="text-[10px] font-mono font-bold text-dark/60 mt-1 block">
                         Logged on {latest.recordedAt}
                         {latest.notes ? ` • ${latest.notes}` : ""}
                       </span>
                     </div>
                   ) : (
-                    <div className="py-2 text-xs text-zinc-600 font-mono italic">
+                    <div className="py-2 text-xs text-dark/50 font-mono italic">
                       No measurements logged yet.
                     </div>
                   )}
 
                   {latest && (
-                    <div className="pt-2 border-t border-[#1F1F1F] flex justify-end">
+                    <div className="pt-2 border-t-2 border-dark/10 flex justify-end">
                       <button
                         onClick={() => deleteMeasurement(latest.id)}
-                        className="text-[10px] font-mono text-zinc-500 hover:text-liftr-coral"
+                        className="text-[10px] font-mono font-bold text-dark/60 hover:text-orange cursor-pointer"
                       >
                         Delete latest entry
                       </button>
@@ -404,14 +404,23 @@ export default function BodyMetricsPage() {
 
       {/* Log Measurement Modal */}
       {isMeasureModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-          <div className="bento-card p-6 w-full max-w-sm border-2 border-border shadow-neo-purple">
-            <h3 className="text-base font-bold text-white mb-4">
-              Log Circumference Measurement
-            </h3>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-dark/70 backdrop-blur-sm animate-in fade-in duration-150">
+          <div className="bg-cream border-3 border-dark rounded-xl shadow-neo-lg p-6 w-full max-w-sm relative font-sans space-y-4">
+            <div className="flex items-center justify-between border-b-2 border-dark/15 pb-3">
+              <h3 className="font-heading font-black text-xl text-dark tracking-tight">
+                LOG MEASUREMENT
+              </h3>
+              <button
+                onClick={() => setIsMeasureModalOpen(false)}
+                className="p-1.5 rounded-lg border-2 border-dark bg-white hover:bg-forest hover:text-cream text-dark transition-all cursor-pointer shadow-neo-sm"
+              >
+                <X className="w-4 h-4 stroke-[2.5]" />
+              </button>
+            </div>
+
             <form onSubmit={handleLogMeasurementSubmit} className="space-y-4">
               <div>
-                <label className="block text-xs font-mono uppercase text-liftr-grey mb-1.5">
+                <label className="block text-xs font-mono uppercase font-bold text-dark mb-1.5">
                   Measurement Zone *
                 </label>
                 <select
@@ -421,7 +430,7 @@ export default function BodyMetricsPage() {
                       e.target.value as BodyMeasurementItem["measurementType"]
                     )
                   }
-                  className="w-full px-3.5 py-2.5 rounded-lg bg-[#181818] border border-[#2c2c2c] text-white text-sm focus:outline-none focus:border-liftr-purple"
+                  className="w-full px-3.5 py-2.5 rounded-lg bg-white border-2 border-dark text-dark text-xs font-mono font-bold focus:outline-none focus:ring-2 focus:ring-forest cursor-pointer"
                 >
                   {MEASUREMENT_TYPES.map((m) => (
                     <option key={m.value} value={m.value}>
@@ -433,7 +442,7 @@ export default function BodyMetricsPage() {
 
               {measureType === "custom" && (
                 <div>
-                  <label className="block text-xs font-mono uppercase text-liftr-grey mb-1.5">
+                  <label className="block text-xs font-mono uppercase font-bold text-dark mb-1.5">
                     Custom Zone Name *
                   </label>
                   <input
@@ -442,14 +451,14 @@ export default function BodyMetricsPage() {
                     value={customName}
                     onChange={(e) => setCustomName(e.target.value)}
                     placeholder="e.g., Neck or Forearm"
-                    className="w-full px-3.5 py-2.5 rounded-lg bg-[#181818] border border-[#2c2c2c] text-white text-sm focus:outline-none focus:border-liftr-purple"
+                    className="w-full px-3.5 py-2.5 rounded-lg bg-white border-2 border-dark text-dark text-sm focus:outline-none focus:ring-2 focus:ring-forest font-sans"
                   />
                 </div>
               )}
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-mono uppercase text-liftr-grey mb-1.5">
+                  <label className="block text-xs font-mono uppercase font-bold text-dark mb-1.5">
                     Value *
                   </label>
                   <input
@@ -459,18 +468,18 @@ export default function BodyMetricsPage() {
                     value={measureValue}
                     onChange={(e) => setMeasureValue(e.target.value)}
                     placeholder="e.g., 38.5"
-                    className="w-full px-3.5 py-2.5 rounded-lg bg-[#181818] border border-[#2c2c2c] text-white text-sm focus:outline-none focus:border-liftr-purple font-mono"
+                    className="w-full px-3.5 py-2.5 rounded-lg bg-white border-2 border-dark text-dark text-sm focus:outline-none focus:ring-2 focus:ring-forest font-mono font-bold"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-mono uppercase text-liftr-grey mb-1.5">
+                  <label className="block text-xs font-mono uppercase font-bold text-dark mb-1.5">
                     Unit
                   </label>
                   <select
                     value={measureUnit}
                     onChange={(e) => setMeasureUnit(e.target.value as MeasurementUnit)}
-                    className="w-full px-3.5 py-2.5 rounded-lg bg-[#181818] border border-[#2c2c2c] text-white text-sm focus:outline-none focus:border-liftr-purple"
+                    className="w-full px-3.5 py-2.5 rounded-lg bg-white border-2 border-dark text-dark text-xs font-mono font-bold focus:outline-none focus:ring-2 focus:ring-forest cursor-pointer"
                   >
                     <option value="cm">Centimeters (cm)</option>
                     <option value="in">Inches (in)</option>
@@ -479,7 +488,7 @@ export default function BodyMetricsPage() {
               </div>
 
               <div>
-                <label className="block text-xs font-mono uppercase text-liftr-grey mb-1.5">
+                <label className="block text-xs font-mono uppercase font-bold text-dark mb-1.5">
                   Date
                 </label>
                 <input
@@ -487,12 +496,12 @@ export default function BodyMetricsPage() {
                   required
                   value={measureDate}
                   onChange={(e) => setMeasureDate(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-lg bg-[#181818] border border-[#2c2c2c] text-white text-sm focus:outline-none focus:border-liftr-purple font-mono"
+                  className="w-full px-3.5 py-2.5 rounded-lg bg-white border-2 border-dark text-dark text-sm focus:outline-none focus:ring-2 focus:ring-forest font-mono font-bold"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-mono uppercase text-liftr-grey mb-1.5">
+                <label className="block text-xs font-mono uppercase font-bold text-dark mb-1.5">
                   Notes
                 </label>
                 <input
@@ -500,21 +509,21 @@ export default function BodyMetricsPage() {
                   value={measureNotes}
                   onChange={(e) => setMeasureNotes(e.target.value)}
                   placeholder="Flexed peak, morning measurement..."
-                  className="w-full px-3.5 py-2.5 rounded-lg bg-[#181818] border border-[#2c2c2c] text-white text-sm focus:outline-none focus:border-liftr-purple"
+                  className="w-full px-3.5 py-2.5 rounded-lg bg-white border-2 border-dark text-dark text-sm focus:outline-none focus:ring-2 focus:ring-forest font-sans"
                 />
               </div>
 
-              <div className="flex justify-end gap-2 pt-2">
+              <div className="flex justify-end gap-2 pt-3 border-t-2 border-dark/15">
                 <button
                   type="button"
                   onClick={() => setIsMeasureModalOpen(false)}
-                  className="px-4 py-2 rounded bg-[#1C1C1C] text-xs font-mono uppercase text-zinc-300"
+                  className="px-4 py-2.5 rounded-lg bg-white border-2 border-dark hover:bg-cream text-dark text-xs font-mono font-bold uppercase transition-all shadow-neo-sm cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 rounded bg-liftr-purple hover:bg-liftr-purple-dark text-white text-xs font-mono uppercase font-bold shadow-neo"
+                  className="px-5 py-2.5 rounded-lg bg-lime hover:bg-lime/90 text-dark text-xs font-mono uppercase font-black tracking-wider border-2 border-dark shadow-neo cursor-pointer transition-all active:translate-x-0.5 active:translate-y-0.5"
                 >
                   Save Measurement
                 </button>
@@ -526,12 +535,21 @@ export default function BodyMetricsPage() {
 
       {/* Update Height Modal */}
       {isHeightModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-          <div className="bento-card p-6 w-full max-w-sm border-2 border-border shadow-neo-purple">
-            <h3 className="text-base font-bold text-white mb-4">Update Height</h3>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-dark/70 backdrop-blur-sm animate-in fade-in duration-150">
+          <div className="bg-cream border-3 border-dark rounded-xl shadow-neo-lg p-6 w-full max-w-sm relative font-sans space-y-4">
+            <div className="flex items-center justify-between border-b-2 border-dark/15 pb-3">
+              <h3 className="font-heading font-black text-xl text-dark tracking-tight">UPDATE HEIGHT</h3>
+              <button
+                onClick={() => setIsHeightModalOpen(false)}
+                className="p-1.5 rounded-lg border-2 border-dark bg-white hover:bg-forest hover:text-cream text-dark transition-all cursor-pointer shadow-neo-sm"
+              >
+                <X className="w-4 h-4 stroke-[2.5]" />
+              </button>
+            </div>
+
             <form onSubmit={handleSaveHeight} className="space-y-4">
               <div>
-                <label className="block text-xs font-mono uppercase text-liftr-grey mb-1.5">
+                <label className="block text-xs font-mono uppercase font-bold text-dark mb-1.5">
                   Height (centimeters)
                 </label>
                 <input
@@ -542,21 +560,21 @@ export default function BodyMetricsPage() {
                   required
                   value={formHeight}
                   onChange={(e) => setFormHeight(Number(e.target.value))}
-                  className="w-full px-3.5 py-2.5 rounded-lg bg-[#181818] border border-[#2c2c2c] text-white text-sm focus:outline-none focus:border-liftr-purple font-mono"
+                  className="w-full px-3.5 py-2.5 rounded-lg bg-white border-2 border-dark text-dark text-sm focus:outline-none focus:ring-2 focus:ring-forest font-mono font-bold"
                 />
               </div>
 
-              <div className="flex justify-end gap-2 pt-2">
+              <div className="flex justify-end gap-2 pt-3 border-t-2 border-dark/15">
                 <button
                   type="button"
                   onClick={() => setIsHeightModalOpen(false)}
-                  className="px-4 py-2 rounded bg-[#1C1C1C] text-xs font-mono uppercase text-zinc-300"
+                  className="px-4 py-2.5 rounded-lg bg-white border-2 border-dark hover:bg-cream text-dark text-xs font-mono font-bold uppercase transition-all shadow-neo-sm cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 rounded bg-liftr-purple hover:bg-liftr-purple-dark text-white text-xs font-mono uppercase font-bold shadow-neo"
+                  className="px-5 py-2.5 rounded-lg bg-lime hover:bg-lime/90 text-dark text-xs font-mono uppercase font-black tracking-wider border-2 border-dark shadow-neo cursor-pointer transition-all active:translate-x-0.5 active:translate-y-0.5"
                 >
                   Save Height
                 </button>

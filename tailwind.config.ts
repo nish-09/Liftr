@@ -17,51 +17,50 @@ const config: Config = {
     },
     extend: {
       colors: {
-        background: "#090909",
-        foreground: "#F5F3EB",
+        background: "#B8D99A", // Pistachio Green
+        foreground: "#171B16", // Almost Black
+        brand: {
+          pistachio: "#B8D99A",
+          forest: "#183D2A",
+          lime: "#D5F36A",
+          orange: "#F07845",
+          lavender: "#B9A4E8",
+          cream: "#F5F0DF",
+          dark: "#171B16",
+          white: "#FFFFFF",
+        },
         card: {
-          DEFAULT: "#121212",
-          elevated: "#181818",
-          border: "#232323",
-          hover: "#1D1D1D",
+          DEFAULT: "#F5F0DF", // Warm Cream
+          forest: "#183D2A", // Deep Forest Green
+          lime: "#D5F36A", // Acid Lime
+          cream: "#F5F0DF", // Warm Cream
+          border: "#171B16",
         },
-        liftr: {
-          purple: "#8957DC",
-          "purple-light": "#A279E5",
-          "purple-dark": "#6C3BBF",
-          yellow: "#E9D65B",
-          "yellow-light": "#F2E385",
-          coral: "#E97860",
-          "coral-light": "#F09884",
-          green: "#60C27D",
-          "green-light": "#83D19B",
-          grey: "#A1A9A8",
-          "grey-dark": "#363C3B",
-          white: "#F5F3EB",
-          black: "#090909",
-        },
-        border: "#232323",
-        input: "#1E1E1E",
-        ring: "#8957DC",
+        border: "#171B16",
+        input: "#F5F0DF",
+        ring: "#183D2A",
       },
       fontFamily: {
+        heading: ["var(--font-space-grotesk)", "sans-serif"],
         sans: ["var(--font-dm-sans)", "sans-serif"],
-        serif: ["var(--font-instrument-serif)", "serif"],
-        mono: ["var(--font-jetbrains-mono)", "monospace"],
+        mono: ["var(--font-ibm-plex-mono)", "monospace"],
       },
       boxShadow: {
-        "neo-sm": "2px 2px 0px 0px #000000",
-        neo: "4px 4px 0px 0px #000000",
-        "neo-lg": "6px 6px 0px 0px #000000",
-        "neo-purple": "4px 4px 0px 0px #8957DC",
-        "neo-yellow": "4px 4px 0px 0px #E9D65B",
-        "neo-coral": "4px 4px 0px 0px #E97860",
-        "neo-green": "4px 4px 0px 0px #60C27D",
+        "neo-sm": "2px 2px 0px 0px #171B16",
+        neo: "3px 3px 0px 0px #171B16",
+        "neo-lg": "5px 5px 0px 0px #171B16",
+        "neo-xl": "7px 7px 0px 0px #171B16",
+        "neo-forest": "3px 3px 0px 0px #183D2A",
+        "neo-lime": "3px 3px 0px 0px #D5F36A",
+        "neo-orange": "3px 3px 0px 0px #F07845",
+        "neo-lavender": "3px 3px 0px 0px #B9A4E8",
+        "neo-cream": "3px 3px 0px 0px #F5F0DF",
       },
       borderRadius: {
-        lg: "0.75rem",
-        md: "0.5rem",
-        sm: "0.25rem",
+        xl: "0.625rem", // ~10px
+        lg: "0.5rem",   // 8px
+        md: "0.375rem", // 6px
+        sm: "0.25rem",  // 4px
       },
     },
   },

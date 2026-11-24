@@ -93,20 +93,20 @@ export default function MuscleHeatmap({
   }
 
   return (
-    <div className="bento-card p-5 sm:p-6 space-y-6 relative border-border">
+    <div className="bg-cream border-2 border-dark rounded-xl shadow-neo p-5 sm:p-6 space-y-6 relative">
       {/* Header with Title and Time / View Controls */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4 border-b border-[#202020]">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4 border-b-2 border-dark/15">
         <div>
-          <div className="flex items-center gap-2">
-            <h3 className="text-lg font-bold text-white flex items-center gap-2 font-sans">
-              <Activity className="w-5 h-5 text-liftr-purple" />
-              <span>Muscle Heatmap – 2D Human Body Visualization</span>
+          <div className="flex items-center gap-3">
+            <h3 className="font-heading font-black text-xl text-dark flex items-center gap-2 tracking-tight">
+              <Activity className="w-5 h-5 text-forest stroke-[2.5]" />
+              <span>MUSCLE HEATMAP – 2D ANATOMICAL VISUALIZATION</span>
             </h3>
-            <span className="px-2 py-0.5 rounded bg-liftr-purple/15 text-liftr-purple-light border border-liftr-purple/30 text-xs font-mono font-bold">
+            <span className="px-2.5 py-1 rounded bg-forest text-cream border-2 border-dark text-xs font-mono font-bold shadow-neo-sm">
               15 Muscle Groups
             </span>
           </div>
-          <p className="text-xs text-liftr-grey font-mono mt-1">
+          <p className="text-xs text-dark/70 font-sans mt-1">
             Real-time hypertrophic stimulus mapping based on completed working sets vs weekly volume targets.
           </p>
         </div>
@@ -114,14 +114,14 @@ export default function MuscleHeatmap({
         {/* View mode toggle & Time filter pills */}
         <div className="flex flex-wrap items-center gap-3">
           {/* View Toggle */}
-          <div className="flex items-center p-1 rounded-lg bg-[#141414] border border-[#262626]">
+          <div className="flex items-center p-1 rounded-lg bg-white border-2 border-dark shadow-neo-sm">
             <button
               onClick={() => setViewMode("both")}
               className={cn(
-                "px-2.5 py-1 rounded text-xs font-mono transition-colors",
+                "px-2.5 py-1 rounded text-xs font-mono transition-all border-2",
                 viewMode === "both"
-                  ? "bg-white text-black font-bold shadow-neo-sm"
-                  : "text-zinc-400 hover:text-white"
+                  ? "bg-forest text-lime border-dark font-black shadow-neo-sm"
+                  : "border-transparent text-dark/70 hover:text-dark font-bold"
               )}
             >
               Both
@@ -129,10 +129,10 @@ export default function MuscleHeatmap({
             <button
               onClick={() => setViewMode("front")}
               className={cn(
-                "px-2.5 py-1 rounded text-xs font-mono transition-colors",
+                "px-2.5 py-1 rounded text-xs font-mono transition-all border-2",
                 viewMode === "front"
-                  ? "bg-white text-black font-bold shadow-neo-sm"
-                  : "text-zinc-400 hover:text-white"
+                  ? "bg-forest text-lime border-dark font-black shadow-neo-sm"
+                  : "border-transparent text-dark/70 hover:text-dark font-bold"
               )}
             >
               Front
@@ -140,10 +140,10 @@ export default function MuscleHeatmap({
             <button
               onClick={() => setViewMode("back")}
               className={cn(
-                "px-2.5 py-1 rounded text-xs font-mono transition-colors",
+                "px-2.5 py-1 rounded text-xs font-mono transition-all border-2",
                 viewMode === "back"
-                  ? "bg-white text-black font-bold shadow-neo-sm"
-                  : "text-zinc-400 hover:text-white"
+                  ? "bg-forest text-lime border-dark font-black shadow-neo-sm"
+                  : "border-transparent text-dark/70 hover:text-dark font-bold"
               )}
             >
               Back
@@ -151,16 +151,16 @@ export default function MuscleHeatmap({
           </div>
 
           {/* Time Filter Pills */}
-          <div className="flex items-center p-1 rounded-lg bg-[#141414] border border-[#262626]">
+          <div className="flex items-center p-1 rounded-lg bg-white border-2 border-dark shadow-neo-sm">
             {TIME_FILTERS.map((tf) => (
               <button
                 key={tf.value}
                 onClick={() => setSelectedDays(tf.value)}
                 className={cn(
-                  "px-2.5 py-1 rounded text-xs font-mono transition-colors cursor-pointer",
+                  "px-2.5 py-1 rounded text-xs font-mono transition-all border-2 cursor-pointer",
                   selectedDays === tf.value
-                    ? "bg-liftr-purple text-white font-bold shadow-neo-sm"
-                    : "text-zinc-400 hover:text-white"
+                    ? "bg-forest text-lime border-dark font-black shadow-neo-sm"
+                    : "border-transparent text-dark/70 hover:text-dark font-bold"
                 )}
               >
                 {tf.label}
@@ -172,22 +172,22 @@ export default function MuscleHeatmap({
 
       {/* Imbalance & Coverage Summary Status */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        <div className="p-3.5 rounded-lg bg-[#141414] border border-[#232323] flex items-center justify-between">
+        <div className="p-3.5 rounded-xl bg-white border-2 border-dark shadow-neo-sm flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-liftr-green animate-pulse" />
-            <span className="text-xs font-mono text-zinc-300">Stimulated Muscles (≥75%):</span>
+            <span className="w-2.5 h-2.5 rounded-full bg-forest animate-pulse" />
+            <span className="text-xs font-mono font-bold text-dark">Stimulated Muscles (≥75%):</span>
           </div>
-          <span className="text-xs font-mono font-bold text-liftr-green">
+          <span className="text-xs font-mono font-black text-forest">
             {optimalMuscles.length} / 15 Groups
           </span>
         </div>
 
-        <div className="p-3.5 rounded-lg bg-[#141414] border border-[#232323] flex items-center justify-between">
+        <div className="p-3.5 rounded-xl bg-white border-2 border-dark shadow-neo-sm flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <AlertTriangle className="w-3.5 h-3.5 text-liftr-coral" />
-            <span className="text-xs font-mono text-zinc-300">Under-Trained (&lt;25%):</span>
+            <AlertTriangle className="w-3.5 h-3.5 text-orange stroke-[2.5]" />
+            <span className="text-xs font-mono font-bold text-dark">Under-Trained (&lt;25%):</span>
           </div>
-          <span className="text-xs font-mono font-bold text-liftr-coral">
+          <span className="text-xs font-mono font-black text-orange">
             {neglectedMuscles.length} Groups
           </span>
         </div>
@@ -196,46 +196,45 @@ export default function MuscleHeatmap({
       {/* Main SVG Visualization Canvas Container */}
       <div
         onMouseMove={handleMouseMove}
-        className="relative bg-[#0E0E0E] border border-[#1E1E1E] rounded-xl p-4 sm:p-6 overflow-hidden flex flex-col md:flex-row items-center justify-around gap-6 select-none"
+        className="relative bg-white border-2 border-dark rounded-xl p-4 sm:p-6 shadow-neo overflow-hidden flex flex-col md:flex-row items-center justify-around gap-6 select-none"
       >
         {/* Floating Tooltip */}
         {hoveredMuscle && (
           <div
-            className="pointer-events-none absolute z-40 bg-[#161616]/95 border-2 border-border shadow-neo-purple rounded-xl p-3 max-w-xs text-xs font-mono space-y-1.5 transition-all duration-75 backdrop-blur-md"
+            className="pointer-events-none absolute z-40 bg-cream border-2 border-dark shadow-neo-lg rounded-xl p-3 max-w-xs text-xs font-mono space-y-1.5 transition-all duration-75 text-dark"
             style={{
               left: `${Math.min(window.innerWidth > 768 ? 650 : 250, mousePos.x + 15)}px`,
               top: `${Math.max(10, mousePos.y - 80)}px`,
             }}
           >
-            <div className="flex items-center justify-between gap-2 border-b border-[#262626] pb-1">
-              <span className="font-bold text-white text-sm">
+            <div className="flex items-center justify-between gap-2 border-b-2 border-dark/15 pb-1">
+              <span className="font-heading font-black text-dark text-sm">
                 {hoveredMuscle.name}
               </span>
               <span
-                className="text-[10px] px-1.5 py-0.5 rounded font-bold uppercase"
+                className="text-[10px] px-1.5 py-0.5 rounded font-black uppercase border-2 border-dark"
                 style={{
-                  backgroundColor: `${hoveredMuscle.color}25`,
-                  color: hoveredMuscle.color,
-                  border: `1px solid ${hoveredMuscle.color}50`,
+                  backgroundColor: `${hoveredMuscle.color}`,
+                  color: "#171B16",
                 }}
               >
                 {hoveredMuscle.coveragePercentage}%
               </span>
             </div>
 
-            <div className="text-[11px] text-zinc-400">
+            <div className="text-[11px] text-dark/80 font-bold">
               Completed Sets:{" "}
-              <span className="font-bold text-white">
+              <span className="font-black text-dark">
                 {hoveredMuscle.completedWorkingSets}
               </span>{" "}
               / {hoveredMuscle.targetWorkingSets} target
             </div>
 
-            <div className="text-[10px] text-zinc-500 italic">
+            <div className="text-[10px] text-dark/60 italic font-semibold">
               Status: {hoveredMuscle.statusText}
             </div>
 
-            <div className="text-[9px] text-liftr-purple pt-1 block uppercase">
+            <div className="text-[9px] text-forest font-black pt-1 block uppercase tracking-wider">
               Click muscle for full exercise breakdown →
             </div>
           </div>
@@ -244,18 +243,18 @@ export default function MuscleHeatmap({
         {/* 1. FRONT VIEW SVG */}
         {(viewMode === "both" || viewMode === "front") && (
           <div className="flex flex-col items-center">
-            <span className="text-[11px] font-mono uppercase tracking-widest text-liftr-grey font-bold mb-2">
+            <span className="text-[11px] font-mono uppercase tracking-widest text-dark font-black mb-2">
               Anterior (Front View)
             </span>
             <div className="w-56 sm:w-64 md:w-72 h-[420px] relative">
               <svg
                 viewBox="0 0 280 440"
-                className="w-full h-full drop-shadow-[0_4px_12px_rgba(0,0,0,0.5)]"
+                className="w-full h-full drop-shadow-sm"
               >
                 {/* Body Background Silhouette / Contours */}
-                <g fill="none" stroke="#222222" strokeWidth="1.5">
+                <g fill="none" stroke="#171B16" strokeWidth="1.5">
                   {/* Head & Neck */}
-                  <ellipse cx="140" cy="35" rx="18" ry="24" stroke="#333333" />
+                  <ellipse cx="140" cy="35" rx="18" ry="24" stroke="#171B16" strokeWidth="2" />
                   <path d="M132 58 L130 75 M148 58 L150 75" />
                   {/* Outer body outline */}
                   <path d="M105 85 L85 105 L65 170 L55 230 L70 232 L85 180 L95 190 L95 240 L105 320 L108 400 L125 405 L135 320 L140 250 L145 320 L155 405 L172 400 L175 320 L185 240 L185 190 L195 180 L210 232 L225 230 L215 170 L195 105 L175 85 Z" />
@@ -461,18 +460,18 @@ export default function MuscleHeatmap({
         {/* 2. BACK VIEW SVG */}
         {(viewMode === "both" || viewMode === "back") && (
           <div className="flex flex-col items-center">
-            <span className="text-[11px] font-mono uppercase tracking-widest text-liftr-grey font-bold mb-2">
+            <span className="text-[11px] font-mono uppercase tracking-widest text-dark font-black mb-2">
               Posterior (Back View)
             </span>
             <div className="w-56 sm:w-64 md:w-72 h-[420px] relative">
               <svg
                 viewBox="0 0 280 440"
-                className="w-full h-full drop-shadow-[0_4px_12px_rgba(0,0,0,0.5)]"
+                className="w-full h-full drop-shadow-sm"
               >
                 {/* Body Background Silhouette / Contours */}
-                <g fill="none" stroke="#222222" strokeWidth="1.5">
+                <g fill="none" stroke="#171B16" strokeWidth="1.5">
                   {/* Head & Neck from Back */}
-                  <ellipse cx="140" cy="35" rx="18" ry="24" stroke="#333333" />
+                  <ellipse cx="140" cy="35" rx="18" ry="24" stroke="#171B16" strokeWidth="2" />
                   <path d="M132 58 L128 75 M148 58 L152 75" />
                   {/* Outer body contour */}
                   <path d="M105 85 L85 105 L65 170 L55 230 L70 232 L85 180 L95 190 L95 240 L105 320 L108 400 L125 405 L135 320 L140 250 L145 320 L155 405 L172 400 L175 320 L185 240 L185 190 L195 180 L210 232 L225 230 L215 170 L195 105 L175 85 Z" />
@@ -678,18 +677,18 @@ export default function MuscleHeatmap({
 
       {/* Color Scale Legend */}
       <div className="pt-2">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs font-mono">
-          <span className="text-[10px] uppercase text-liftr-grey font-bold">
+        <div className="bg-white border-2 border-dark rounded-xl p-3.5 shadow-neo-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs font-mono">
+          <span className="text-[10px] uppercase text-dark font-black tracking-wider">
             Training Coverage (% of Target):
           </span>
           <div className="flex flex-wrap items-center gap-3">
             {COLOR_SCALE_LEGEND.map((item) => (
               <div key={item.label} className="flex items-center gap-1.5">
                 <span
-                  className="w-3 h-3 rounded-sm border border-black/40"
+                  className="w-3.5 h-3.5 rounded-sm border-2 border-dark shadow-neo-sm"
                   style={{ backgroundColor: item.color }}
                 />
-                <span className="text-zinc-300 text-[11px]">{item.label}</span>
+                <span className="text-dark font-bold text-[11px]">{item.label}</span>
               </div>
             ))}
           </div>
@@ -698,63 +697,63 @@ export default function MuscleHeatmap({
 
       {/* Detailed Muscle Analytics Drawer / Modal */}
       {selectedMuscle && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-150">
-          <div className="bento-card p-6 w-full max-w-lg border-2 border-border shadow-neo-purple space-y-5 relative">
-            <div className="flex items-start justify-between gap-3">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-dark/70 backdrop-blur-sm animate-in fade-in duration-150">
+          <div className="bg-cream border-3 border-dark rounded-xl shadow-neo-lg p-6 w-full max-w-lg space-y-5 relative font-sans">
+            <div className="flex items-start justify-between gap-3 border-b-2 border-dark/15 pb-3">
               <div>
                 <div className="flex items-center gap-2 mb-1">
                   <span
-                    className="w-2.5 h-2.5 rounded-full"
+                    className="w-3 h-3 rounded-full border-2 border-dark"
                     style={{ backgroundColor: selectedMuscle.color }}
                   />
-                  <span className="text-[10px] font-mono uppercase tracking-widest text-liftr-purple font-bold">
+                  <span className="text-[10px] font-mono uppercase tracking-widest text-forest font-black">
                     Target Muscle Group
                   </span>
                 </div>
-                <h3 className="text-xl font-bold text-white font-sans">
+                <h3 className="font-heading font-black text-2xl text-dark tracking-tight">
                   {selectedMuscle.name}
                 </h3>
-                <span className="text-xs text-zinc-400 font-mono italic">
+                <span className="text-xs text-dark/70 font-mono italic font-bold">
                   {selectedMuscle.anatomicalName}
                 </span>
               </div>
 
               <button
                 onClick={() => setSelectedMuscle(null)}
-                className="p-1.5 rounded hover:bg-[#202020] text-zinc-400 hover:text-white cursor-pointer"
+                className="p-1.5 rounded-lg border-2 border-dark bg-white hover:bg-forest hover:text-cream text-dark transition-all cursor-pointer shadow-neo-sm"
               >
-                <X className="w-5 h-5" />
+                <X className="w-4 h-4 stroke-[2.5]" />
               </button>
             </div>
 
             {/* Coverage Stats Grid */}
             <div className="grid grid-cols-3 gap-3 text-center">
-              <div className="p-3 rounded-lg bg-[#181818] border border-[#262626]">
-                <span className="text-[10px] font-mono uppercase text-zinc-500 block">
+              <div className="p-3 rounded-xl bg-white border-2 border-dark shadow-neo-sm">
+                <span className="text-[10px] font-mono uppercase font-black text-dark/60 block">
                   Coverage
                 </span>
                 <span
-                  className="font-mono text-xl font-bold"
-                  style={{ color: selectedMuscle.color }}
+                  className="font-heading font-black text-2xl"
+                  style={{ color: "#183D2A" }}
                 >
                   {selectedMuscle.coveragePercentage}%
                 </span>
               </div>
 
-              <div className="p-3 rounded-lg bg-[#181818] border border-[#262626]">
-                <span className="text-[10px] font-mono uppercase text-zinc-500 block">
+              <div className="p-3 rounded-xl bg-white border-2 border-dark shadow-neo-sm">
+                <span className="text-[10px] font-mono uppercase font-black text-dark/60 block">
                   Completed Sets
                 </span>
-                <span className="font-mono text-xl font-bold text-white">
+                <span className="font-mono text-xl font-black text-dark">
                   {selectedMuscle.completedWorkingSets}
                 </span>
               </div>
 
-              <div className="p-3 rounded-lg bg-[#181818] border border-[#262626]">
-                <span className="text-[10px] font-mono uppercase text-zinc-500 block">
+              <div className="p-3 rounded-xl bg-white border-2 border-dark shadow-neo-sm">
+                <span className="text-[10px] font-mono uppercase font-black text-dark/60 block">
                   Target Sets
                 </span>
-                <span className="font-mono text-xl font-bold text-liftr-yellow">
+                <span className="font-mono text-xl font-black text-orange">
                   {selectedMuscle.targetWorkingSets}
                 </span>
               </div>
@@ -762,28 +761,28 @@ export default function MuscleHeatmap({
 
             {/* Contributing Exercises Table */}
             <div className="space-y-2">
-              <span className="text-xs font-mono uppercase tracking-wider text-liftr-grey block">
+              <span className="text-xs font-mono uppercase font-black tracking-wider text-dark/70 block">
                 Recorded Exercise Contributions
               </span>
 
               {selectedMuscle.contributingExercises.length === 0 ? (
-                <div className="p-4 rounded-lg bg-[#141414] border border-[#262626] text-center text-xs text-zinc-500 font-mono italic">
+                <div className="p-4 rounded-xl bg-white border-2 border-dashed border-dark/30 text-center text-xs text-dark/60 font-mono italic">
                   No completed exercises targeting this muscle group in the selected {selectedDays} days timeframe.
                 </div>
               ) : (
-                <div className="space-y-1.5 max-h-48 overflow-y-auto">
+                <div className="space-y-1.5 max-h-48 overflow-y-auto pr-1">
                   {selectedMuscle.contributingExercises.map((item, idx) => (
                     <div
                       key={idx}
-                      className="p-2.5 rounded-lg bg-[#161616] border border-[#242424] flex items-center justify-between text-xs font-mono"
+                      className="p-2.5 rounded-lg bg-white border-2 border-dark shadow-neo-sm flex items-center justify-between text-xs font-mono"
                     >
                       <div className="flex items-center gap-2">
-                        <Dumbbell className="w-3.5 h-3.5 text-liftr-purple" />
-                        <span className="font-bold text-white">{item.exerciseName}</span>
+                        <Dumbbell className="w-3.5 h-3.5 text-forest" />
+                        <span className="font-bold text-dark">{item.exerciseName}</span>
                       </div>
-                      <div className="flex items-center gap-3 text-zinc-400">
+                      <div className="flex items-center gap-3 text-dark/80 font-bold">
                         <span>{item.setsCount} sets</span>
-                        <span className="text-zinc-500">
+                        <span className="text-dark/60">
                           {Math.round(item.volume).toLocaleString()} kg vol
                         </span>
                       </div>
@@ -794,10 +793,10 @@ export default function MuscleHeatmap({
             </div>
 
             {/* Target Sets Customizer */}
-            <div className="p-3.5 rounded-lg bg-[#141414] border border-[#232323] flex items-center justify-between">
+            <div className="p-3.5 rounded-xl bg-white border-2 border-dark shadow-neo-sm flex items-center justify-between">
               <div>
-                <div className="text-xs font-bold text-white">Weekly Set Target</div>
-                <span className="text-[10px] text-liftr-grey font-mono">
+                <div className="text-xs font-heading font-black text-dark">WEEKLY SET TARGET</div>
+                <span className="text-[10px] text-dark/60 font-mono font-bold">
                   Prescribed weekly working sets for {selectedMuscle.name}
                 </span>
               </div>
@@ -820,15 +819,15 @@ export default function MuscleHeatmap({
                       }));
                     }
                   }}
-                  className="w-14 px-2 py-1 rounded bg-[#1C1C1C] border border-[#2D2D2D] text-white text-xs font-mono font-bold text-center"
+                  className="w-14 px-2 py-1 rounded bg-cream border-2 border-dark text-dark text-xs font-mono font-black text-center shadow-neo-sm"
                 />
-                <span className="text-xs font-mono text-zinc-500">sets/wk</span>
+                <span className="text-xs font-mono font-bold text-dark/70">sets/wk</span>
               </div>
             </div>
 
             <button
               onClick={() => setSelectedMuscle(null)}
-              className="w-full py-2.5 rounded-lg bg-[#1E1E1E] hover:bg-[#282828] text-white text-xs font-mono uppercase font-bold transition-colors cursor-pointer"
+              className="w-full py-2.5 rounded-lg bg-lime hover:bg-lime/90 text-dark text-xs font-mono uppercase font-black tracking-wider border-2 border-dark shadow-neo transition-all active:translate-x-0.5 active:translate-y-0.5 cursor-pointer"
             >
               Close Details
             </button>

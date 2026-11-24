@@ -12,8 +12,8 @@ export default async function DashboardLayout({
   const user = await getUser();
 
   return (
-    <div className="min-h-screen bg-background flex flex-col lg:flex-row text-foreground">
-      {/* Desktop Persistent Sidebar */}
+    <div className="min-h-screen bg-[#B8D99A] flex flex-col lg:flex-row text-[#171B16]">
+      {/* Desktop Persistent Sidebar in Deep Forest Green */}
       <Sidebar />
 
       {/* Main Content Area */}
