@@ -9,7 +9,7 @@ import { useExerciseStore } from "@/stores/useExerciseStore";
 import { calculateProgression, ProgressionSuggestion } from "@/lib/progression/engine";
 import { calculateVolume } from "@/lib/calculations/strength";
 import { formatDuration, cn } from "@/lib/utils";
-import { SetType, PersonalRecordItem } from "@/types";
+import { SetType, PersonalRecordItem, MuscleGroup } from "@/types";
 import { PastelCard, PastelBadge, PageHeader } from "@/components/ui/DesignSystem";
 import {
   Play,
@@ -24,6 +24,7 @@ import {
   Dumbbell,
   Flame,
   Pause,
+  Search,
 } from "lucide-react";
 
 interface CompletionSummary {
@@ -63,6 +64,7 @@ export default function WorkoutsPage() {
   const [mounted, setMounted] = useState(false);
   const [isAddExerciseOpen, setIsAddExerciseOpen] = useState(false);
   const [selectedExerciseId, setSelectedExerciseId] = useState<string>("");
+  const [addExerciseMuscle, setAddExerciseMuscle] = useState<MuscleGroup | "all">("all");
   const [showCompletionModal, setShowCompletionModal] = useState(false);
   const [completionSummary, setCompletionSummary] = useState<CompletionSummary | null>(null);
   const [sessionNotes, setSessionNotes] = useState("");
@@ -863,22 +865,77 @@ export default function WorkoutsPage() {
                   </Link>
                 </div>
               ) : (
-                <div>
-                  <label className="block text-xs font-bold text-[#142746] mb-1.5">
-                    Select Exercise
-                  </label>
-                  <select
-                    value={selectedExerciseId}
-                    onChange={(e) => setSelectedExerciseId(e.target.value)}
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-white border-[1.5px] border-[#142746] text-[#142746] text-sm font-medium focus:outline-none"
-                  >
-                    <option value="">-- Choose Exercise --</option>
-                    {exercises.map((ex) => (
-                      <option key={ex.id} value={ex.id}>
-                        {ex.name} ({ex.primaryMuscleGroup}{ex.targetMusclePart ? ` • ${ex.targetMusclePart}` : ""} • {ex.equipment})
-                      </option>
-                    ))}
-                  </select>
+                <div className="space-y-3">
+                  <div className="space-y-1.5">
+                    <label className="block text-xs font-bold text-[#142746]">
+                      Filter by Muscle Group
+                    </label>
+                    <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-thin">
+                      {(
+                        [
+                          { label: "All", value: "all" },
+                          { label: "Chest", value: "chest" },
+                          { label: "Back", value: "back" },
+                          { label: "Shoulders", value: "shoulders" },
+                          { label: "Biceps", value: "biceps" },
+                          { label: "Triceps", value: "triceps" },
+                          { label: "Forearms", value: "forearms" },
+                          { label: "Quads", value: "quadriceps" },
+                          { label: "Hamstrings", value: "hamstrings" },
+                          { label: "Glutes", value: "glutes" },
+                          { label: "Calves", value: "calves" },
+                          { label: "Abs", value: "abs" },
+                          { label: "Full Body", value: "full_body" },
+                        ] as const
+                      ).map((mg) => {
+                        const isSelected = addExerciseMuscle === mg.value;
+                        const count =
+                          mg.value === "all"
+                            ? exercises.length
+                            : exercises.filter((e) => e.primaryMuscleGroup === mg.value).length;
+                        return (
+                          <button
+                            key={mg.value}
+                            type="button"
+                            onClick={() => setAddExerciseMuscle(mg.value)}
+                            className={cn(
+                              "px-2.5 py-1 rounded-lg text-xs whitespace-nowrap transition-all cursor-pointer border-[1.5px] font-bold shrink-0",
+                              isSelected
+                                ? "bg-[#E9FF91] text-[#142746] border-[#142746] shadow-neo-xs"
+                                : "bg-[#FAF9FD] border-[#142746]/20 text-[#142746]/75 hover:border-[#142746]"
+                            )}
+                          >
+                            {mg.label} {count > 0 ? `(${count})` : ""}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-[#142746] mb-1.5">
+                      Select Exercise *
+                    </label>
+                    <select
+                      value={selectedExerciseId}
+                      onChange={(e) => setSelectedExerciseId(e.target.value)}
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-white border-[1.5px] border-[#142746] text-[#142746] text-xs font-bold cursor-pointer focus:outline-none"
+                    >
+                      <option value="">-- Choose Exercise --</option>
+                      {exercises
+                        .filter(
+                          (ex) =>
+                            addExerciseMuscle === "all" ||
+                            ex.primaryMuscleGroup === addExerciseMuscle
+                        )
+                        .map((ex) => (
+                          <option key={ex.id} value={ex.id}>
+                            {ex.name} — {ex.primaryMuscleGroup.replace("_", " ")}
+                            {ex.targetMusclePart ? ` (${ex.targetMusclePart})` : ""} • {ex.equipment}
+                          </option>
+                        ))}
+                    </select>
+                  </div>
                 </div>
               )}
 
