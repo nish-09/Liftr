@@ -60,6 +60,7 @@ export default function ExerciseLibraryPage() {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingExercise, setEditingExercise] = useState<Exercise | null>(null);
+  const [exerciseToDelete, setExerciseToDelete] = useState<Exercise | null>(null);
 
   const [formName, setFormName] = useState("");
   const [formMuscle, setFormMuscle] = useState<MuscleGroup>("chest");
@@ -335,24 +336,27 @@ export default function ExerciseLibraryPage() {
                   </span>
                 </div>
 
-                {!exercise.isSystem && (
-                  <div className="flex items-center gap-1">
-                    <button
-                      onClick={() => openEditModal(exercise)}
-                      className="p-1.5 rounded-lg border border-[#142746] bg-[#FAF9FD] hover:bg-[#E9FF91] cursor-pointer"
-                      title="Edit Exercise"
-                    >
-                      <Edit2 className="w-3 h-3" />
-                    </button>
-                    <button
-                      onClick={() => deleteExercise(exercise.id)}
-                      className="p-1.5 rounded-lg border border-[#142746] bg-[#F8C3B5] text-[#142746] cursor-pointer"
-                      title="Delete Exercise"
-                    >
-                      <Trash2 className="w-3 h-3" />
-                    </button>
-                  </div>
-                )}
+                <div className="flex items-center gap-1.5">
+                  <button
+                    type="button"
+                    onClick={() => openEditModal(exercise)}
+                    className="min-h-[30px] px-2.5 py-1 rounded-lg border border-[#142746] bg-[#FAF9FD] hover:bg-[#E9FF91] text-[#142746] text-xs font-bold inline-flex items-center gap-1.5 cursor-pointer transition-colors shadow-neo-xs"
+                    title="Edit Exercise"
+                    aria-label={`Edit ${exercise.name}`}
+                  >
+                    <Edit2 className="w-3 h-3" />
+                    <span>Edit</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setExerciseToDelete(exercise)}
+                    className="min-h-[30px] p-1.5 rounded-lg border border-[#142746] bg-[#FAF9FD] hover:bg-[#F8C3B5] text-[#142746] cursor-pointer transition-colors"
+                    title="Delete Exercise"
+                    aria-label={`Delete ${exercise.name}`}
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
+                </div>
               </div>
             </PastelCard>
           ))}
@@ -507,22 +511,88 @@ export default function ExerciseLibraryPage() {
               />
             </div>
 
-            <div className="flex justify-end gap-2 pt-3 border-t border-[#142746]/15">
-              <button
-                type="button"
-                onClick={() => setIsModalOpen(false)}
-                className="neo-btn px-4 py-2 rounded-xl bg-white text-[#142746] text-xs font-bold cursor-pointer"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                className="neo-btn px-5 py-2 rounded-xl bg-[#142746] text-white text-xs font-bold cursor-pointer"
-              >
-                {editingExercise ? "Update Exercise" : "Create Exercise"}
-              </button>
+            <div className="flex items-center justify-between gap-2 pt-3 border-t border-[#142746]/15 flex-wrap">
+              {editingExercise ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setExerciseToDelete(editingExercise);
+                  }}
+                  className="neo-btn px-3.5 py-2 rounded-xl bg-[#F8C3B5] hover:bg-[#f6b09f] text-[#142746] text-xs font-bold inline-flex items-center gap-1.5 cursor-pointer"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  <span>Delete Exercise</span>
+                </button>
+              ) : (
+                <div />
+              )}
+
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setIsModalOpen(false)}
+                  className="neo-btn px-4 py-2 rounded-xl bg-white text-[#142746] text-xs font-bold cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="neo-btn px-5 py-2 rounded-xl bg-[#142746] text-white text-xs font-bold cursor-pointer"
+                >
+                  {editingExercise ? "Save Changes" : "Create Exercise"}
+                </button>
+              </div>
             </div>
           </form>
+        </PastelCard>
+      </div>
+    )}
+
+    {/* Delete Confirmation Modal */}
+    {exerciseToDelete && (
+      <div className="fixed inset-0 !m-0 z-50 flex items-center justify-center p-4 bg-[#142746]/50 backdrop-blur-sm overflow-y-auto w-full h-full min-h-[100dvh]">
+        <PastelCard tone="white" className="p-5 sm:p-6 w-full max-w-sm space-y-4 shadow-neo-xl">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-[#F8C3B5] border-[1.5px] border-[#142746] flex items-center justify-center text-[#142746] shrink-0">
+              <Trash2 className="w-5 h-5" />
+            </div>
+            <div className="min-w-0">
+              <h3 className="font-heading font-extrabold text-base text-[#142746]">
+                Delete Exercise?
+              </h3>
+              <p className="text-xs text-[#8993A5] mt-0.5 truncate">
+                {exerciseToDelete.name}
+              </p>
+            </div>
+          </div>
+
+          <p className="text-xs text-[#142746]/80 leading-relaxed">
+            Are you sure you want to remove this movement from your library?
+          </p>
+
+          <div className="flex items-center justify-end gap-2 pt-2 border-t border-[#142746]/15">
+            <button
+              type="button"
+              onClick={() => setExerciseToDelete(null)}
+              className="neo-btn px-4 py-2 rounded-xl bg-white text-[#142746] text-xs font-bold cursor-pointer"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                deleteExercise(exerciseToDelete.id);
+                if (editingExercise?.id === exerciseToDelete.id) {
+                  setIsModalOpen(false);
+                  setEditingExercise(null);
+                }
+                setExerciseToDelete(null);
+              }}
+              className="neo-btn px-4 py-2 rounded-xl bg-[#F8C3B5] hover:bg-[#f6b09f] text-[#142746] text-xs font-bold cursor-pointer"
+            >
+              Delete
+            </button>
+          </div>
         </PastelCard>
       </div>
     )}

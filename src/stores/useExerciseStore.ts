@@ -5,6 +5,7 @@ import { DEFAULT_SYSTEM_EXERCISES } from "@/lib/constants/defaultExercises";
 
 interface ExerciseStore {
   exercises: Exercise[];
+  deletedExerciseIds: string[];
   addExercise: (exercise: Omit<Exercise, "id" | "isSystem" | "isArchived">) => Exercise;
   updateExercise: (id: string, updates: Partial<Exercise>) => void;
   deleteExercise: (id: string) => void;
@@ -13,27 +14,42 @@ interface ExerciseStore {
   resetToDefaults: () => void;
 }
 
-function mergeSystemAndCustom(storedExercises: Exercise[] = []): Exercise[] {
-  const custom = storedExercises.filter((e) => !e.isSystem);
-  const favMap = new Map<string, boolean>();
-  storedExercises.forEach((e) => {
-    if (e.isSystem && e.isFavorite !== undefined) {
-      favMap.set(e.id, e.isFavorite);
+function mergeSystemAndCustom(
+  storedExercises: Exercise[] = [],
+  deletedExerciseIds: string[] = []
+): { exercises: Exercise[]; deletedExerciseIds: string[] } {
+  const deletedSet = new Set(deletedExerciseIds);
+  const storedMap = new Map<string, Exercise>();
+  storedExercises.forEach((ex) => storedMap.set(ex.id, ex));
+
+  // 1. System exercises: preserve user updates, omit user deletions
+  const system: Exercise[] = [];
+  DEFAULT_SYSTEM_EXERCISES.forEach((sys) => {
+    if (deletedSet.has(sys.id)) return;
+    const userVersion = storedMap.get(sys.id);
+    if (userVersion) {
+      system.push(userVersion);
+    } else {
+      system.push(sys);
     }
   });
 
-  const system = DEFAULT_SYSTEM_EXERCISES.map((sys) => ({
-    ...sys,
-    isFavorite: favMap.has(sys.id) ? favMap.get(sys.id)! : sys.isFavorite,
-  }));
+  // 2. Custom exercises: non-system and not deleted
+  const custom = storedExercises.filter(
+    (ex) => !ex.isSystem && !deletedSet.has(ex.id)
+  );
 
-  return [...system, ...custom];
+  return {
+    exercises: [...system, ...custom],
+    deletedExerciseIds,
+  };
 }
 
 export const useExerciseStore = create<ExerciseStore>()(
   persist(
     (set, get) => ({
       exercises: DEFAULT_SYSTEM_EXERCISES,
+      deletedExerciseIds: [],
 
       addExercise: (exerciseData) => {
         const newEx: Exercise = {
@@ -64,8 +80,10 @@ export const useExerciseStore = create<ExerciseStore>()(
 
       deleteExercise: (id) => {
         set((state) => ({
-          // System exercises are protected; custom exercises can be removed
-          exercises: state.exercises.filter((ex) => ex.id !== id || ex.isSystem),
+          exercises: state.exercises.filter((ex) => ex.id !== id),
+          deletedExerciseIds: state.deletedExerciseIds.includes(id)
+            ? state.deletedExerciseIds
+            : [...state.deletedExerciseIds, id],
         }));
       },
 
@@ -82,23 +100,35 @@ export const useExerciseStore = create<ExerciseStore>()(
       },
 
       resetToDefaults: () => {
-        set({ exercises: DEFAULT_SYSTEM_EXERCISES });
+        set({
+          exercises: DEFAULT_SYSTEM_EXERCISES,
+          deletedExerciseIds: [],
+        });
       },
     }),
     {
       name: "liftr-exercises-storage",
-      version: 3,
+      version: 4,
       migrate: (persistedState: unknown) => {
-        const prev = persistedState as { exercises?: Exercise[] } | undefined;
-        return {
-          exercises: mergeSystemAndCustom(prev?.exercises || []),
-        };
+        const prev = persistedState as
+          | { exercises?: Exercise[]; deletedExerciseIds?: string[] }
+          | undefined;
+        return mergeSystemAndCustom(
+          prev?.exercises || [],
+          prev?.deletedExerciseIds || []
+        );
       },
       merge: (persistedState: unknown, currentState: ExerciseStore) => {
-        const prev = persistedState as { exercises?: Exercise[] } | undefined;
+        const prev = persistedState as
+          | { exercises?: Exercise[]; deletedExerciseIds?: string[] }
+          | undefined;
+        const merged = mergeSystemAndCustom(
+          prev?.exercises || [],
+          prev?.deletedExerciseIds || []
+        );
         return {
           ...currentState,
-          exercises: mergeSystemAndCustom(prev?.exercises || []),
+          ...merged,
         };
       },
       storage: createJSONStorage(() => localStorage),
