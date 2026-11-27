@@ -31,7 +31,7 @@ export function NewPlanModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#142746]/50 backdrop-blur-sm overflow-y-auto">
+    <div className="fixed inset-0 !m-0 z-50 flex items-center justify-center p-4 bg-[#142746]/50 backdrop-blur-sm overflow-y-auto w-full h-full min-h-[100dvh]">
       <PastelCard tone="white" className="p-5 sm:p-6 w-full max-w-md max-h-[calc(100dvh-2rem)] overflow-y-auto my-auto shadow-neo-xl">
         <div className="flex items-center justify-between mb-4 border-b border-[#142746]/15 pb-3">
           <h3 className="font-heading font-extrabold text-xl text-[#142746]">
@@ -129,7 +129,7 @@ export function AddPlanExerciseModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#142746]/50 backdrop-blur-sm overflow-y-auto">
+    <div className="fixed inset-0 !m-0 z-50 flex items-center justify-center p-4 bg-[#142746]/50 backdrop-blur-sm overflow-y-auto w-full h-full min-h-[100dvh]">
       <PastelCard tone="white" className="p-5 sm:p-6 w-full max-w-md max-h-[calc(100dvh-2rem)] overflow-y-auto my-auto shadow-neo-xl">
         <div className="flex items-center justify-between mb-4 border-b border-[#142746]/15 pb-3">
           <h3 className="font-heading font-extrabold text-xl text-[#142746]">
@@ -168,7 +168,7 @@ export function AddPlanExerciseModal({
               >
                 {exercises.map((ex) => (
                   <option key={ex.id} value={ex.id}>
-                    {ex.name} ({ex.primaryMuscleGroup} • {ex.equipment})
+                    {ex.name} ({ex.primaryMuscleGroup}{ex.targetMusclePart ? ` • ${ex.targetMusclePart}` : ""} • {ex.equipment})
                   </option>
                 ))}
               </select>

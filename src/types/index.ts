@@ -33,6 +33,7 @@ export interface Exercise {
   userId?: string | null;
   name: string;
   primaryMuscleGroup: MuscleGroup;
+  targetMusclePart?: string | null;
   secondaryMuscleGroups: string[];
   equipment: Equipment;
   weightUnit: WeightUnit;

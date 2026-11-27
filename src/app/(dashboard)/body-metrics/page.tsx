@@ -130,7 +130,8 @@ export default function BodyMetricsPage() {
     : null;
 
   return (
-    <div className="space-y-6">
+    <>
+      <div className="space-y-6">
       <PageHeader
         title="Body Metrics"
         actions={
@@ -367,7 +368,7 @@ export default function BodyMetricsPage() {
 
       {/* Log Measurement Modal */}
       {isMeasureModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#142746]/50 backdrop-blur-sm overflow-y-auto">
+        <div className="fixed inset-0 !m-0 z-50 flex items-center justify-center p-4 bg-[#142746]/50 backdrop-blur-sm overflow-y-auto w-full h-full min-h-[100dvh]">
           <PastelCard tone="white" className="p-5 sm:p-6 w-full max-w-sm max-h-[calc(100dvh-2rem)] overflow-y-auto my-auto space-y-4 shadow-neo-xl">
             <div className="flex items-center justify-between border-b border-[#142746]/15 pb-3">
               <h3 className="font-heading font-extrabold text-xl text-[#142746]">
@@ -492,7 +493,7 @@ export default function BodyMetricsPage() {
 
       {/* Update Height Modal */}
       {isHeightModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#142746]/50 backdrop-blur-sm overflow-y-auto">
+        <div className="fixed inset-0 !m-0 z-50 flex items-center justify-center p-4 bg-[#142746]/50 backdrop-blur-sm overflow-y-auto w-full h-full min-h-[100dvh]">
           <PastelCard tone="white" className="p-5 sm:p-6 w-full max-w-sm max-h-[calc(100dvh-2rem)] overflow-y-auto my-auto space-y-4 shadow-neo-xl">
             <div className="flex items-center justify-between border-b border-[#142746]/15 pb-3">
               <h3 className="font-heading font-extrabold text-xl text-[#142746]">
@@ -543,5 +544,6 @@ export default function BodyMetricsPage() {
         </div>
       )}
     </div>
-  );
+  </>
+);
 }

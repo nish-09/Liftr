@@ -41,7 +41,8 @@ export function PlanExerciseRow({
               {exerciseMeta?.name || "Exercise"}
             </h4>
             <span className="text-[11px] font-medium capitalize text-[#8993A5]">
-              {exerciseMeta?.primaryMuscleGroup?.replace("_", " ")} •{" "}
+              {exerciseMeta?.primaryMuscleGroup?.replace("_", " ")}
+              {exerciseMeta?.targetMusclePart ? ` (${exerciseMeta.targetMusclePart})` : ""} •{" "}
               {exerciseMeta?.equipment?.replace("_", " ")}
             </span>
           </div>

@@ -379,6 +379,7 @@ export default function WorkoutsPage() {
                     <div className="flex items-center gap-2 text-xs text-[#8993A5] mt-0.5 flex-wrap">
                       <span className="capitalize font-semibold text-[#142746]">
                         {exMeta?.primaryMuscleGroup?.replace("_", " ")}
+                        {exMeta?.targetMusclePart ? ` (${exMeta.targetMusclePart})` : ""}
                       </span>
                       <span>•</span>
                       <span className="capitalize">{exMeta?.equipment?.replace("_", " ")}</span>
@@ -843,7 +844,7 @@ export default function WorkoutsPage() {
 
       {/* Add Movement Modal */}
       {isAddExerciseOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#142746]/50 backdrop-blur-sm overflow-y-auto">
+        <div className="fixed inset-0 !m-0 z-50 flex items-center justify-center p-4 bg-[#142746]/50 backdrop-blur-sm overflow-y-auto w-full h-full min-h-[100dvh]">
           <PastelCard tone="white" className="p-5 sm:p-6 w-full max-w-md max-h-[calc(100dvh-2rem)] overflow-y-auto my-auto space-y-4 shadow-neo-xl">
             <h3 className="text-lg font-heading font-extrabold text-[#142746]">
               Add Exercise to Live Session
@@ -874,7 +875,7 @@ export default function WorkoutsPage() {
                     <option value="">-- Choose Exercise --</option>
                     {exercises.map((ex) => (
                       <option key={ex.id} value={ex.id}>
-                        {ex.name} ({ex.primaryMuscleGroup} • {ex.equipment})
+                        {ex.name} ({ex.primaryMuscleGroup}{ex.targetMusclePart ? ` • ${ex.targetMusclePart}` : ""} • {ex.equipment})
                       </option>
                     ))}
                   </select>
@@ -904,7 +905,7 @@ export default function WorkoutsPage() {
 
       {/* Workout Completion Summary Modal */}
       {showCompletionModal && completionSummary && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#142746]/55 backdrop-blur-sm overflow-y-auto">
+        <div className="fixed inset-0 !m-0 z-50 flex items-center justify-center p-4 bg-[#142746]/55 backdrop-blur-sm overflow-y-auto w-full h-full min-h-[100dvh]">
           <PastelCard tone="green" className="p-5 sm:p-8 w-full max-w-lg max-h-[calc(100dvh-2rem)] overflow-y-auto my-auto space-y-6 shadow-neo-xl">
             <div className="text-center space-y-2">
               <div className="w-14 h-14 mx-auto rounded-2xl bg-[#E9FF91] border-[1.5px] border-[#142746] flex items-center justify-center text-[#142746] shadow-neo-sm">

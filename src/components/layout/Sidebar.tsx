@@ -46,10 +46,10 @@ export default function Sidebar({ isMobileOpen = false, onCloseMobile }: Sidebar
         <Link
           href="/overview"
           onClick={onCloseMobile}
-          className="flex-1 flex items-center px-3 py-2 rounded-xl bg-white border-[1.5px] border-[#142746]"
+          className="flex-1 flex items-center justify-center px-4 py-2.5 rounded-2xl bg-white border-[1.5px] border-[#142746] shadow-neo-sm hover:shadow-neo transition-all text-center"
         >
           <LiftrLogo
-            className="h-6 w-auto"
+            className="h-6 w-auto mx-auto"
             symbolColor="#142746"
             textColor="#142746"
           />

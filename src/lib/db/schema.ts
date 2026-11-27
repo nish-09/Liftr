@@ -155,6 +155,7 @@ export const exercises = pgTable("exercises", {
   userId: uuid("user_id").references(() => profiles.id, { onDelete: "cascade" }), // null if system exercise
   name: text("name").notNull(),
   primaryMuscleGroup: muscleGroupEnum("primary_muscle_group").notNull(),
+  targetMusclePart: text("target_muscle_part"),
   secondaryMuscleGroups: jsonb("secondary_muscle_groups").$type<string[]>().default([]).notNull(),
   equipment: equipmentEnum("equipment").notNull(),
   weightUnit: weightUnitEnum("weight_unit").default("kg").notNull(),

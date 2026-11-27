@@ -4,6 +4,7 @@ import { useHistoryStore } from "@/stores/useHistoryStore";
 import { usePlanStore } from "@/stores/usePlanStore";
 import { useWorkoutStore } from "@/stores/useWorkoutStore";
 import { clearAllOfflineData } from "@/lib/offline/db";
+import { DEFAULT_SYSTEM_EXERCISES } from "@/lib/constants/defaultExercises";
 
 const OWNER_UID_KEY = "liftr_session_owner_uid";
 
@@ -52,7 +53,7 @@ export function clearAllUserBrowserData(): void {
       plans: [],
     });
     useExerciseStore.setState({
-      exercises: [],
+      exercises: DEFAULT_SYSTEM_EXERCISES,
     });
     useBodyStore.setState({
       userBodyProfile: {

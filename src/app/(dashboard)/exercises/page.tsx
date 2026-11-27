@@ -3,6 +3,7 @@
 import { useState, useMemo } from "react";
 import { useExerciseStore } from "@/stores/useExerciseStore";
 import { MuscleGroup, Equipment, Exercise } from "@/types";
+import { TARGET_MUSCLE_PARTS_BY_GROUP } from "@/lib/constants/defaultExercises";
 import {
   Search,
   Plus,
@@ -62,6 +63,7 @@ export default function ExerciseLibraryPage() {
 
   const [formName, setFormName] = useState("");
   const [formMuscle, setFormMuscle] = useState<MuscleGroup>("chest");
+  const [formTargetPart, setFormTargetPart] = useState("");
   const [formEquipment, setFormEquipment] = useState<Equipment>("barbell");
   const [formRest, setFormRest] = useState(90);
   const [formIncrement, setFormIncrement] = useState(2.5);
@@ -72,6 +74,7 @@ export default function ExerciseLibraryPage() {
       const matchesSearch =
         ex.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         ex.primaryMuscleGroup.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (ex.targetMusclePart && ex.targetMusclePart.toLowerCase().includes(searchQuery.toLowerCase())) ||
         ex.equipment.toLowerCase().includes(searchQuery.toLowerCase());
 
       const matchesMuscle =
@@ -88,6 +91,7 @@ export default function ExerciseLibraryPage() {
     setEditingExercise(null);
     setFormName("");
     setFormMuscle("chest");
+    setFormTargetPart("");
     setFormEquipment("barbell");
     setFormRest(90);
     setFormIncrement(2.5);
@@ -99,6 +103,7 @@ export default function ExerciseLibraryPage() {
     setEditingExercise(ex);
     setFormName(ex.name);
     setFormMuscle(ex.primaryMuscleGroup);
+    setFormTargetPart(ex.targetMusclePart || "");
     setFormEquipment(ex.equipment);
     setFormRest(ex.defaultRestDuration);
     setFormIncrement(ex.progressionIncrement);
@@ -114,6 +119,7 @@ export default function ExerciseLibraryPage() {
       updateExercise(editingExercise.id, {
         name: formName.trim(),
         primaryMuscleGroup: formMuscle,
+        targetMusclePart: formTargetPart.trim() || null,
         equipment: formEquipment,
         defaultRestDuration: Number(formRest),
         progressionIncrement: Number(formIncrement),
@@ -123,6 +129,7 @@ export default function ExerciseLibraryPage() {
       addExercise({
         name: formName.trim(),
         primaryMuscleGroup: formMuscle,
+        targetMusclePart: formTargetPart.trim() || null,
         secondaryMuscleGroups: [],
         equipment: formEquipment,
         weightUnit: "kg",
@@ -137,7 +144,8 @@ export default function ExerciseLibraryPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <>
+      <div className="space-y-6">
       <PageHeader
         title="Exercises"
         actions={
@@ -299,6 +307,15 @@ export default function ExerciseLibraryPage() {
                   {exercise.name}
                 </h3>
 
+                {exercise.targetMusclePart && (
+                  <div className="mt-1.5 flex items-center gap-1.5">
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-[#BDF7B6]/40 border border-[#142746]/25 text-[#142746] inline-flex items-center gap-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#142746]" />
+                      {exercise.targetMusclePart}
+                    </span>
+                  </div>
+                )}
+
                 {exercise.description && (
                   <p className="text-xs text-[#8993A5] mt-1 line-clamp-2 leading-relaxed">
                     {exercise.description}
@@ -341,138 +358,174 @@ export default function ExerciseLibraryPage() {
           ))}
         </div>
       )}
+    </div>
 
-      {/* Create / Edit Exercise Modal */}
-      {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#142746]/50 backdrop-blur-sm overflow-y-auto">
-          <PastelCard tone="white" className="p-5 sm:p-6 w-full max-w-lg max-h-[calc(100dvh-2rem)] overflow-y-auto my-auto shadow-neo-xl">
-            <div className="flex items-center justify-between mb-5 border-b border-[#142746]/15 pb-3">
-              <h3 className="font-heading text-xl font-extrabold text-[#142746]">
-                {editingExercise ? "Edit Exercise" : "New Custom Exercise"}
-              </h3>
-              <button
-                onClick={() => setIsModalOpen(false)}
-                className="p-1.5 rounded-xl border-[1.5px] border-[#142746] bg-[#FAF9FD] hover:bg-[#EBCBF7] text-[#142746] cursor-pointer"
-              >
-                <X className="w-4 h-4" />
-              </button>
+    {/* Create / Edit Exercise Modal */}
+    {isModalOpen && (
+      <div className="fixed inset-0 !m-0 z-50 flex items-center justify-center p-4 bg-[#142746]/50 backdrop-blur-sm overflow-y-auto w-full h-full min-h-[100dvh]">
+        <PastelCard tone="white" className="p-5 sm:p-6 w-full max-w-lg max-h-[calc(100dvh-2rem)] overflow-y-auto my-auto shadow-neo-xl">
+          <div className="flex items-center justify-between mb-5 border-b border-[#142746]/15 pb-3">
+            <h3 className="font-heading text-xl font-extrabold text-[#142746]">
+              {editingExercise ? "Edit Exercise" : "New Custom Exercise"}
+            </h3>
+            <button
+              onClick={() => setIsModalOpen(false)}
+              className="p-1.5 rounded-xl border-[1.5px] border-[#142746] bg-[#FAF9FD] hover:bg-[#EBCBF7] text-[#142746] cursor-pointer"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+
+          <form onSubmit={handleSaveExercise} className="space-y-4">
+            <div>
+              <label className="block text-xs font-bold text-[#142746] mb-1.5">
+                Exercise Name *
+              </label>
+              <input
+                type="text"
+                required
+                value={formName}
+                onChange={(e) => setFormName(e.target.value)}
+                placeholder="e.g., Incline Hammer Strength Press"
+                className="w-full px-3.5 py-2.5 rounded-xl bg-white border-[1.5px] border-[#142746] text-[#142746] text-sm focus:outline-none"
+              />
             </div>
 
-            <form onSubmit={handleSaveExercise} className="space-y-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <label className="block text-xs font-bold text-[#142746] mb-1.5">
-                  Exercise Name *
+                  Primary Muscle *
+                </label>
+                <select
+                  value={formMuscle}
+                  onChange={(e) => setFormMuscle(e.target.value as MuscleGroup)}
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-white border-[1.5px] border-[#142746] text-[#142746] text-xs font-bold cursor-pointer focus:outline-none"
+                >
+                  {MUSCLE_GROUPS.filter((m) => m.value !== "all").map((m) => (
+                    <option key={m.value} value={m.value}>
+                      {m.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-[#142746] mb-1.5">
+                  Equipment *
+                </label>
+                <select
+                  value={formEquipment}
+                  onChange={(e) => setFormEquipment(e.target.value as Equipment)}
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-white border-[1.5px] border-[#142746] text-[#142746] text-xs font-bold cursor-pointer focus:outline-none"
+                >
+                  {EQUIPMENT_OPTIONS.filter((eq) => eq.value !== "all").map((eq) => (
+                    <option key={eq.value} value={eq.value}>
+                      {eq.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            <div>
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="block text-xs font-bold text-[#142746]">
+                  Target Muscle Part (Optional)
+                </label>
+                <span className="text-[10px] text-[#8993A5]">e.g. Upper Chest, Long Head</span>
+              </div>
+              <input
+                type="text"
+                value={formTargetPart}
+                onChange={(e) => setFormTargetPart(e.target.value)}
+                placeholder="Select a suggestion below or type custom..."
+                className="w-full px-3.5 py-2 rounded-xl bg-white border-[1.5px] border-[#142746] text-[#142746] text-xs font-medium focus:outline-none mb-1.5"
+              />
+              {TARGET_MUSCLE_PARTS_BY_GROUP[formMuscle] && (
+                <div className="flex flex-wrap gap-1.5">
+                  {TARGET_MUSCLE_PARTS_BY_GROUP[formMuscle].map((part) => (
+                    <button
+                      key={part}
+                      type="button"
+                      onClick={() => setFormTargetPart(part)}
+                      className={cn(
+                        "text-[10px] font-bold px-2 py-0.5 rounded-lg border transition-all cursor-pointer",
+                        formTargetPart === part
+                          ? "bg-[#142746] text-white border-[#142746]"
+                          : "bg-[#FAF9FD] border-[#142746]/20 text-[#142746]/80 hover:border-[#142746]"
+                      )}
+                    >
+                      {part}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label className="block text-xs font-bold text-[#142746] mb-1.5">
+                  Rest Duration (seconds)
                 </label>
                 <input
-                  type="text"
-                  required
-                  value={formName}
-                  onChange={(e) => setFormName(e.target.value)}
-                  placeholder="e.g., Incline Hammer Strength Press"
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-white border-[1.5px] border-[#142746] text-[#142746] text-sm focus:outline-none"
+                  type="number"
+                  min={15}
+                  max={600}
+                  step={15}
+                  value={formRest}
+                  onChange={(e) => setFormRest(Number(e.target.value))}
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-white border-[1.5px] border-[#142746] text-[#142746] text-sm font-bold focus:outline-none"
                 />
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-bold text-[#142746] mb-1.5">
-                    Primary Muscle *
-                  </label>
-                  <select
-                    value={formMuscle}
-                    onChange={(e) => setFormMuscle(e.target.value as MuscleGroup)}
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-white border-[1.5px] border-[#142746] text-[#142746] text-xs font-bold cursor-pointer focus:outline-none"
-                  >
-                    {MUSCLE_GROUPS.filter((m) => m.value !== "all").map((m) => (
-                      <option key={m.value} value={m.value}>
-                        {m.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-[#142746] mb-1.5">
-                    Equipment *
-                  </label>
-                  <select
-                    value={formEquipment}
-                    onChange={(e) => setFormEquipment(e.target.value as Equipment)}
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-white border-[1.5px] border-[#142746] text-[#142746] text-xs font-bold cursor-pointer focus:outline-none"
-                  >
-                    {EQUIPMENT_OPTIONS.filter((eq) => eq.value !== "all").map((eq) => (
-                      <option key={eq.value} value={eq.value}>
-                        {eq.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-bold text-[#142746] mb-1.5">
-                    Rest Duration (seconds)
-                  </label>
-                  <input
-                    type="number"
-                    min={15}
-                    max={600}
-                    step={15}
-                    value={formRest}
-                    onChange={(e) => setFormRest(Number(e.target.value))}
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-white border-[1.5px] border-[#142746] text-[#142746] text-sm font-bold focus:outline-none"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-[#142746] mb-1.5">
-                    Increment Step (kg)
-                  </label>
-                  <input
-                    type="number"
-                    min={0.5}
-                    max={20}
-                    step={0.5}
-                    value={formIncrement}
-                    onChange={(e) => setFormIncrement(Number(e.target.value))}
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-white border-[1.5px] border-[#142746] text-[#142746] text-sm font-bold focus:outline-none"
-                  />
-                </div>
               </div>
 
               <div>
                 <label className="block text-xs font-bold text-[#142746] mb-1.5">
-                  Form Notes / Description
+                  Increment Step (kg)
                 </label>
-                <textarea
-                  rows={2}
-                  value={formDescription}
-                  onChange={(e) => setFormDescription(e.target.value)}
-                  placeholder="Elbow tuck angle, bench inclination, cue reminders..."
-                  className="w-full px-3.5 py-2 rounded-xl bg-white border-[1.5px] border-[#142746] text-[#142746] text-sm resize-none focus:outline-none"
+                <input
+                  type="number"
+                  min={0.5}
+                  max={20}
+                  step={0.5}
+                  value={formIncrement}
+                  onChange={(e) => setFormIncrement(Number(e.target.value))}
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-white border-[1.5px] border-[#142746] text-[#142746] text-sm font-bold focus:outline-none"
                 />
               </div>
+            </div>
 
-              <div className="flex justify-end gap-2 pt-3 border-t border-[#142746]/15">
-                <button
-                  type="button"
-                  onClick={() => setIsModalOpen(false)}
-                  className="neo-btn px-4 py-2 rounded-xl bg-white text-[#142746] text-xs font-bold cursor-pointer"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="neo-btn px-5 py-2 rounded-xl bg-[#142746] text-white text-xs font-bold cursor-pointer"
-                >
-                  {editingExercise ? "Update Exercise" : "Create Exercise"}
-                </button>
-              </div>
-            </form>
-          </PastelCard>
-        </div>
-      )}
-    </div>
-  );
+            <div>
+              <label className="block text-xs font-bold text-[#142746] mb-1.5">
+                Form Notes / Description
+              </label>
+              <textarea
+                rows={2}
+                value={formDescription}
+                onChange={(e) => setFormDescription(e.target.value)}
+                placeholder="Elbow tuck angle, bench inclination, cue reminders..."
+                className="w-full px-3.5 py-2 rounded-xl bg-white border-[1.5px] border-[#142746] text-[#142746] text-sm resize-none focus:outline-none"
+              />
+            </div>
+
+            <div className="flex justify-end gap-2 pt-3 border-t border-[#142746]/15">
+              <button
+                type="button"
+                onClick={() => setIsModalOpen(false)}
+                className="neo-btn px-4 py-2 rounded-xl bg-white text-[#142746] text-xs font-bold cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="neo-btn px-5 py-2 rounded-xl bg-[#142746] text-white text-xs font-bold cursor-pointer"
+              >
+                {editingExercise ? "Update Exercise" : "Create Exercise"}
+              </button>
+            </div>
+          </form>
+        </PastelCard>
+      </div>
+    )}
+  </>
+);
 }
